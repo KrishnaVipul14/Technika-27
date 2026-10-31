@@ -85,6 +85,41 @@
   .panelHeader h2 { font-size: 31px; }
   .panelBody { padding: 18px 24px 32px; }
 }
+.immersive { height: 100dvh; min-height: 0; }
+.immersive .header { position: absolute; inset: 0 0 auto; border: 0; background: linear-gradient(#03100fb3, transparent); }
+.canvas { position: absolute; inset: 0; z-index: 0; touch-action: none; }
+.canvas canvas { display: block; cursor: default; }
+.vignette { position: absolute; inset: 0; pointer-events: none; z-index: 2; background: linear-gradient(0deg, #040d0be6 0%, #040d0b40 20%, transparent 39%), radial-gradient(ellipse at 50% 43%, transparent 40%, #01060655 100%); }
+.roomTitle { position: absolute; left: 38px; bottom: 92px; z-index: 3; pointer-events: none; }
+.roomTitle .eyebrow { font-size: 8px; letter-spacing: .2em; color: #c0cbb3; }
+.roomTitle h1 { font-family: var(--font-garamond), serif; font-weight: 400; font-size: clamp(30px, 3.4vw, 50px); line-height: 1.08; margin: 9px 0 8px; color: #f3edda; }
+.roomTitle p { font-family: var(--font-garamond), serif; font-style: italic; font-size: 17px; color: #bec9b3; margin: 0; }
+.roomFooter { position: absolute; bottom: 0; left: 0; right: 0; z-index: 8; display: flex; justify-content: space-between; align-items: center; padding: 12px 36px 20px; gap: 20px; }
+.roomFooter > span { display: flex; align-items: center; gap: 12px; font-size: 8px; letter-spacing: .2em; color: #a0ae9c; }
+.roomFooter i { width: 3px; height: 3px; border-radius: 50%; background: var(--room-accent); }
+.roomFooter > div { display: flex; gap: 22px; align-items: center; }
+.roomFooter button { background: transparent; color: #c6d0be; font-size: 10px; min-height: 44px; }
+.guide { position: relative; }
+.guide summary { display: flex; gap: 9px; align-items: center; min-height: 44px; cursor: pointer !important; color: #eee9d8; font-size: 11px; list-style: none; }
+.guide summary::-webkit-details-marker { display: none; }
+.guide nav { position: absolute; bottom: calc(100% + 14px); right: 0; width: 235px; padding: 12px 18px; background: #101b16f5; border: 1px solid #b9c3a342; box-shadow: 0 15px 55px #0006; }
+.guide nav button { width: 100%; display: flex; align-items: center; gap: 13px; border-bottom: 1px solid #d3d8b91a; text-align: left; font-family: var(--font-garamond), serif; font-size: 18px; }
+.guide nav button span { font-size: 10px; color: var(--room-accent); }
+.guide nav p { font-size: 9px; color: #aeb8a3; line-height: 1.8; }
+.loader { position: absolute; inset: 0; z-index: 12; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; background: #08110f; color: #e2dfc9; }
+.loaderMark { font-size: 50px; font-family: var(--font-garamond), serif; color: #afbd9d; }
+.loader p { font-family: var(--font-garamond), serif; font-size: 27px; margin: 0; }
+.loaderLine { height: 1px; width: 100px; background: linear-gradient(90deg, transparent, #9daf8c, transparent); }
+.fallback .paperButton { color: var(--room-accent); }
+@media (max-width: 640px) {
+  .roomTitle { left: 22px; bottom: 104px; right: 22px; }
+  .roomTitle h1 { font-size: 33px; }
+  .roomTitle .eyebrow { font-size: 7px; }
+  .roomFooter { padding: 10px 22px max(14px, env(safe-area-inset-bottom)); flex-wrap: wrap; gap: 0; }
+  .roomFooter > span { width: 100%; font-size: 7px; }
+  .roomFooter > div { justify-content: space-between; width: 100%; }
+  .loader p { font-size: 23px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .room *, .dialog * { scroll-behavior: auto !important; }
 }

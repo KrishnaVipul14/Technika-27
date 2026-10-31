@@ -217,12 +217,10 @@ export default async function RootLayout({
         <HouseProvider initialHouse={theme} preferInitialHouse={fromDatabase}>
           <AuthProvider>
             <SmoothScroll>
-              <Experience>
-                <Header />
+              <Experience header={<Header />} footer={<Footer />}>
                 <main id="main-content" tabIndex={-1}>
                   <PageTransition>{children}</PageTransition>
                 </main>
-                <Footer />
               </Experience>
             </SmoothScroll>
           </AuthProvider>

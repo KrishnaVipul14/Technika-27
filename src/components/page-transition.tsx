@@ -58,6 +58,7 @@ function BrickTransition({ phase }: { phase: "closing" | "opening" }) {
 
 export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const isRoom = pathname === "/account";
   const router = useRouter();
   const pageRef = useRef<HTMLDivElement>(null);
   const door = useRef<ChamberDoorHandle>(null);
@@ -122,7 +123,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
 
   /* Intercept clicks on internal links (capture phase, before Next's own handler). */
   useEffect(() => {
-    if (!enabled || !ready) return;
+    if (!enabled || !ready || isRoom) return;
     const onClick = (e: MouseEvent) => {
       if (
         e.defaultPrevented ||
@@ -144,7 +145,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
       )
         return;
       const url = new URL(a.href, window.location.href);
-      if (url.origin !== window.location.origin) return;
+      if (url.origin !== window.location.origin || url.pathname === "/account") return;
       if (
         url.pathname === window.location.pathname &&
         url.search === window.location.search
@@ -156,12 +157,19 @@ export function PageTransition({ children }: { children: ReactNode }) {
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
-  }, [enabled, ready, go]);
+  }, [enabled, ready, go, isRoom]);
 
   /* The route changed. */
   useIsoLayoutEffect(() => {
     const changed = previous.current !== pathname;
+    const fromRoom = previous.current === "/account";
     previous.current = pathname;
+    if (isRoom || fromRoom) {
+      clearGiveUp();
+      phase.current = "idle";
+      if (pageRef.current) gsap.set(pageRef.current, { clearProps: "all" });
+      return;
+    }
     if (!ready || !enabled) return;
 
     if (!changed) {
@@ -190,10 +198,11 @@ export function PageTransition({ children }: { children: ReactNode }) {
       closedAt.current = performance.now();
     }
     void reveal();
-  }, [pathname, enabled, ready, reveal]);
+  }, [pathname, enabled, ready, reveal, isRoom]);
 
   useEffect(() => clearGiveUp, []);
 
+  if (isRoom) return <>{children}</>;
   return (
     <>
       {brickPhase !== "idle" && <BrickTransition phase={brickPhase} />}

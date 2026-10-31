@@ -131,8 +131,9 @@ function WandSparks({ enabled }: { enabled: boolean }) {
   return <canvas className="wand-sparks" ref={canvasRef} aria-hidden="true" />;
 }
 
-export function Experience({ children }: { children: React.ReactNode }) {
+export function Experience({ children, header, footer }: { children: React.ReactNode; header?: React.ReactNode; footer?: React.ReactNode }) {
   const pathname = usePathname();
+  const isRoom = pathname === "/account";
   const isHome = pathname === "/";
   // On the home page, the intro video controls when ready becomes true (at the castle scene).
   // On all other routes, ready is immediately true.
@@ -146,6 +147,7 @@ export function Experience({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   useEffect(() => {
+    if (isRoom) return;
     document.documentElement.dataset.magic = enabled ? "on" : "off";
     if (!ready) return;
     const globalLenis = (
@@ -154,20 +156,24 @@ export function Experience({ children }: { children: React.ReactNode }) {
     globalLenis?.start();
     globalLenis?.resize();
     ScrollTrigger.refresh();
-  }, [enabled, ready]);
+  }, [enabled, ready, isRoom]);
 
   return (
-    <MotionConfig reducedMotion={enabled ? "never" : "always"}>
+    <MotionConfig reducedMotion={isRoom ? "user" : enabled ? "never" : "always"}>
       <MagicContext.Provider value={{ enabled, ready, setReady }}>
         <div className="experience-content">
+          {!isRoom && header}
           {children}
+          {!isRoom && footer}
         </div>
-        <WandSparks enabled={enabled} />
-        <WandCursor />
-        <SnakeScroll />
-        <MagicInteractions />
-        <HouseSwitcher />
-        <div className="scroll-progress" aria-hidden="true" />
+        {!isRoom && <>
+          <WandSparks enabled={enabled} />
+          <WandCursor />
+          <SnakeScroll />
+          <MagicInteractions />
+          <HouseSwitcher />
+          <div className="scroll-progress" aria-hidden="true" />
+        </>}
       </MagicContext.Provider>
     </MotionConfig>
   );

@@ -3,7 +3,8 @@ import { signInFixture, setFixtureScenario, fixtureRequests } from "./fixtures";
 
 const panels = ["House Archives", "Notice Board", "House Community", "Your Belongings", "Hidden Passage"];
 test.describe("panels", () => {
-  test.beforeEach(async ({ page }) => { await signInFixture(page); await page.goto("/account"); });
+  test.use({ reducedMotion: "reduce" });
+  test.beforeEach(async ({ page }) => { await signInFixture(page); await page.goto("/account"); await page.getByText("Explore the room", { exact: true }).click(); });
   test("five panels, Escape and focus restoration", async ({ page }) => {
     for (const title of panels) {
       const opener = page.getByRole("button", { name: title, exact: true });
@@ -37,6 +38,7 @@ test.describe("panels", () => {
     const name = "<b>Not markup</b> " + "A very long participant name ".repeat(8);
     await setFixtureScenario({ name });
     await page.reload();
+    await page.getByText("Explore the room", { exact: true }).click();
     await page.getByRole("button", { name: "Your Belongings", exact: true }).click();
     await expect(page.getByRole("dialog")).toContainText(name.trim());
     await expect(page.getByRole("dialog").locator("b")).toHaveCount(0);

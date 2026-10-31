@@ -38,8 +38,10 @@ export interface SmoothScrollProps {
 export function SmoothScroll({ children }: SmoothScrollProps) {
   const lenisRef = useRef<Lenis | null>(null);
   const pathname = usePathname();
+  const isRoom = pathname === "/account";
 
   useEffect(() => {
+    if (isRoom) return;
     // Instantiate Lenis with optimal fluid lerp smoothing
     const lenis = new Lenis({
       lerp: 0.088, // Silky smooth deceleration without sluggishness
@@ -107,7 +109,7 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
         delete (window as unknown as { lenis?: Lenis }).lenis;
       }
     };
-  }, []);
+  }, [isRoom]);
 
   // On route changes, recalculate dimensions and update ScrollTrigger
   useEffect(() => {
