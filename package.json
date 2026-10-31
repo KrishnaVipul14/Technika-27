@@ -12,7 +12,8 @@
     "assets": "node scripts/prepare-assets.mjs",
     "assets:social": "node scripts/create-social-image.mjs",
     "assets:wizard": "node scripts/prepare-wizard-assets.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:room": "playwright test --config=playwright.common-room.config.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
