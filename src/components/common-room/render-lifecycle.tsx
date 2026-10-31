@@ -14,17 +14,18 @@ export function RenderLifecycle({ motion, quality, onDecline }: { motion: boolea
     visibility();
     return () => { document.removeEventListener("visibilitychange", visibility); if (timer.current) clearTimeout(timer.current); };
   }, [invalidate, motion]);
-  useFrame(({ gl, scene, camera }) => {
+  useFrame(({ gl, scene, camera }, delta) => {
     if (document.hidden) return;
     if (previousQuality.current !== quality) { samples.current = 0; slow.current = 0; gl.shadowMap.enabled = quality !== "low"; previousQuality.current = quality; }
     const start = performance.now();
     gl.render(scene, camera);
-    const cost = performance.now() - start;
+    const cost = Math.max(performance.now() - start, delta * 1000 - 1000 / 30);
     samples.current++;
-    if (samples.current > 3) {
+    if (samples.current > 2) {
       slow.current = cost > 45 ? slow.current + 1 : Math.max(0, slow.current - 1);
-      if (slow.current >= 4) { onDecline(); if (cost > 80) gl.shadowMap.enabled = false; slow.current = 0; }
+      if (slow.current >= (cost > 120 ? 2 : 4)) { onDecline(); if (cost > 80) gl.shadowMap.enabled = false; slow.current = 0; }
     }
+    gl.domElement.dataset.frameMs = String(Math.round(delta * 1000));
     gl.domElement.dataset.drawCalls = String(gl.info.render.calls);
     gl.domElement.dataset.triangles = String(gl.info.render.triangles);
     gl.domElement.dataset.dpr = String(gl.getPixelRatio());

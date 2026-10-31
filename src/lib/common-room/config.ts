@@ -15,7 +15,7 @@ export const roomConfigs: Record<AssignedHouse, HouseRoomConfig> = {
     objects: {
       archives: placement([-5.6, 0, -3.8], .16, [-3.6, 2.7, 3.8], [-5.6, 2.1, -3.8]),
       notices: placement([5.5, 0, -3.4], -.15, [3.6, 2.6, 3.8], [5.5, 2.3, -3.4]),
-      members: placement([-5.2, 0, 2.1], .28, [-3.9, 2.4, 7.5], [-5.2, 1.9, 2.1]),
+      members: placement([-6.4, 0, .7], .28, [-4.7, 2.4, 7], [-6.4, 1.9, .7]),
       profile: placement([2.9, 0, 3.9], -.18, [2.4, 2.6, 8.5], [2.9, .8, 3.9]),
       secret: placement([6.5, 0, 1.8], -.35, [5.4, 2.2, 6.5], [7.1, 1.8, -.3]),
     },

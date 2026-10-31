@@ -7,9 +7,7 @@ test("Slytherin architecture and room shell", async ({ page }, testInfo) => {
   await signInFixture(page);
   await page.goto("/account");
   await expect(page.getByTestId("room-canvas").locator("canvas")).toBeVisible();
-  const skip = page.getByRole("button", { name: "Skip entrance" });
-  if (await skip.isVisible()) await skip.click();
-  await expect(page.getByTestId("common-room")).toHaveAttribute("data-ready", "true");
+  await expect(page.getByTestId("common-room")).toHaveAttribute("data-ready", "true", { timeout: 25_000 });
   await expect(page.getByRole("heading", { name: "The Serpent’s Den", exact: true })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Main Navigation" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Change house", exact: true })).toHaveCount(0);

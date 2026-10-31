@@ -89,6 +89,32 @@
 .immersive .header { position: absolute; inset: 0 0 auto; border: 0; background: linear-gradient(#03100fb3, transparent); }
 .canvas { position: absolute; inset: 0; z-index: 0; touch-action: none; }
 .canvas canvas { display: block; cursor: default; }
+.canvas[data-hovered]:not([data-hovered=""]) canvas { cursor: pointer; }
+.canvas canvas:focus-visible { outline: 1px solid #b9caa0; outline-offset: -5px; }
+.objectAnchor { display: block; width: 2px; height: 2px; pointer-events: none; }
+.tooltip { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(4px); width: max-content; max-width: 210px; padding: 10px 18px; border: 1px solid #b7c19c6b; background: #0a1613ed; color: #eee8d3; font-family: var(--font-garamond), serif; font-size: 20px; text-align: center; opacity: 0; transition: opacity .18s, transform .18s; box-shadow: 0 6px 25px #0005; }
+.tooltip::after { content: ""; position: absolute; width: 6px; height: 6px; bottom: -4px; left: calc(50% - 3px); transform: rotate(45deg); border-right: 1px solid #b7c19c6b; border-bottom: 1px solid #b7c19c6b; background: #0a1613; }
+.tooltip[data-visible="true"] { opacity: 1; transform: translateX(-50%) translateY(0); }
+.tooltip small { display: block; font-family: var(--font-outfit), sans-serif; font-size: 8px; text-transform: uppercase; letter-spacing: .14em; color: #b1c09f; margin-top: 3px; }
+.entrance { position: absolute; inset: 0; z-index: 13; pointer-events: none; --entrance-progress: 0; --welcome-opacity: 0; }
+.welcome { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: radial-gradient(ellipse at center, #02130a88, transparent 65%); opacity: var(--welcome-opacity); text-align: center; padding: 30px; }
+.welcome img { object-fit: contain; width: 66px; height: 66px; }
+.welcome .eyebrow { max-width: min(600px, 85vw); max-height: 42px; overflow: hidden; line-height: 1.8; color: #d9e4cb; }
+.welcome h2 { font-family: var(--font-garamond), serif; font-weight: 400; font-size: clamp(45px, 7vw, 92px); line-height: 1; margin: 0; color: #f3efda; }
+.welcome p { font-family: var(--font-garamond), serif; font-style: italic; font-size: 21px; color: #c1cfb3; margin: 0; }
+.entranceFoot { position: absolute; bottom: 90px; left: 36px; right: 36px; display: flex; align-items: center; gap: 16px; color: #c5d2b6; }
+.entranceFoot > span { font-size: 10px; letter-spacing: .08em; }
+.entranceTrack { width: 120px; height: 1px; background: #c0d3a72b; }
+.entranceTrack span { display: block; height: 1px; background: #c0d3a7; transform: scaleX(var(--entrance-progress)); transform-origin: left; }
+.entranceFoot button { margin-left: auto; min-height: 44px; padding: 0 18px; border: 1px solid #afc8996e; background: #0a1614bc; color: #e2e9d7; font-size: 11px; pointer-events: auto; }
+.room[data-phase="entering"] .roomTitle { opacity: 0; }
+.room[data-phase="panel"] .roomTitle { opacity: .35; }
+.dialog[data-closing="true"]::backdrop { background: transparent; }
+@media (max-width: 640px) {
+  .entranceFoot { bottom: 106px; left: 22px; right: 22px; flex-wrap: wrap; gap: 10px; }
+  .entranceFoot > span { width: 100%; font-size: 9px; }
+  .entranceTrack { width: 70px; }
+}
 .vignette { position: absolute; inset: 0; pointer-events: none; z-index: 2; background: linear-gradient(0deg, #040d0be6 0%, #040d0b40 20%, transparent 39%), radial-gradient(ellipse at 50% 43%, transparent 40%, #01060655 100%); }
 .roomTitle { position: absolute; left: 38px; bottom: 92px; z-index: 3; pointer-events: none; }
 .roomTitle .eyebrow { font-size: 8px; letter-spacing: .2em; color: #c0cbb3; }
