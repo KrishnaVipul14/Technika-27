@@ -9,7 +9,7 @@ export default defineConfig({
   expect: { timeout: 12000 },
   reporter: "list",
   outputDir: "test-results/common-room",
-  use: { baseURL: "http://127.0.0.1:3410", trace: "retain-on-failure" },
+  use: { baseURL: "http://127.0.0.1:3410", trace: "retain-on-failure", actionTimeout: 12000 },
   projects: [
     { name: "logic", testMatch: /logic\.room\.ts$/ },
     { name: "desktop", testIgnore: /logic\.room\.ts$/, use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },

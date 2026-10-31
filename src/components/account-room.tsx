@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowUpRight, LogOut, ShieldCheck } from "lucide-react";
 import { getSupabase } from "@/lib/supabase/client";
-import { houseThemes } from "@/lib/houses";
 import type { RoomAccess } from "@/lib/common-room/types";
+import { CommonRoomExperience } from "./common-room/common-room-experience";
 import { useAuth } from "./auth-provider";
 
 export function AccountRoom({ access }: { access: Exclude<RoomAccess, { status: "signed-out" }> }) {
@@ -33,12 +33,11 @@ export function AccountRoom({ access }: { access: Exclude<RoomAccess, { status: 
     finally { setBusy(false); }
   };
   if (staleSession) return <p className="shell py-40" role="status">Verifying your castle key…</p>;
-  return <section className="common-room shell" data-testid="common-room" data-house={access.status === "ready" ? access.participant.house : undefined}>
+  const accountActions = <><button className="button button-glass" type="button" disabled={busy} onClick={logout}><LogOut size={14} />{busy ? "Signing out…" : "Sign out"}</button>{feedback && <p role="status">{feedback}</p>}</>;
+  if (access.status === "ready") return <CommonRoomExperience key={`${access.participant.id}:${access.participant.house}`} participant={access.participant} accountActions={accountActions} />;
+  return <section className="common-room shell" data-testid="common-room">
     <span className="eyebrow"><ShieldCheck size={13} />Your private common room</span>
-    {access.status === "ready" ? <>
-      <h1>Welcome home, <em>{access.participant.displayName}.</em></h1>
-      <p>{houseThemes[access.participant.house].name} · {houseThemes[access.participant.house].motto}</p>
-    </> : access.status === "unassigned" ? <>
+    {access.status === "unassigned" ? <>
       <h1>House assignment pending</h1>
       <p>{access.displayName}, your account is verified, but a house has not been saved in your profile. The Common Room will not assign one for you.</p>
       <Link className="button button-gold" href="/signup?step=ceremony">Return to the Sorting Hat <ArrowUpRight size={15} /></Link>

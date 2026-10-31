@@ -1,9 +1,27 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { houseFromValue } from "@/lib/houses";
-import type { RoomAccess } from "./types";
+import type { AssignedHouse, MembersResult, RoomAccess } from "./types";
 
-/** Only a verified user and their database profile can choose a room. Never assigns a house. */
+export async function loadRoomMembers(client: SupabaseClient, house: AssignedHouse, page: number): Promise<MembersResult> {
+  try {
+    // ponytail: legacy house strings require a wildcard scan; normalize/index the column
+    // through a separately approved migration if directory scale warrants it.
+    const { data, error } = await client.from("profiles").select("full_name,house")
+      .ilike("house", `%${house}%`).order("full_name", { nullsFirst: false }).order("id")
+      .range(page * 24, page * 24 + 24);
+    if (error) throw error;
+    const rows = data || [];
+    return { status: "ready", house, nextPage: rows.length > 24 && page < 1000 ? page + 1 : null,
+      members: rows.slice(0, 24).filter((row) => houseFromValue(row.house) === house).map((row) => ({
+        name: typeof row.full_name === "string" && row.full_name.trim() ? row.full_name.trim() : "House member", house,
+      })),
+    };
+  } catch {
+    return { status: "unavailable", message: "The house directory could not be reached. Please try again." };
+  }
+}
+
 export async function loadRoomAccount(client: SupabaseClient | null): Promise<RoomAccess> {
   if (!client) return { status: "signed-out" };
   try {
