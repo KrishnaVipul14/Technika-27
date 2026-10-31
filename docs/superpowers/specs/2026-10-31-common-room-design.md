@@ -1,7 +1,7 @@
 # TECHNIKA ’27 — Four-House Common Room Design
 
 Date: 2026-10-31
-Status: Written specification for review, following approval of the scoped design and procedural-3D-first approach for all four houses.
+Status: Approved by the user on 2026-11-01, including the scoped design and procedural-3D-first approach for all four houses.
 
 ## 1. Outcome and scope
 
