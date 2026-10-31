@@ -15,6 +15,7 @@ import styles from "./common-room.module.css";
 
 const SlytherinScene = lazy(() => import("./scenes/slytherin-scene"));
 const GryffindorScene = lazy(() => import("./scenes/gryffindor-scene"));
+const RavenclawScene = lazy(() => import("./scenes/ravenclaw-scene"));
 function SceneReady({ onReady }: { onReady: () => void }) {
   const sent = useRef(false);
   useFrame(() => { if (!sent.current) { sent.current = true; onReady(); } });
@@ -42,6 +43,7 @@ export default function RoomCanvas({ participant, quality, motion, state, dispat
         <CameraController house={house} state={state} dispatch={dispatch} motion={motion} controlsLocked={controlsLocked} progress={progress} entranceRef={entranceRef} />
         {house === "slytherin" && <SlytherinScene house={house} motion={motion} quality={quality} />}
         {house === "gryffindor" && <GryffindorScene house={house} motion={motion} quality={quality} />}
+        {house === "ravenclaw" && <RavenclawScene house={house} motion={motion} quality={quality} />}
         <RoomObjects house={house} motion={motion} quality={quality} hovered={state.hovered} selected={state.selected} disabled={state.phase !== "exploring" || controlsLocked} onHover={(id) => dispatch({ type: "HOVER", id })} onSelect={onSelect} />
         <EntranceDoor house={house} progress={progress} /><SceneReady onReady={onReady} />
       </RoomMaterials></Suspense>

@@ -26,7 +26,7 @@ import styles from "./common-room.module.css";
 const RoomCanvas = dynamic(() => import("./room-canvas"), { ssr: false, loading: () => <RoomLoader stage="Opening the chamber" /> });
 
 export function CommonRoomExperience({ participant, accountActions }: { participant: RoomParticipant; accountActions: ReactNode }) {
-  const hasScene = ["slytherin", "gryffindor"].includes(participant.house);
+  const hasScene = ["slytherin", "gryffindor", "ravenclaw"].includes(participant.house);
   const [state, dispatch] = useReducer(roomReducer, hasScene ? initialRoomState : { ...initialRoomState, phase: "exploring" });
   const [expired, setExpired] = useState(false);
   const [modelReady, setModelReady] = useState(false);

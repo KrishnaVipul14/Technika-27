@@ -23,7 +23,7 @@ test("Slytherin architecture and room shell", async ({ page }, testInfo) => {
 
 test.describe("distinct house scenes", () => {
   test.use({ reducedMotion: "reduce" });
-  for (const [house, title, name] of [["gryffindor", "The Lion’s Hearth", "Gryffindor"]] as const) {
+  for (const [house, title, name] of [["gryffindor", "The Lion’s Hearth", "Gryffindor"], ["ravenclaw", "The Celestial Observatory", "Ravenclaw"], ["hufflepuff", "The Hearth Garden", "Hufflepuff"]] as const) {
     test(`${name} architecture and five physical picks`, async ({ page }, info) => {
       const errors: string[] = []; const chunks: string[] = [];
       page.on("pageerror", (error) => errors.push(error.message));
