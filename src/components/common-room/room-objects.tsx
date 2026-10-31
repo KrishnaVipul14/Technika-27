@@ -108,7 +108,7 @@ export function RoomObjects({ house, quality, motion, hovered, selected, disable
   return <>{roomObjects.map(({ id }) => <InteractiveObject key={id} id={id} house={house} hovered={hovered === id} disabled={disabled} onHover={onHover} onSelect={onSelect}>
     {id === "archives" && <Fireplace house={house} motion={motion} quality={quality} active={hovered === id || selected === id} />}
     {id === "notices" && <NoticeBoard motion={motion} active={hovered === id || selected === id} />}
-    {id === "members" && <Bookshelf motion={motion} active={hovered === id || selected === id} />}
+    {id === "members" && <group scale={house === "hufflepuff" ? .85 : 1}><Bookshelf motion={motion} active={hovered === id || selected === id} /></group>}
     {id === "profile" && <Chest motion={motion} open={selected === id} hovered={hovered === id} />}
     {id === "secret" && <SecretDoor motion={motion} open={selected === id} hovered={hovered === id} />}
   </InteractiveObject>)}</>;

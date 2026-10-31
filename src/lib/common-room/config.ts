@@ -48,7 +48,7 @@ export const roomConfigs: Record<AssignedHouse, HouseRoomConfig> = {
     objects: {
       archives: placement([-5.3, 0, -3.1], .15, [-3.5, 2.6, 4], [-5.3, 2, -3.1]),
       notices: placement([5.3, 0, -2.9], -.18, [3.4, 2.6, 4], [5.3, 2.2, -2.9]),
-      members: placement([-4.9, 0, 2.4], .3, [-3.3, 2.6, 7.8], [-4.9, 1.8, 2.4]),
+      members: placement([-5.8, 0, -.2], .3, [-4.3, 2.4, 6.8], [-5.8, 1.7, -.2]),
       profile: placement([2.8, 0, 3.8], -.2, [2.3, 2.6, 8.5], [2.8, .8, 3.8]),
       secret: placement([6.1, 0, 1.5], -.32, [5, 2, 6], [6.7, 1.7, -.8]),
     },

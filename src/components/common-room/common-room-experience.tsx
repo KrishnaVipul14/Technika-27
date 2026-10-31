@@ -26,8 +26,7 @@ import styles from "./common-room.module.css";
 const RoomCanvas = dynamic(() => import("./room-canvas"), { ssr: false, loading: () => <RoomLoader stage="Opening the chamber" /> });
 
 export function CommonRoomExperience({ participant, accountActions }: { participant: RoomParticipant; accountActions: ReactNode }) {
-  const hasScene = ["slytherin", "gryffindor", "ravenclaw"].includes(participant.house);
-  const [state, dispatch] = useReducer(roomReducer, hasScene ? initialRoomState : { ...initialRoomState, phase: "exploring" });
+  const [state, dispatch] = useReducer(roomReducer, initialRoomState);
   const [expired, setExpired] = useState(false);
   const [modelReady, setModelReady] = useState(false);
   const [fallback, setFallback] = useState<FallbackReason | null>(null);
@@ -35,7 +34,7 @@ export function CommonRoomExperience({ participant, accountActions }: { particip
   const reducedMotion = useReducedMotion();
   const root = useRef<HTMLDivElement>(null); const entranceRef = useRef<HTMLDivElement>(null);
   const opener = useRef<HTMLElement | null>(null); const selecting = useRef(false);
-  const showFallback = fallback !== null || !hasScene;
+  const showFallback = fallback !== null;
   const onReady = useCallback(() => { setModelReady(true); dispatch({ type: "READY" }); }, []);
   const ready = showFallback || (modelReady && state.phase !== "loading" && state.phase !== "entering");
   const router = useRouter();
@@ -63,7 +62,7 @@ export function CommonRoomExperience({ participant, accountActions }: { particip
   return <div ref={root} className={`${styles.room} ${!showFallback ? styles.immersive : ""}`} data-testid="common-room" data-house={participant.house} data-theme={participant.house} data-ready={ready} data-phase={state.phase} data-lenis-prevent>
     {!showFallback && <><RoomCanvas participant={participant} quality="medium" motion={!reducedMotion} state={state} dispatch={dispatch} controlsLocked={guideOpen} entranceRef={entranceRef} onSelect={select} onReady={onReady} /><div className={styles.vignette} />{!modelReady && <RoomLoader stage="Lighting the chamber" />}{state.phase === "entering" && <RoomEntrance participant={participant} progressRef={entranceRef} onSkip={() => dispatch({ type: "SKIP" })} />}</>}
     <header className={styles.header}><div className={styles.identity}><Image src={houseLogoFor(participant.house)} width={37} height={46} alt={`${houseThemes[participant.house].name} emblem`} /><div><span>{houseThemes[participant.house].name} · Common Room</span><strong>{participant.displayName}</strong></div></div><Link className={styles.back} href="/" data-no-transition><ArrowLeft size={15} />Leave the room</Link></header>
-    {showFallback ? <RoomFallback participant={participant} reason={fallback || "chosen"} onSelect={select} onRetry={hasScene ? () => { setModelReady(false); setFallback(null); } : undefined} /> : <>
+    {showFallback ? <RoomFallback participant={participant} reason={fallback || "chosen"} onSelect={select} onRetry={() => { setModelReady(false); setFallback(null); }} /> : <>
       <div className={styles.roomTitle}><span className={styles.eyebrow}>{houseLore[participant.house].location}</span><h1>{houseLore[participant.house].title}</h1><p>{houseThemes[participant.house].motto}</p></div>
       <footer className={styles.roomFooter}><span>TECHNIKA ’27 <i /> PROCEDURAL 3D PROTOTYPE</span><div><button type="button" disabled={!ready || state.phase !== "exploring"} onClick={() => setFallback("chosen")}>Reading mode</button><ObjectGuide disabled={!ready} onSelect={select} onOpenChange={setGuideOpen} /></div></footer>
     </>}

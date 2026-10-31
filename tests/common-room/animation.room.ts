@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { signInFixture } from "./fixtures";
 import { enterRoom } from "./room-actions";
 
-test("Ravenclaw ambience obeys reduced motion", async ({ page }) => {
+for (const [house, name] of [["ravenclaw", "Ravenclaw"], ["hufflepuff", "Hufflepuff"]] as const) test(`${name} environment obeys reduced motion`, async ({ page }) => {
   await page.addInitScript(() => {
     const probe = { draws: 0 };
     Object.defineProperty(window, "roomDrawProbe", { value: probe });
@@ -12,7 +12,7 @@ test("Ravenclaw ambience obeys reduced motion", async ({ page }) => {
     }
   });
   const drawCount = () => page.evaluate(() => (window as unknown as { roomDrawProbe: { draws: number } }).roomDrawProbe.draws);
-  await signInFixture(page, { house: "ravenclaw" });
+  await signInFixture(page, { house });
   await page.emulateMedia({ reducedMotion: "reduce" }); await enterRoom(page);
   const canvas = page.getByTestId("room-canvas").locator("canvas");
   const staticFrame = await canvas.screenshot(); const count = await drawCount();
