@@ -8,6 +8,8 @@ export async function setFixtureScenario(scenario: Scenario & { reset?: boolean 
   if (!response.ok) throw new Error("Local fixture unavailable");
 }
 export async function signInFixture(page: Page, scenario: Scenario = {}) {
+  // Keep fixture sessions/telemetry on loopback; third-party analytics is not under test.
+  await page.route((url) => !["127.0.0.1", "localhost"].includes(url.hostname), (route) => route.abort("blockedbyclient"));
   await setFixtureScenario({ reset: true, ...scenario });
   const session = await (await fetch(`${fixtureUrl}/__session`)).json();
   const cookies: { name: string; value: string; domain: string; path: string; sameSite: "Lax"; httpOnly: boolean; secure: boolean }[] = [];

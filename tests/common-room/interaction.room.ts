@@ -54,10 +54,17 @@ test("camera parallax is damped and bounded; the guide preserves a non-default v
   await page.mouse.move(box.width * .85, box.height * .32);
   await expect.poll(async () => Math.abs((await anchors(page))[0][0] - before[0][0])).toBeGreaterThan(2);
   const summary = page.getByText("Explore the room", { exact: true }); await summary.focus(); await summary.press("Enter");
-  const saved = await anchors(page);
+  await expect(page.getByRole("navigation", { name: "Room objects" })).toBeVisible();
+  const distance = (a: number[][], b: number[][]) => Math.max(...a.flatMap((point, i) => point.map((value, j) => Math.abs(value - b[i][j]))));
+  let saved = await anchors(page), stable = 0;
+  // Native details/toggle and the R3F renderer commit separately. Snapshot the
+  // frozen projection, not a frame still queued before the guide's camera lock.
+  await expect.poll(async () => { const next = await anchors(page); stable = distance(next, saved) < .05 ? stable + 1 : 0; saved = next; return stable; }, { intervals: [100, 200, 400] }).toBeGreaterThanOrEqual(3);
   for (let i = 0; i < saved.length; i++) expect(Math.abs(saved[i][0] - before[i][0])).toBeLessThan(140);
+  await page.mouse.move(0, 0);
   await page.getByRole("button", { name: "House Archives", exact: true }).press("Enter");
   await expect(page.getByRole("dialog")).toBeVisible(); await page.keyboard.press("Escape");
   await expect(page.getByTestId("common-room")).toHaveAttribute("data-phase", "exploring");
-  await expect.poll(() => anchors(page)).toEqual(saved);
+  // DOM projection rounds to subpixels; the numeric camera test remains exact.
+  await expect.poll(async () => distance(await anchors(page), saved)).toBeLessThan(.05);
 });

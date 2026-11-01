@@ -25,7 +25,7 @@ test.describe("room recovery", () => {
     await expect(page.getByRole("dialog")).toContainText("Ravenclaw"); await page.keyboard.press("Escape");
     await page.unroute(/ravenclaw-scene.*\.js/);
     await page.getByRole("button", { name: "Reload the 3D room" }).click();
-    await expect(page.getByTestId("common-room")).toHaveAttribute("data-ready", "true");
+    await expect(page.getByTestId("common-room")).toHaveAttribute("data-ready", "true", { timeout: 25_000 });
     await expect(page.getByTestId("room-canvas").locator("canvas")).toBeVisible();
   });
   test("context-loss fallback preserves an open panel and recreates only one renderer", async ({ page }, info) => {

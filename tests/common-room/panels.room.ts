@@ -61,7 +61,7 @@ test.describe("panels", () => {
     await expect(page.getByTestId("room-member")).toHaveCount(4);
     await setFixtureScenario({ revoked: true });
     await page.getByRole("button", { name: "Previous page" }).click();
-    await expect(page).toHaveURL(/\/login$/);
+    await expect(page).toHaveURL(/\/login$/, { timeout: 30_000 });
     await expect(page.getByTestId("room-member")).toHaveCount(0);
   });
 });

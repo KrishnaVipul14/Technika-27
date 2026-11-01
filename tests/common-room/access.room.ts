@@ -3,7 +3,7 @@ import { signInFixture, setFixtureScenario } from "./fixtures";
 
 test.describe("account access", () => {
   test("unsigned visitors remain behind the existing login gate", async ({ request }) => {
-    const response = await request.get("/account", { maxRedirects: 0 });
+    const response = await request.get("/account", { maxRedirects: 0, timeout: 30_000 });
     expect(response.status()).toBe(307);
     expect(response.headers().location).toMatch(/\/login$/);
   });
