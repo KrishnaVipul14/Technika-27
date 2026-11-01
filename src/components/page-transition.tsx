@@ -28,6 +28,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { useMagic } from "./experience";
+import { useRegistrationArrival } from "./registration-arrival";
 import { ChamberDoor, type ChamberDoorHandle } from "./ChamberDoor";
 
 /** 1 = default (~1.4s). 1.25 = quicker, 0.8 = slower. */
@@ -59,6 +60,8 @@ function BrickTransition({ phase }: { phase: "closing" | "opening" }) {
 export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isRoom = pathname === "/account";
+  const { active: arrivalActive } = useRegistrationArrival();
+  const suspended = isRoom || arrivalActive;
   const router = useRouter();
   const pageRef = useRef<HTMLDivElement>(null);
   const door = useRef<ChamberDoorHandle>(null);
@@ -123,7 +126,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
 
   /* Intercept clicks on internal links (capture phase, before Next's own handler). */
   useEffect(() => {
-    if (!enabled || !ready || isRoom) return;
+    if (!enabled || !ready || suspended) return;
     const onClick = (e: MouseEvent) => {
       if (
         e.defaultPrevented ||
@@ -157,14 +160,14 @@ export function PageTransition({ children }: { children: ReactNode }) {
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
-  }, [enabled, ready, go, isRoom]);
+  }, [enabled, ready, go, suspended]);
 
   /* The route changed. */
   useIsoLayoutEffect(() => {
     const changed = previous.current !== pathname;
     const fromRoom = previous.current === "/account";
     previous.current = pathname;
-    if (isRoom || fromRoom) {
+    if (suspended || fromRoom) {
       clearGiveUp();
       phase.current = "idle";
       if (pageRef.current) gsap.set(pageRef.current, { clearProps: "all" });
@@ -198,15 +201,15 @@ export function PageTransition({ children }: { children: ReactNode }) {
       closedAt.current = performance.now();
     }
     void reveal();
-  }, [pathname, enabled, ready, reveal, isRoom]);
+  }, [pathname, enabled, ready, reveal, suspended]);
 
   useEffect(() => clearGiveUp, []);
 
   if (isRoom) return <>{children}</>;
   return (
     <>
-      {brickPhase !== "idle" && <BrickTransition phase={brickPhase} />}
-      <ChamberDoor ref={door} speed={SPEED} />
+      {!arrivalActive && brickPhase !== "idle" && <BrickTransition phase={brickPhase} />}
+      {!arrivalActive && <ChamberDoor ref={door} speed={SPEED} />}
       <div ref={pageRef} className="page-transition">
         {children}
       </div>

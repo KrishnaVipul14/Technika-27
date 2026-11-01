@@ -8,10 +8,12 @@ import { getSupabase } from "@/lib/supabase/client";
 import type { RoomAccess } from "@/lib/common-room/types";
 import { CommonRoomExperience } from "./common-room/common-room-experience";
 import { useAuth } from "./auth-provider";
+import { useRegistrationArrival } from "./registration-arrival";
 
 export function AccountRoom({ access }: { access: Exclude<RoomAccess, { status: "signed-out" }> }) {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const { cancel: cancelArrival } = useRegistrationArrival();
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState("");
   const staleSession = (!loading && !user) || Boolean(user && access.status === "ready" && user.id !== access.participant.id);
@@ -21,6 +23,7 @@ export function AccountRoom({ access }: { access: Exclude<RoomAccess, { status: 
     router.refresh();
   }, [staleSession, user, router]);
 
+  useEffect(() => { if (staleSession || access.status !== "ready") cancelArrival(); }, [staleSession, access.status, cancelArrival]);
   const logout = async () => {
     setBusy(true); setFeedback("");
     try {

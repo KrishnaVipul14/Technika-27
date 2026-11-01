@@ -14,6 +14,7 @@ import { MagicInteractions } from "./magic-interactions";
 import { WandCursor } from "./wand-cursor";
 import SnakeScroll from "@/components/snake-scroll";
 import { HouseSwitcher } from "./house-switcher";
+import { useRegistrationArrival } from "./registration-arrival";
 
 interface MagicContextValue {
   enabled: boolean;
@@ -133,7 +134,8 @@ function WandSparks({ enabled }: { enabled: boolean }) {
 
 export function Experience({ children, header, footer }: { children: React.ReactNode; header?: React.ReactNode; footer?: React.ReactNode }) {
   const pathname = usePathname();
-  const isRoom = pathname === "/account";
+  const { active: arrivalActive } = useRegistrationArrival();
+  const immersive = pathname === "/account" || arrivalActive;
   const isHome = pathname === "/";
   // On the home page, the intro video controls when ready becomes true (at the castle scene).
   // On all other routes, ready is immediately true.
@@ -147,7 +149,7 @@ export function Experience({ children, header, footer }: { children: React.React
   }, [pathname]);
 
   useEffect(() => {
-    if (isRoom) return;
+    if (immersive) return;
     document.documentElement.dataset.magic = enabled ? "on" : "off";
     if (!ready) return;
     const globalLenis = (
@@ -156,17 +158,17 @@ export function Experience({ children, header, footer }: { children: React.React
     globalLenis?.start();
     globalLenis?.resize();
     ScrollTrigger.refresh();
-  }, [enabled, ready, isRoom]);
+  }, [enabled, ready, immersive]);
 
   return (
-    <MotionConfig reducedMotion={isRoom ? "user" : enabled ? "never" : "always"}>
+    <MotionConfig reducedMotion={immersive ? "user" : enabled ? "never" : "always"}>
       <MagicContext.Provider value={{ enabled, ready, setReady }}>
         <div className="experience-content">
-          {!isRoom && header}
+          {!immersive && header}
           {children}
-          {!isRoom && footer}
+          {!immersive && footer}
         </div>
-        {!isRoom && <>
+        {!immersive && <>
           <WandSparks enabled={enabled} />
           <WandCursor />
           <SnakeScroll />

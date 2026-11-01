@@ -23,6 +23,7 @@ import { NoticeBoardPanel } from "./panels/notice-board-panel";
 import { MembersPanel } from "./panels/members-panel";
 import { ParticipantProfilePanel } from "./panels/participant-profile-panel";
 import { SecretRoomPanel } from "./panels/secret-room-panel";
+import { useRegistrationArrival } from "../registration-arrival";
 import styles from "./common-room.module.css";
 
 const RoomCanvas = dynamic(() => import("./room-canvas"), { ssr: false, loading: () => <RoomLoader stage="Opening the chamber" /> });
@@ -42,6 +43,10 @@ export function CommonRoomExperience({ participant, accountActions }: { particip
   const [guideOpen, setGuideOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState<"open" | "closing" | null>(null);
   const { settings, update, quality, motion } = useRoomSettings();
+  const arrival = useRegistrationArrival();
+  const { roomReady } = arrival;
+  const journeyPhase = arrival.journey?.phase;
+  const arrivalPhase = arrival.journey?.participant.id === participant.id && arrival.journey.participant.house === participant.house ? arrival.journey.phase : undefined;
   const { setEnabled, play, unavailable, paused } = useRoomAudio(participant.house);
   const root = useRef<HTMLDivElement>(null); const entranceRef = useRef<HTMLDivElement>(null);
   const opener = useRef<HTMLElement | null>(null); const selecting = useRef(false);
@@ -68,6 +73,8 @@ export function CommonRoomExperience({ participant, accountActions }: { particip
   };
   const onReady = useCallback(() => { setModelReady(true); dispatch({ type: "READY" }); }, []);
   const ready = showFallback || (modelReady && state.phase !== "loading" && state.phase !== "entering");
+  useEffect(() => { if (ready && !expired) roomReady(participant); }, [ready, expired, participant, roomReady]);
+  useEffect(() => { if (arrival.journey?.skipped && arrivalPhase && state.phase === "entering") dispatch({ type: "SKIP" }); }, [arrival.journey?.skipped, arrivalPhase, state.phase]);
   const router = useRouter();
   const onSessionExpired = useCallback(() => { void setEnabled(false, false); setExpired(true); router.refresh(); }, [router, setEnabled]);
   const onExited = useCallback(() => { dispatch({ type: "PANEL_EXITED" }); if (showFallback) dispatch({ type: "RESTORED" }); }, [showFallback]);
@@ -91,9 +98,10 @@ export function CommonRoomExperience({ participant, accountActions }: { particip
   const { selected } = state;
   const panelVisible = selected && ["panel", "closing", "restoring"].includes(state.phase);
   if (expired) return <p role="status">Verifying your castle key…</p>;
-  return <div ref={root} className={`${styles.room} ${!showFallback ? styles.immersive : ""}`} data-testid="common-room" data-house={participant.house} data-theme={participant.house} data-ready={ready} data-phase={state.phase} data-motion={motion} data-quality={quality} data-lenis-prevent>
-    {!showFallback && <><RoomRendererBoundary onFailure={onFailure}><RoomCanvas participant={participant} quality={quality} motion={motion} state={state} dispatch={dispatch} controlsLocked={guideOpen || settingsOpen !== null} entranceRef={entranceRef} onSelect={select} onReady={onReady} onFailure={onFailure} /></RoomRendererBoundary><div className={styles.vignette} />{!modelReady && <RoomLoader stage="Lighting the chamber" />}{state.phase === "entering" && <RoomEntrance participant={participant} progressRef={entranceRef} onSkip={() => dispatch({ type: "SKIP" })} />}</>}
+  return <div ref={root} className={`${styles.room} ${!showFallback ? styles.immersive : ""}`} data-testid="common-room" data-house={participant.house} data-theme={participant.house} data-ready={ready} data-phase={state.phase} data-motion={motion} data-quality={quality} data-arrival={arrivalPhase} data-journey-phase={journeyPhase} data-lenis-prevent>
+    {!showFallback && <><RoomRendererBoundary onFailure={onFailure}><RoomCanvas participant={participant} quality={quality} motion={motion} state={state} dispatch={dispatch} controlsLocked={guideOpen || settingsOpen !== null || arrival.active} entranceRef={entranceRef} onSelect={select} onReady={onReady} onFailure={onFailure} /></RoomRendererBoundary><div className={styles.vignette} />{!modelReady && <RoomLoader stage="Lighting the chamber" />}{state.phase === "entering" && <RoomEntrance participant={participant} progressRef={entranceRef} onSkip={() => dispatch({ type: "SKIP" })} />}</>}
     <header className={styles.header}><div className={styles.identity}><Image src={houseLogoFor(participant.house)} width={37} height={46} alt={`${houseThemes[participant.house].name} emblem`} /><div><span>{houseThemes[participant.house].name} · Common Room</span><strong>{participant.displayName}</strong></div></div><div className={styles.headerActions}><button type="button" className={styles.settingsButton} aria-label="Room settings" onClick={() => setSettingsOpen("open")} disabled={state.phase !== "exploring" && state.phase !== "loading"}><Settings2 size={17} /></button><Link className={styles.back} href="/" data-no-transition><ArrowLeft size={15} /><span>Leave the room</span></Link></div></header>
+    {arrivalPhase === "complete" && <p className={styles.arrivalWelcome} role="status">Welcome home, {participant.displayName}.</p>}
     {showFallback ? <RoomFallback participant={participant} reason={fallback || "chosen"} onSelect={select} onRetry={() => void changeSettings({ lightweight: false })} /> : <>
       <div className={styles.roomTitle}><span className={styles.eyebrow}>{houseLore[participant.house].location}</span><h1>{houseLore[participant.house].title}</h1><p>{houseThemes[participant.house].motto}</p></div>
       <footer className={styles.roomFooter}><span>TECHNIKA ’27 <i /> PROCEDURAL 3D PROTOTYPE</span><div><button type="button" disabled={!ready || state.phase !== "exploring"} onClick={() => void changeSettings({ lightweight: true })}>Reading mode</button><ObjectGuide disabled={!ready} onSelect={select} onOpenChange={setGuideOpen} /></div></footer>

@@ -13,7 +13,8 @@
     "assets:social": "node scripts/create-social-image.mjs",
     "assets:wizard": "node scripts/prepare-wizard-assets.mjs",
     "test:e2e": "playwright test",
-    "test:e2e:room": "playwright test --config=playwright.common-room.config.ts"
+    "test:e2e:room": "playwright test --config=playwright.common-room.config.ts",
+    "test:e2e:registration": "playwright test --config=playwright.registration.config.ts"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",

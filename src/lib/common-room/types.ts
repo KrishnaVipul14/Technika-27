@@ -8,6 +8,7 @@ export type RoomParticipant = {
   college: string | null;
   house: AssignedHouse;
 };
+export type ArrivalParticipant = Pick<RoomParticipant, "id" | "displayName" | "house">;
 export type RoomAccess =
   | { status: "ready"; participant: RoomParticipant }
   | { status: "signed-out" }

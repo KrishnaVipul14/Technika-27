@@ -17,6 +17,7 @@ import {
   socialImage,
 } from "@/lib/seo";
 import { HouseProvider } from "@/components/house-provider";
+import { RegistrationArrivalProvider } from "@/components/registration-arrival";
 import { AuthProvider } from "@/components/auth-provider";
 import { SmoothScroll } from "@/components/smoothScroll";
 import { getServerSupabase } from "@/lib/supabase/server";
@@ -216,13 +217,15 @@ export default async function RootLayout({
         <Analytics />
         <HouseProvider initialHouse={theme} preferInitialHouse={fromDatabase}>
           <AuthProvider>
-            <SmoothScroll>
-              <Experience header={<Header />} footer={<Footer />}>
-                <main id="main-content" tabIndex={-1}>
-                  <PageTransition>{children}</PageTransition>
-                </main>
-              </Experience>
-            </SmoothScroll>
+            <RegistrationArrivalProvider>
+              <SmoothScroll>
+                <Experience header={<Header />} footer={<Footer />}>
+                  <main id="main-content" tabIndex={-1}>
+                    <PageTransition>{children}</PageTransition>
+                  </main>
+                </Experience>
+              </SmoothScroll>
+            </RegistrationArrivalProvider>
           </AuthProvider>
         </HouseProvider>
       </body>

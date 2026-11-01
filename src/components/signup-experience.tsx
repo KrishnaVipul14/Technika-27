@@ -31,10 +31,12 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { getSupabase } from "@/lib/supabase/client";
-import { houseThemes, themeAttributeForHouse } from "@/lib/houses";
+import { houseFromValue, houseThemes, themeAttributeForHouse } from "@/lib/houses";
+import type { ArrivalParticipant } from "@/lib/common-room/types";
 import { useHouse } from "./house-provider";
 import { useAuth } from "./auth-provider";
 import { useMagic } from "./experience";
+import { useRegistrationArrival } from "./registration-arrival";
 
 export const HOUSES = [
   "gryffindor",
@@ -51,7 +53,7 @@ type SupabaseBrowserClient = NonNullable<ReturnType<typeof getSupabase>>;
 interface SignupExperienceProps {
   initialMode?: AuthMode;
   callbackError?: CallbackError;
-  onSignupSuccess?: () => void;
+  onSignupSuccess?: (participant: ArrivalParticipant) => void;
 }
 
 const houseIcons: Record<CanonicalHouse, LucideIcon> = {
@@ -282,12 +284,14 @@ export function SignupExperience({
   const { setHouse } = useHouse();
   const { user } = useAuth();
   const { enabled } = useMagic();
+  const { begin: beginArrival, active: arrivalActive } = useRegistrationArrival();
 
   const [mode, setMode] = useState<AuthMode>(() =>
     searchParams.get("step") === "signup" ? "signup" : initialMode,
   );
   const [busy, setBusy] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const [continuation, setContinuation] = useState<"/account" | "/login" | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [assignedHouse, setAssignedHouse] = useState<CanonicalHouse | null>(
     null,
@@ -316,19 +320,23 @@ export function SignupExperience({
   const alertRef = useRef<HTMLParagraphElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lockRef = useRef(false);
+  const mounted = useRef(true);
+  const verification = useRef<AbortController | null>(null);
 
   const isSignup = mode === "signup";
   const isReset = mode === "reset";
   const isForgot = mode === "forgot";
   const isNewPassword = isSignup || isReset;
-  const disabled = busy || leaving;
+  const disabled = busy || leaving || continuation !== null;
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      verification.current?.abort();
       if (timerRef.current) clearTimeout(timerRef.current);
-    },
-    [],
-  );
+    };
+  }, []);
 
   useEffect(() => {
     if (error) alertRef.current?.focus();
@@ -388,6 +396,34 @@ export function SignupExperience({
   ) => {
     setLeaving(true);
     const house = await resolveHouse(client, userId);
+    if (!mounted.current) return;
+    if (isSignup) {
+      const controller = new AbortController();
+      verification.current = controller;
+      const timeout = setTimeout(() => controller.abort(), 10_000);
+      try {
+        const response = await fetch("/api/common-room/arrival", { cache: "no-store", signal: controller.signal });
+        const result: { status?: string; participant?: Partial<ArrivalParticipant> } = await response.json();
+        const saved = result?.participant;
+        const verifiedHouse = houseFromValue(saved?.house);
+        if (!response.ok || result?.status !== "ready" || saved?.id !== userId || typeof saved.displayName !== "string" || !saved.displayName.trim() || !verifiedHouse || verifiedHouse === "default" || saved.house !== verifiedHouse) throw new Error("Arrival not verified");
+        if (!mounted.current) return;
+        const participant: ArrivalParticipant = { id: userId, displayName: saved.displayName, house: verifiedHouse };
+        setAssignedHouse(verifiedHouse); setHouse(verifiedHouse);
+        setHatMood("revealed"); setHatSpeech("Your acceptance letter has arrived.");
+        setHatSubtext(houseThemes[verifiedHouse].motto);
+        setMessage("Your registration is confirmed. Your acceptance letter is ready.");
+        void syncHouseMetadata(client, verifiedHouse, metaHouse);
+        (onSignupSuccess ?? beginArrival)(participant);
+      } catch {
+        if (!mounted.current) return;
+        setAssignedHouse(null); setHatMood("idle");
+        setHatSpeech("Your record is safe. The profile ledger needs another look.");
+        setMessage("Your registration succeeded, but we could not verify your session and saved house. Continue to your Common Room to retry.");
+        setContinuation("/account");
+      } finally { clearTimeout(timeout); verification.current = null; }
+      return;
+    }
     setAssignedHouse(house);
     setHouse(house);
     setHatMood("revealed");
@@ -398,10 +434,6 @@ export function SignupExperience({
     );
     void syncHouseMetadata(client, house, metaHouse);
 
-    if (isSignup && onSignupSuccess) {
-      onSignupSuccess();
-      return;
-    }
     timerRef.current = setTimeout(() => {
       router.push("/account");
       router.refresh();
@@ -410,7 +442,7 @@ export function SignupExperience({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (lockRef.current || leaving) return;
+    if (lockRef.current || leaving || continuation) return;
     setError("");
     setMessage("");
 
@@ -492,6 +524,8 @@ export function SignupExperience({
         );
         setHatSubtext(msg);
       } else if (isSignup) {
+        // Loading public animation code is not a success signal; rendering waits for verification.
+        void import("./acceptance-letter").catch(() => {});
         // The profile row (incl. a balanced house) is created by the DB trigger.
         const { data: signUpData, error: signUpErr } = await client.auth.signUp(
           {
@@ -505,6 +539,7 @@ export function SignupExperience({
             },
           },
         );
+        if (!mounted.current) return;
         if (signUpErr) throw signUpErr;
 
         const emailConfirmed = Boolean(
@@ -521,6 +556,7 @@ export function SignupExperience({
             "Your letter has been recorded in the castle ledger. Confirm the parchment sent to your inbox!",
           );
           setHatSubtext(signupMsg);
+          setContinuation("/login");
           return;
         }
 
@@ -531,6 +567,9 @@ export function SignupExperience({
             signUpData.user.user_metadata?.house,
             1800,
           );
+        } else {
+          setMessage("Your registration was received, but no signed-in session was returned. Sign in to verify your Common Room.");
+          setHatMood("idle"); setContinuation("/login");
         }
       } else if (isReset) {
         const { data: verified, error: verifyErr } =
@@ -581,8 +620,7 @@ export function SignupExperience({
       );
       setHatSubtext(friendlyErr);
     } finally {
-      lockRef.current = false;
-      setBusy(false);
+      if (mounted.current) { lockRef.current = false; setBusy(false); }
     }
   };
 
@@ -594,7 +632,7 @@ export function SignupExperience({
 
   return (
     <div
-      className="flex min-h-[100dvh] w-full items-center justify-center bg-neutral-950 px-4 pb-12 pt-24 text-neutral-100 selection:bg-amber-500/30 selection:text-amber-100 sm:px-6 sm:pt-28 lg:px-8"
+      className={`flex min-h-[100dvh] w-full items-center justify-center bg-neutral-950 px-4 pb-12 pt-24 text-neutral-100 selection:bg-amber-500/30 selection:text-amber-100 transition-opacity duration-500 motion-reduce:transition-none sm:px-6 sm:pt-28 lg:px-8 ${arrivalActive ? "pointer-events-none opacity-0" : ""}`}
       data-theme={
         assignedHouse ? themeAttributeForHouse(assignedHouse) : undefined
       }
@@ -1004,7 +1042,7 @@ export function SignupExperience({
                 disabled={disabled}
                 className="mt-1 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 px-6 py-3.5 text-center text-xs font-semibold uppercase tracking-widest text-neutral-950 shadow-lg shadow-amber-500/20 transition-all duration-300 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm"
               >
-                {disabled ? (
+                {continuation ? <><CheckCircle2 size={16} /><span>Registration recorded</span></> : disabled ? (
                   <>
                     <LoaderCircle size={16} className="shrink-0 animate-spin" />
                     <span>
@@ -1031,6 +1069,7 @@ export function SignupExperience({
                 )}
               </button>
             </form>
+            {continuation && <Link href={continuation} className={`${linkBtn} inline-flex min-h-11 items-center justify-center gap-2 text-sm`} data-no-transition>{continuation === "/login" ? "Continue to sign in" : "Continue to your Common Room"}<ArrowRight size={15} /></Link>}
 
             <div className="border-t border-neutral-800 pt-4 text-center text-xs text-neutral-400">
               {isSignup ? (

@@ -10,6 +10,7 @@ import {
 import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { useRegistrationArrival } from "./registration-arrival";
 
 type LenisContextValue = {
   getLenis: () => Lenis | null;
@@ -38,10 +39,11 @@ export interface SmoothScrollProps {
 export function SmoothScroll({ children }: SmoothScrollProps) {
   const lenisRef = useRef<Lenis | null>(null);
   const pathname = usePathname();
-  const isRoom = pathname === "/account";
+  const { active: arrivalActive } = useRegistrationArrival();
+  const immersive = pathname === "/account" || arrivalActive;
 
   useEffect(() => {
-    if (isRoom) return;
+    if (immersive) return;
     // Instantiate Lenis with optimal fluid lerp smoothing
     const lenis = new Lenis({
       lerp: 0.088, // Silky smooth deceleration without sluggishness
@@ -109,7 +111,7 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
         delete (window as unknown as { lenis?: Lenis }).lenis;
       }
     };
-  }, [isRoom]);
+  }, [immersive]);
 
   // On route changes, recalculate dimensions and update ScrollTrigger
   useEffect(() => {
