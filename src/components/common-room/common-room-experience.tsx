@@ -2,11 +2,10 @@
 
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Settings2 } from "lucide-react";
 import { houseLogoFor, houseThemes } from "@/lib/houses";
 import { houseLore, roomObjects } from "@/lib/common-room/content";
 import { initialRoomState, roomReducer } from "@/lib/common-room/interaction";
@@ -15,6 +14,9 @@ import { RoomFallback, type FallbackReason } from "./room-fallback";
 import { RoomLoader } from "./room-loader";
 import { RoomEntrance } from "./room-entrance";
 import { ObjectGuide } from "./object-guide";
+import { RoomSettingsPanel } from "./room-settings";
+import { useRoomSettings, type RoomSettings } from "./use-room-settings";
+import { useRoomAudio } from "./use-room-audio";
 import { MagicalOverlay } from "./panels/magical-overlay";
 import { HouseArchivesPanel } from "./panels/house-archives-panel";
 import { NoticeBoardPanel } from "./panels/notice-board-panel";
@@ -31,21 +33,36 @@ export function CommonRoomExperience({ participant, accountActions }: { particip
   const [modelReady, setModelReady] = useState(false);
   const [fallback, setFallback] = useState<FallbackReason | null>(null);
   const [guideOpen, setGuideOpen] = useState(false);
-  const reducedMotion = useReducedMotion();
+  const [settingsOpen, setSettingsOpen] = useState<"open" | "closing" | null>(null);
+  const [audioPending, setAudioPending] = useState(false);
+  const { settings, update, quality, motion } = useRoomSettings();
+  const { setEnabled, play, unavailable, paused } = useRoomAudio(participant.house);
   const root = useRef<HTMLDivElement>(null); const entranceRef = useRef<HTMLDivElement>(null);
   const opener = useRef<HTMLElement | null>(null); const selecting = useRef(false);
-  const showFallback = fallback !== null;
+  const showFallback = fallback !== null || settings.lightweight;
+  useEffect(() => { if (showFallback) dispatch({ type: "FALLBACK" }); }, [showFallback]);
+  const onSettingsExited = useCallback(() => setSettingsOpen(null), []);
+  const changeSettings = async (patch: Partial<RoomSettings>) => {
+    update(patch);
+    if (patch.lightweight === false) { setModelReady(false); setFallback(null); dispatch({ type: "RETRY" }); }
+    if (patch.ambient !== undefined || patch.effects !== undefined) {
+      setAudioPending(true);
+      const enabled = await setEnabled(patch.ambient ?? settings.ambient, patch.effects ?? settings.effects);
+      if (root.current?.isConnected) { if (!enabled) update({ ambient: false, effects: false }); setAudioPending(false); }
+    }
+  };
   const onReady = useCallback(() => { setModelReady(true); dispatch({ type: "READY" }); }, []);
   const ready = showFallback || (modelReady && state.phase !== "loading" && state.phase !== "entering");
   const router = useRouter();
-  const onSessionExpired = useCallback(() => { setExpired(true); router.refresh(); }, [router]);
+  const onSessionExpired = useCallback(() => { void setEnabled(false, false); setExpired(true); router.refresh(); }, [router, setEnabled]);
   const onExited = useCallback(() => { dispatch({ type: "PANEL_EXITED" }); if (showFallback) dispatch({ type: "RESTORED" }); }, [showFallback]);
   const select = useCallback((id: ObjectId) => {
     if (state.phase !== "exploring" || selecting.current) return;
     selecting.current = true; opener.current = document.activeElement as HTMLElement | null;
+    play(id === "members" || id === "notices" ? "book" : id === "secret" || id === "profile" ? "door" : "magic");
     dispatch({ type: "SELECT", id });
     if (showFallback) dispatch({ type: "FOCUSED" });
-  }, [state.phase, showFallback]);
+  }, [state.phase, showFallback, play]);
   useEffect(() => {
     if (state.phase !== "exploring") return;
     selecting.current = false;
@@ -59,14 +76,15 @@ export function CommonRoomExperience({ participant, accountActions }: { particip
   const { selected } = state;
   const panelVisible = selected && ["panel", "closing", "restoring"].includes(state.phase);
   if (expired) return <p role="status">Verifying your castle key…</p>;
-  return <div ref={root} className={`${styles.room} ${!showFallback ? styles.immersive : ""}`} data-testid="common-room" data-house={participant.house} data-theme={participant.house} data-ready={ready} data-phase={state.phase} data-lenis-prevent>
-    {!showFallback && <><RoomCanvas participant={participant} quality="medium" motion={!reducedMotion} state={state} dispatch={dispatch} controlsLocked={guideOpen} entranceRef={entranceRef} onSelect={select} onReady={onReady} /><div className={styles.vignette} />{!modelReady && <RoomLoader stage="Lighting the chamber" />}{state.phase === "entering" && <RoomEntrance participant={participant} progressRef={entranceRef} onSkip={() => dispatch({ type: "SKIP" })} />}</>}
-    <header className={styles.header}><div className={styles.identity}><Image src={houseLogoFor(participant.house)} width={37} height={46} alt={`${houseThemes[participant.house].name} emblem`} /><div><span>{houseThemes[participant.house].name} · Common Room</span><strong>{participant.displayName}</strong></div></div><Link className={styles.back} href="/" data-no-transition><ArrowLeft size={15} />Leave the room</Link></header>
-    {showFallback ? <RoomFallback participant={participant} reason={fallback || "chosen"} onSelect={select} onRetry={() => { setModelReady(false); setFallback(null); }} /> : <>
+  return <div ref={root} className={`${styles.room} ${!showFallback ? styles.immersive : ""}`} data-testid="common-room" data-house={participant.house} data-theme={participant.house} data-ready={ready} data-phase={state.phase} data-motion={motion} data-quality={quality} data-lenis-prevent>
+    {!showFallback && <><RoomCanvas participant={participant} quality={quality} motion={motion} state={state} dispatch={dispatch} controlsLocked={guideOpen || settingsOpen !== null} entranceRef={entranceRef} onSelect={select} onReady={onReady} /><div className={styles.vignette} />{!modelReady && <RoomLoader stage="Lighting the chamber" />}{state.phase === "entering" && <RoomEntrance participant={participant} progressRef={entranceRef} onSkip={() => dispatch({ type: "SKIP" })} />}</>}
+    <header className={styles.header}><div className={styles.identity}><Image src={houseLogoFor(participant.house)} width={37} height={46} alt={`${houseThemes[participant.house].name} emblem`} /><div><span>{houseThemes[participant.house].name} · Common Room</span><strong>{participant.displayName}</strong></div></div><div className={styles.headerActions}><button type="button" className={styles.settingsButton} aria-label="Room settings" onClick={() => setSettingsOpen("open")} disabled={state.phase !== "exploring" && state.phase !== "loading"}><Settings2 size={17} /></button><Link className={styles.back} href="/" data-no-transition><ArrowLeft size={15} /><span>Leave the room</span></Link></div></header>
+    {showFallback ? <RoomFallback participant={participant} reason={fallback || "chosen"} onSelect={select} onRetry={() => void changeSettings({ lightweight: false })} /> : <>
       <div className={styles.roomTitle}><span className={styles.eyebrow}>{houseLore[participant.house].location}</span><h1>{houseLore[participant.house].title}</h1><p>{houseThemes[participant.house].motto}</p></div>
-      <footer className={styles.roomFooter}><span>TECHNIKA ’27 <i /> PROCEDURAL 3D PROTOTYPE</span><div><button type="button" disabled={!ready || state.phase !== "exploring"} onClick={() => setFallback("chosen")}>Reading mode</button><ObjectGuide disabled={!ready} onSelect={select} onOpenChange={setGuideOpen} /></div></footer>
+      <footer className={styles.roomFooter}><span>TECHNIKA ’27 <i /> PROCEDURAL 3D PROTOTYPE</span><div><button type="button" disabled={!ready || state.phase !== "exploring"} onClick={() => void changeSettings({ lightweight: true })}>Reading mode</button><ObjectGuide disabled={!ready} onSelect={select} onOpenChange={setGuideOpen} /></div></footer>
     </>}
-    {panelVisible && <MagicalOverlay open={state.phase === "panel"} title={roomObjects.find((object) => object.id === selected)!.label} house={participant.house} onClose={() => dispatch({ type: "CLOSE" })} onExited={onExited}>
+    {settingsOpen && <RoomSettingsPanel house={participant.house} settings={settings} motion={motion} open={settingsOpen === "open"} onClose={() => setSettingsOpen("closing")} onExited={onSettingsExited} onChange={changeSettings} audioUnavailable={unavailable} audioPending={audioPending} audioPaused={paused} onResume={() => void changeSettings({ ambient: settings.ambient, effects: settings.effects })} />}
+    {panelVisible && <MagicalOverlay motion={motion} open={state.phase === "panel"} title={roomObjects.find((object) => object.id === selected)!.label} house={participant.house} onClose={() => dispatch({ type: "CLOSE" })} onExited={onExited}>
       {selected === "archives" && <HouseArchivesPanel house={participant.house} />}
       {selected === "notices" && <NoticeBoardPanel />}
       {selected === "members" && <MembersPanel house={participant.house} onSessionExpired={onSessionExpired} />}

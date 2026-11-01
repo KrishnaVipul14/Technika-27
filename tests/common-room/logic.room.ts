@@ -47,3 +47,8 @@ test("camera pose is a numeric snapshot, restores exactly and preserves resized 
   expect(target.toArray()).toEqual([-1, 1, -5]);
   expect(camera.fov).toBe(47); expect(camera.zoom).toBe(1.2); expect(camera.aspect).toBe(.48);
 });
+test("interaction fallback keeps an active panel but settles loading and cancelled motion", () => {
+  expect(roomReducer(initialRoomState, { type: "FALLBACK" }).phase).toBe("exploring");
+  expect(roomReducer({ phase: "focusing", selected: "profile", hovered: null }, { type: "FALLBACK" })).toEqual({ phase: "panel", selected: "profile", hovered: null });
+  expect(roomReducer({ phase: "exploring", selected: null, hovered: null }, { type: "RETRY" })).toEqual(initialRoomState);
+});

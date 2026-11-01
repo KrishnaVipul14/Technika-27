@@ -66,6 +66,9 @@ export function CameraController({ house, state, dispatch, motion, controlsLocke
     invalidate();
     return () => { tween?.kill(); if (animation.current?.tween === tween) animation.current = null; };
   }, [state.phase, state.selected, house, motion, get, dispatch, size.width, size.height, progressRef]);
+  useLayoutEffect(() => {
+    if (!controlsLocked && state.phase === "exploring") { baseline.current = captureCameraPose(get().camera as PerspectiveCamera, target.current); origin.current.copy(pointer.current); }
+  }, [controlsLocked, state.phase, get]);
   useFrame(({ camera }, delta) => {
     if (document.hidden) return;
     const active = animation.current;
