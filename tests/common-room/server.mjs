@@ -23,7 +23,7 @@ let state = { ...defaults };
 let requests = [];
 const secret = "local-common-room-test-signing-key-not-a-live-credential";
 const encode = (value) => Buffer.from(JSON.stringify(value)).toString("base64url");
-const user = () => ({ id: state.id || userId, aud: "authenticated", role: "authenticated", email: state.email || "rowan@example.invalid", email_confirmed_at: "2026-01-01T00:00:00Z", created_at: "2026-01-01T00:00:00Z", app_metadata: { provider: "email", providers: ["email"] }, user_metadata: { display_name: "Metadata Name", house: "gryffindor" }, identities: [] });
+const user = () => ({ id: state.id || userId, aud: "authenticated", role: "authenticated", email: state.email || "rowan@example.invalid", email_confirmed_at: state.signup === "confirmation-required" ? undefined : "2026-01-01T00:00:00Z", created_at: "2026-01-01T00:00:00Z", app_metadata: { provider: "email", providers: ["email"] }, user_metadata: state.metadata || { display_name: "Metadata Name", house: "gryffindor" }, identities: [] });
 function session() {
   const now = Math.floor(Date.now() / 1000);
   const body = `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: user().id, aud: "authenticated", role: "authenticated", iat: now, exp: now + 3600, iss: "http://127.0.0.1:3411/auth/v1", session_id: "20000000-0000-4000-8000-000000000001", email: user().email })}`;
@@ -36,7 +36,7 @@ function validToken(token) {
 const fixture = createServer(async (request, response) => {
   const url = new URL(request.url, "http://127.0.0.1:3411");
   const send = (value, status = 200) => {
-    response.writeHead(status, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Expose-Headers": "content-range" });
+    response.writeHead(status, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS", "Access-Control-Expose-Headers": "content-range" });
     response.end(JSON.stringify(value));
   };
   if (request.method === "OPTIONS") return send({});
@@ -52,7 +52,24 @@ const fixture = createServer(async (request, response) => {
   if (url.pathname === "/health") return send({ ok: true });
   requests.push({ method: request.method, path: url.pathname, query: Object.fromEntries(url.searchParams) });
   requests = requests.slice(-1000);
-  if (url.pathname === "/auth/v1/user") return validToken(request.headers.authorization?.replace(/^Bearer /, "")) ? send(user()) : send({ code: "bad_jwt", msg: "Session is not valid" }, 401);
+  if (url.pathname === "/auth/v1/signup" && request.method === "POST" && state.signup) {
+    let body = ""; for await (const chunk of request) body += chunk;
+    const payload = JSON.parse(body);
+    if (!payload.email || !payload.password || !payload.data) return send({ code: "validation_failed", msg: "Invalid signup payload" }, 422);
+    if (state.signup === "error") return send({ code: "user_already_exists", msg: "User already registered" }, 422);
+    state.email = payload.email; state.metadata = { ...payload.data, house: "gryffindor" };
+    return send(state.signup === "confirmed" ? session() : user());
+  }
+  if (url.pathname === "/auth/v1/recover" && request.method === "POST" && state.signup) return send({});
+  if (url.pathname === "/auth/v1/user") {
+    if (!validToken(request.headers.authorization?.replace(/^Bearer /, ""))) return send({ code: "bad_jwt", msg: "Session is not valid" }, 401);
+    if (request.method === "PUT" && state.signup) {
+      let body = ""; for await (const chunk of request) body += chunk;
+      const payload = JSON.parse(body);
+      if (payload.data) state.metadata = { ...user().user_metadata, ...payload.data };
+    }
+    return send(user());
+  }
   if (url.pathname === "/auth/v1/logout") return send({});
   if (url.pathname === "/auth/v1/token") return state.revoked ? send({ code: "refresh_token_not_found", msg: "Revoked" }, 401) : send(session());
   if (url.pathname === "/rest/v1/profiles" && request.method === "GET") {

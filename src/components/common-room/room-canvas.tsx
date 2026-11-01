@@ -12,12 +12,13 @@ import { RoomObjects, EntranceDoor } from "./room-objects";
 import { CameraController } from "./camera-controller";
 import { RenderLifecycle } from "./render-lifecycle";
 import type { RoomFailure } from "./room-fallback";
+import { sceneLoaders } from "./room-assets";
 import styles from "./common-room.module.css";
 
-const SlytherinScene = lazy(() => import("./scenes/slytherin-scene"));
-const GryffindorScene = lazy(() => import("./scenes/gryffindor-scene"));
-const RavenclawScene = lazy(() => import("./scenes/ravenclaw-scene"));
-const HufflepuffScene = lazy(() => import("./scenes/hufflepuff-scene"));
+const SlytherinScene = lazy(sceneLoaders.slytherin);
+const GryffindorScene = lazy(sceneLoaders.gryffindor);
+const RavenclawScene = lazy(sceneLoaders.ravenclaw);
+const HufflepuffScene = lazy(sceneLoaders.hufflepuff);
 function SceneReady({ onReady }: { onReady: () => void }) {
   const sent = useRef(false);
   useFrame(() => { if (!sent.current) { sent.current = true; onReady(); } });
