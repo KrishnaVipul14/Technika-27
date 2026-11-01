@@ -66,8 +66,8 @@ The Common Room harness starts a temporary watched Next project and a loopback S
 
 Verified checkpoints:
 
-- Complete 88-case Common Room checkpoint passed (logic, desktop and mobile).
-- Final-review cases passed 4/4: in-flight account switching and the delayed successful audio-acknowledgement regression on both viewports. The audio regression was observed failing before its fix.
+- Final complete Common Room gate passed **92/92** (8.6 minutes); the earlier 88-case checkpoint also passed.
+- Final-review cases passed 4/4: in-flight account switching and the delayed successful audio-acknowledgement regression on both viewports. The audio regression was observed failing before its fix. A subsequent traced resource/recovery run passed **10/10** and retained renderer-budget JSON.
 - Typecheck and scoped feature/test ESLint passed.
 - Production `npm run build` passed. `next-env.d.ts` was compared byte-for-byte with its pre-build contents after restoring Next's generated import changes.
 - Full `npm run lint` and `npm test` fail on the existing `experience.tsx` synchronous `setReady(true)` effect; `contact/page.tsx` also retains its unused `ContactForm` warning. `npm test` stops at lint, so the production build was run separately.
@@ -101,11 +101,13 @@ Production lazy-manifest sizes (raw / gzip estimate, excluding shared initial ap
 | Ravenclaw scene | 7,582 | 2,359 |
 | Slytherin scene | 5,945 | 2,194 |
 
-Only the assigned architecture is lazy-loaded. Scene tests attach actual renderer/draw/triangle/DPR measurements as `render-budget` JSON and capture screenshots under `test-results/common-room/`. Recovery tests check live contexts, hidden-tab draws and fresh-renderer re-entry. Responsive parchment checks cover 320×740, 390×844, 844×390 and 768×1024, including paragraph contrast ≥4.5:1 and primary 44×44 controls.
+Only the assigned architecture is lazy-loaded. Scene tests persist actual renderer/draw/triangle/DPR measurements as `render-budget.json` and capture screenshots under `test-results/common-room/`. Recovery tests check live contexts, hidden-tab draws and fresh-renderer re-entry. Responsive parchment checks cover 320×740, 390×844, 844×390 and 768×1024, including paragraph contrast ≥4.5:1 and primary 44×44 controls.
+
+The traced final samples on Intel UHD/D3D11 observed **231–527 draw calls / 43,735–120,098 triangles** on desktop (1440×900, DPR .65–1), and **221–271 draw calls / 37,084–70,010 triangles** on mobile emulation (390×664, DPR 1, shadows off). Shadow-enabled counts include shadow passes. JavaScript draw submission was 1–8ms; frame-pressure diagnostics were 31–52ms. These are individual instrumented samples, **not sustained FPS benchmarks** or acceptable-performance certification.
 
 The legacy headless shell used SwiftShader and produced 1.5–2.2-second frames and unreliable navigation on this host. Switching the harness to current Chromium exposed the available Intel UHD D3D11 renderer. This does **not** establish acceptable performance on software renderers or every physical device; reading mode remains essential. Headless timings are observations, not an FPS guarantee.
 
-Development diagnostics include upstream Three Clock/CJS deprecations and occasional Drei HTML-root unmount warnings during teardown. Real context-loss/chunk-abort tests deliberately produce renderer/chunk errors. The checked dependency audit reports 18 advisories (16 moderate, 2 high), with high-severity chains through existing sharp/zod dependencies; no broad audit upgrade was applied.
+Development diagnostics include upstream Three Clock/CJS deprecations and occasional Drei HTML-root unmount warnings during teardown. Real context-loss/chunk-abort tests deliberately produce renderer/chunk errors. The 92-case gate also logged one transient development-layout chunk parse/load error that recovered; the subsequent 10-case traced run did not reproduce it. Its cause is not established, and it is not silently classified as an intentional test error. The checked dependency audit reports 18 advisories (16 moderate, 2 high), with high-severity chains through existing sharp/zod dependencies; no broad audit upgrade was applied.
 
 ## Review and remaining checks
 

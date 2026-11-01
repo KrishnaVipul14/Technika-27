@@ -1,3 +1,4 @@
+import { writeFileSync } from "node:fs";
 import { test, expect, type Page, type TestInfo } from "@playwright/test";
 import { signInFixture } from "./fixtures";
 import { panels, enterRoom, pickObject } from "./room-actions";
@@ -8,7 +9,9 @@ async function recordBudget(page: Page, info: TestInfo) {
     return { drawCalls: Number(canvas.dataset.drawCalls), triangles: Number(canvas.dataset.triangles), dpr: Number(canvas.dataset.dpr), shadows: canvas.dataset.shadows === "true", frameMs: Number(canvas.dataset.frameMs), renderMs: Number(canvas.dataset.renderMs), viewport: [innerWidth, innerHeight], renderer: debug ? String(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL)) : "undisclosed" };
   });
   expect(budget.drawCalls).toBeGreaterThan(0);
-  await info.attach("render-budget", { body: JSON.stringify(budget, null, 2), contentType: "application/json" });
+  const path = info.outputPath("render-budget.json");
+  writeFileSync(path, JSON.stringify(budget, null, 2));
+  await info.attach("render-budget", { path, contentType: "application/json" });
 }
 
 test("Slytherin architecture and room shell", async ({ page }, testInfo) => {
