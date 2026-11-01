@@ -11,6 +11,7 @@ import { RoomMaterials } from "./scenes/scene-primitives";
 import { RoomObjects, EntranceDoor } from "./room-objects";
 import { CameraController } from "./camera-controller";
 import { RenderLifecycle } from "./render-lifecycle";
+import type { RoomFailure } from "./room-fallback";
 import styles from "./common-room.module.css";
 
 const SlytherinScene = lazy(() => import("./scenes/slytherin-scene"));
@@ -22,7 +23,7 @@ function SceneReady({ onReady }: { onReady: () => void }) {
   useFrame(() => { if (!sent.current) { sent.current = true; onReady(); } });
   return null;
 }
-export default function RoomCanvas({ participant, quality, motion, state, dispatch, controlsLocked, entranceRef, onSelect, onReady }: { participant: RoomParticipant; quality: Quality; motion: boolean; state: RoomState; dispatch: Dispatch<RoomAction>; controlsLocked: boolean; entranceRef: RefObject<HTMLDivElement | null>; onSelect: (id: ObjectId) => void; onReady: () => void }) {
+export default function RoomCanvas({ participant, quality, motion, state, dispatch, controlsLocked, entranceRef, onSelect, onReady, onFailure }: { participant: RoomParticipant; quality: Quality; motion: boolean; state: RoomState; dispatch: Dispatch<RoomAction>; controlsLocked: boolean; entranceRef: RefObject<HTMLDivElement | null>; onSelect: (id: ObjectId) => void; onReady: () => void; onFailure: (reason: RoomFailure) => void }) {
   const progress = useRef({ value: 0 });
   const { house } = participant; const config = roomConfigs[house];
   const [budgetDpr, setBudgetDpr] = useState(() => Math.min(window.devicePixelRatio || 1, 1.75));
@@ -36,7 +37,7 @@ export default function RoomCanvas({ participant, quality, motion, state, dispat
       camera.position.fromArray(view.position); if ("fov" in camera) { camera.fov = view.fov; camera.updateProjectionMatrix(); }
       camera.lookAt(...view.target);
     }}>
-      <RenderLifecycle motion={motion} quality={quality} onDecline={onDecline} />
+      <RenderLifecycle motion={motion} quality={quality} onDecline={onDecline} onFailure={onFailure} />
       <color attach="background" args={[config.palette.fog]} /><fog attach="fog" args={[config.palette.fog, 24, 65]} />
       <hemisphereLight args={["#c4d7cf", "#17130f", 1.5]} />
       <directionalLight position={[2, 8, 7]} color={config.palette.light} intensity={2.5} castShadow={quality !== "low"} shadow-mapSize={[1024, 1024]} shadow-camera-left={-12} shadow-camera-right={12} shadow-camera-top={12} shadow-camera-bottom={-12} shadow-normalBias={.06} />

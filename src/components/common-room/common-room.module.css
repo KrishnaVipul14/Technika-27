@@ -37,7 +37,7 @@
 .objectList button > span:first-child { color: var(--room-accent); font-family: var(--font-garamond), serif; font-size: 17px; }
 .objectList strong { display: block; font-family: var(--font-garamond), serif; font-size: 23px; font-weight: 400; }
 .objectList small { display: block; margin-top: 4px; color: #a5ad9f; font-size: 11px; }
-.dialog { --room-ink: #283b31; --room-paper: #eee4d1; color-scheme: light; position: fixed; inset: 24px 24px 24px auto; margin: 0; width: min(480px, calc(100vw - 48px)); height: calc(100dvh - 48px); max-height: none; max-width: none; padding: 0; color: #342e25; border: 1px solid #aa9170; background-color: var(--room-paper); background-image: radial-gradient(ellipse at 3% 0%, #bd956038, transparent 50%), repeating-linear-gradient(0deg, #75532104 0px, #75532104 1px, transparent 1px, transparent 4px); box-shadow: 0 24px 100px #0009, inset 0 0 55px #ad8d4130; }
+.dialog { --fg: #342e25; --fg-strong: var(--room-ink); --fg-muted: #5e5545; --fg-brand: var(--room-ink); --room-ink: #283b31; --room-paper: #eee4d1; color-scheme: light; position: fixed; inset: 24px 24px 24px auto; margin: 0; width: min(480px, calc(100vw - 48px)); height: calc(100dvh - 48px); max-height: none; max-width: none; padding: 0; color: #342e25; border: 1px solid #aa9170; background-color: var(--room-paper); background-image: radial-gradient(ellipse at 3% 0%, #bd956038, transparent 50%), repeating-linear-gradient(0deg, #75532104 0px, #75532104 1px, transparent 1px, transparent 4px); box-shadow: 0 24px 100px #0009, inset 0 0 55px #ad8d4130; }
 .dialog::backdrop { background: #02080670; }
 .dialog[open] { display: flex; flex-direction: column; }
 .dialog[data-house="gryffindor"] { --room-ink: #652c26; }
@@ -45,7 +45,7 @@
 .dialog[data-house="hufflepuff"] { --room-ink: #5a4a27; }
 .dialog::before { content: ""; position: absolute; inset: 9px; border: 1px solid #a08b6745; pointer-events: none; z-index: 1; }
 .panelHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 32px 32px 22px; border-bottom: 1px solid #91805a40; }
-.panelHeader span { display: block; font-size: 8px; letter-spacing: .22em; color: #766348; text-transform: uppercase; }
+.panelHeader span { display: block; font-size: 8px; letter-spacing: .22em; color: #665337; text-transform: uppercase; }
 .panelHeader h2 { margin: 6px 0 0; color: var(--room-ink); font-family: var(--font-garamond), serif; font-size: 34px; line-height: 1.1; font-weight: 500; }
 .close { display: grid; flex-shrink: 0; place-items: center; width: 44px; height: 44px; margin: -9px -10px 0 0; color: var(--room-ink); background: transparent; }
 .panelBody { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 26px 32px 40px; scrollbar-width: thin; scrollbar-color: #9b8561 transparent; font-size: 13px; line-height: 1.8; }

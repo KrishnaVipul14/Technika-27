@@ -4,13 +4,13 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
+import { Component, useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, Settings2 } from "lucide-react";
 import { houseLogoFor, houseThemes } from "@/lib/houses";
 import { houseLore, roomObjects } from "@/lib/common-room/content";
 import { initialRoomState, roomReducer } from "@/lib/common-room/interaction";
 import type { ObjectId, RoomParticipant } from "@/lib/common-room/types";
-import { RoomFallback, type FallbackReason } from "./room-fallback";
+import { RoomFallback, type FallbackReason, type RoomFailure } from "./room-fallback";
 import { RoomLoader } from "./room-loader";
 import { RoomEntrance } from "./room-entrance";
 import { ObjectGuide } from "./object-guide";
@@ -27,6 +27,13 @@ import styles from "./common-room.module.css";
 
 const RoomCanvas = dynamic(() => import("./room-canvas"), { ssr: false, loading: () => <RoomLoader stage="Opening the chamber" /> });
 
+class RoomRendererBoundary extends Component<{ children: ReactNode; onFailure: (reason: RoomFailure) => void }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  componentDidCatch(error: Error) { this.props.onFailure(/webgl/i.test(error.message) ? "unsupported" : "loading-error"); }
+  render() { return this.state.failed ? null : this.props.children; }
+}
+
 export function CommonRoomExperience({ participant, accountActions }: { participant: RoomParticipant; accountActions: ReactNode }) {
   const [state, dispatch] = useReducer(roomReducer, initialRoomState);
   const [expired, setExpired] = useState(false);
@@ -39,12 +46,22 @@ export function CommonRoomExperience({ participant, accountActions }: { particip
   const { setEnabled, play, unavailable, paused } = useRoomAudio(participant.house);
   const root = useRef<HTMLDivElement>(null); const entranceRef = useRef<HTMLDivElement>(null);
   const opener = useRef<HTMLElement | null>(null); const selecting = useRef(false);
+  const onFailure = useCallback((reason: RoomFailure) => { setGuideOpen(false); setFallback(reason); }, []);
   const showFallback = fallback !== null || settings.lightweight;
   useEffect(() => { if (showFallback) dispatch({ type: "FALLBACK" }); }, [showFallback]);
+  useEffect(() => {
+    if (modelReady || showFallback) return;
+    const timeout = setTimeout(() => onFailure("loading-error"), 30_000);
+    return () => clearTimeout(timeout);
+  }, [modelReady, showFallback, onFailure]);
   const onSettingsExited = useCallback(() => setSettingsOpen(null), []);
   const changeSettings = async (patch: Partial<RoomSettings>) => {
     update(patch);
-    if (patch.lightweight === false) { setModelReady(false); setFallback(null); dispatch({ type: "RETRY" }); }
+    if (patch.lightweight === false) {
+      // A rejected dynamic import is cached by React.lazy; explicit reload is the honest retry.
+      if (fallback === "loading-error") { window.location.reload(); return; }
+      setGuideOpen(false); setModelReady(false); setFallback(null); dispatch({ type: "RETRY" });
+    }
     if (patch.ambient !== undefined || patch.effects !== undefined) {
       setAudioPending(true);
       const enabled = await setEnabled(patch.ambient ?? settings.ambient, patch.effects ?? settings.effects);
@@ -77,13 +94,13 @@ export function CommonRoomExperience({ participant, accountActions }: { particip
   const panelVisible = selected && ["panel", "closing", "restoring"].includes(state.phase);
   if (expired) return <p role="status">Verifying your castle key…</p>;
   return <div ref={root} className={`${styles.room} ${!showFallback ? styles.immersive : ""}`} data-testid="common-room" data-house={participant.house} data-theme={participant.house} data-ready={ready} data-phase={state.phase} data-motion={motion} data-quality={quality} data-lenis-prevent>
-    {!showFallback && <><RoomCanvas participant={participant} quality={quality} motion={motion} state={state} dispatch={dispatch} controlsLocked={guideOpen || settingsOpen !== null} entranceRef={entranceRef} onSelect={select} onReady={onReady} /><div className={styles.vignette} />{!modelReady && <RoomLoader stage="Lighting the chamber" />}{state.phase === "entering" && <RoomEntrance participant={participant} progressRef={entranceRef} onSkip={() => dispatch({ type: "SKIP" })} />}</>}
+    {!showFallback && <><RoomRendererBoundary onFailure={onFailure}><RoomCanvas participant={participant} quality={quality} motion={motion} state={state} dispatch={dispatch} controlsLocked={guideOpen || settingsOpen !== null} entranceRef={entranceRef} onSelect={select} onReady={onReady} onFailure={onFailure} /></RoomRendererBoundary><div className={styles.vignette} />{!modelReady && <RoomLoader stage="Lighting the chamber" />}{state.phase === "entering" && <RoomEntrance participant={participant} progressRef={entranceRef} onSkip={() => dispatch({ type: "SKIP" })} />}</>}
     <header className={styles.header}><div className={styles.identity}><Image src={houseLogoFor(participant.house)} width={37} height={46} alt={`${houseThemes[participant.house].name} emblem`} /><div><span>{houseThemes[participant.house].name} · Common Room</span><strong>{participant.displayName}</strong></div></div><div className={styles.headerActions}><button type="button" className={styles.settingsButton} aria-label="Room settings" onClick={() => setSettingsOpen("open")} disabled={state.phase !== "exploring" && state.phase !== "loading"}><Settings2 size={17} /></button><Link className={styles.back} href="/" data-no-transition><ArrowLeft size={15} /><span>Leave the room</span></Link></div></header>
     {showFallback ? <RoomFallback participant={participant} reason={fallback || "chosen"} onSelect={select} onRetry={() => void changeSettings({ lightweight: false })} /> : <>
       <div className={styles.roomTitle}><span className={styles.eyebrow}>{houseLore[participant.house].location}</span><h1>{houseLore[participant.house].title}</h1><p>{houseThemes[participant.house].motto}</p></div>
       <footer className={styles.roomFooter}><span>TECHNIKA ’27 <i /> PROCEDURAL 3D PROTOTYPE</span><div><button type="button" disabled={!ready || state.phase !== "exploring"} onClick={() => void changeSettings({ lightweight: true })}>Reading mode</button><ObjectGuide disabled={!ready} onSelect={select} onOpenChange={setGuideOpen} /></div></footer>
     </>}
-    {settingsOpen && <RoomSettingsPanel house={participant.house} settings={settings} motion={motion} open={settingsOpen === "open"} onClose={() => setSettingsOpen("closing")} onExited={onSettingsExited} onChange={changeSettings} audioUnavailable={unavailable} audioPending={audioPending} audioPaused={paused} onResume={() => void changeSettings({ ambient: settings.ambient, effects: settings.effects })} />}
+    {settingsOpen && <RoomSettingsPanel house={participant.house} settings={{ ...settings, lightweight: showFallback }} motion={motion} open={settingsOpen === "open"} onClose={() => setSettingsOpen("closing")} onExited={onSettingsExited} onChange={changeSettings} audioUnavailable={unavailable} audioPending={audioPending} audioPaused={paused} onResume={() => void changeSettings({ ambient: settings.ambient, effects: settings.effects })} />}
     {panelVisible && <MagicalOverlay motion={motion} open={state.phase === "panel"} title={roomObjects.find((object) => object.id === selected)!.label} house={participant.house} onClose={() => dispatch({ type: "CLOSE" })} onExited={onExited}>
       {selected === "archives" && <HouseArchivesPanel house={participant.house} />}
       {selected === "notices" && <NoticeBoardPanel />}

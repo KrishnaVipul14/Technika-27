@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { renderFrameCost } from "../../src/components/common-room/render-lifecycle";
 import { PerspectiveCamera, Vector3 } from "three";
 import { initialRoomState, roomReducer, type RoomState } from "../../src/lib/common-room/interaction";
 import { captureCameraPose, restoreCameraPose } from "../../src/lib/common-room/camera";
@@ -46,6 +47,11 @@ test("camera pose is a numeric snapshot, restores exactly and preserves resized 
   expect(camera.quaternion.toArray()).toEqual(quaternion);
   expect(target.toArray()).toEqual([-1, 1, -5]);
   expect(camera.fov).toBe(47); expect(camera.zoom).toBe(1.2); expect(camera.aspect).toBe(.48);
+});
+test("quality pressure ignores static idle time but measures real draw and moving-frame work", () => {
+  expect(renderFrameCost?.(2, 1000, false)).toBe(2);
+  expect(renderFrameCost?.(180, 1000, false)).toBe(180);
+  expect(renderFrameCost?.(2, 100, true)).toBeCloseTo(66.6667, 3);
 });
 test("interaction fallback keeps an active panel but settles loading and cancelled motion", () => {
   expect(roomReducer(initialRoomState, { type: "FALLBACK" }).phase).toBe("exploring");
