@@ -1,5 +1,5 @@
 import { Hero } from "@/components/hero";
-import { Timeline } from "@/components/timeline";
+// import { Timeline } from "@/components/timeline";
 import { About, Campus, Sponsors, Invitation } from "@/components/home-sections";
 import { createPageMetadata } from "@/lib/seo";
 import { RelicsSection } from "@/components/relics-section";
@@ -7,5 +7,5 @@ import { RelicsSection } from "@/components/relics-section";
 export const metadata = createPageMetadata("/");
 
 export default function Home() {
-  return <><Hero /><Timeline /><RelicsSection /><About /><Campus /><Sponsors /><Invitation /></>;
+  return <><Hero /><RelicsSection /><About /><Campus /><Sponsors /><Invitation /></>;
 }
