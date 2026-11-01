@@ -23,10 +23,10 @@ let state = { ...defaults };
 let requests = [];
 const secret = "local-common-room-test-signing-key-not-a-live-credential";
 const encode = (value) => Buffer.from(JSON.stringify(value)).toString("base64url");
-const user = () => ({ id: userId, aud: "authenticated", role: "authenticated", email: "rowan@example.invalid", email_confirmed_at: "2026-01-01T00:00:00Z", created_at: "2026-01-01T00:00:00Z", app_metadata: { provider: "email", providers: ["email"] }, user_metadata: { display_name: "Metadata Name", house: "gryffindor" }, identities: [] });
+const user = () => ({ id: state.id || userId, aud: "authenticated", role: "authenticated", email: state.email || "rowan@example.invalid", email_confirmed_at: "2026-01-01T00:00:00Z", created_at: "2026-01-01T00:00:00Z", app_metadata: { provider: "email", providers: ["email"] }, user_metadata: { display_name: "Metadata Name", house: "gryffindor" }, identities: [] });
 function session() {
   const now = Math.floor(Date.now() / 1000);
-  const body = `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: userId, aud: "authenticated", role: "authenticated", iat: now, exp: now + 3600, iss: "http://127.0.0.1:3411/auth/v1", session_id: "20000000-0000-4000-8000-000000000001", email: user().email })}`;
+  const body = `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: user().id, aud: "authenticated", role: "authenticated", iat: now, exp: now + 3600, iss: "http://127.0.0.1:3411/auth/v1", session_id: "20000000-0000-4000-8000-000000000001", email: user().email })}`;
   return { access_token: `${body}.${createHmac("sha256", secret).update(body).digest("base64url")}`, refresh_token: "local-test-refresh", token_type: "bearer", expires_in: 3600, expires_at: now + 3600, user: user() };
 }
 function validToken(token) {
@@ -58,7 +58,7 @@ const fixture = createServer(async (request, response) => {
   if (url.pathname === "/rest/v1/profiles" && request.method === "GET") {
     const own = Boolean(url.searchParams.get("id"));
     if (state.profileError || (!own && state.directoryError)) return send({ code: "XX000", message: "Fixture profile read failed" }, 500);
-    let rows = own ? (state.missing ? [] : [{ id: userId, full_name: state.name, college: "BIT Patna", house: state.house, phone: "PRIVATE_PHONE_FIXTURE" }]) : state.empty ? [] : [
+    let rows = own ? (state.missing ? [] : [{ id: user().id, full_name: state.name, college: "BIT Patna", house: state.house, phone: "PRIVATE_PHONE_FIXTURE" }]) : state.empty ? [] : [
       ...Array.from({ length: 28 }, (_, i) => ({ id: `member-${i}`, full_name: `House member ${String(i + 1).padStart(2, "0")}`, house: state.house, phone: "PRIVATE_PHONE_FIXTURE", email: "private-member@example.invalid" })),
       { id: "other-house", full_name: "Other house member", house: "hufflepuff", phone: "PRIVATE_PHONE_FIXTURE" },
     ];

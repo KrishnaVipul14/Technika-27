@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { signInFixture, setFixtureScenario } from "./fixtures";
+import { signInFixture, setFixtureScenario, fixtureRequests } from "./fixtures";
 
 test.describe("account access", () => {
   test("unsigned visitors remain behind the existing login gate", async ({ request }) => {
@@ -23,6 +23,29 @@ test.describe("account access", () => {
       await expect(page.getByTestId("common-room").locator("canvas")).toHaveCount(0);
     });
   }
+  test("an account change discards an in-flight directory and the previous participant", async ({ page }) => {
+    await signInFixture(page);
+    await page.addInitScript(() => localStorage.setItem("technika:common-room:v1", JSON.stringify({ lightweight: true })));
+    await page.goto("/account");
+    let release!: () => void, received!: () => void;
+    const held = new Promise<void>((resolve) => { release = resolve; });
+    const requested = new Promise<void>((resolve) => { received = resolve; });
+    await page.route("**/api/common-room/members?*", async (route) => { const response = await route.fetch(); received(); await held; await route.fulfill({ response }); });
+    await page.getByRole("button", { name: "House Community", exact: true }).click();
+    await requested;
+    const id = "10000000-0000-4000-8000-000000000002";
+    try {
+      const session = await signInFixture(page, { id, email: "mira@example.invalid", name: "Mira Finch", house: "ravenclaw" });
+      // Deliver the same native cross-tab event as Supabase, with SDK-issued fixture cookies.
+      await page.evaluate((session) => { const channel = new BroadcastChannel("sb-127-auth-token"); channel.postMessage({ event: "SIGNED_IN", session }); channel.close(); }, session);
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+    } finally { release(); }
+    await expect(page.getByTestId("common-room")).toHaveAttribute("data-house", "ravenclaw", { timeout: 25_000 });
+    await expect(page.getByTestId("common-room")).toContainText("Mira Finch");
+    await expect(page.getByTestId("common-room")).not.toContainText("Rowan Vale");
+    await expect(page.getByTestId("room-member")).toHaveCount(0);
+    expect((await fixtureRequests()).some((request) => request.query.id === `eq.${id}`)).toBe(true);
+  });
   test("profile errors are retryable, not treated as unassigned", async ({ page }) => {
     await signInFixture(page, { profileError: true });
     await page.goto("/account");

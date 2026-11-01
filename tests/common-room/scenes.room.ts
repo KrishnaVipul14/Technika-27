@@ -1,6 +1,15 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page, type TestInfo } from "@playwright/test";
 import { signInFixture } from "./fixtures";
 import { panels, enterRoom, pickObject } from "./room-actions";
+
+async function recordBudget(page: Page, info: TestInfo) {
+  const budget = await page.getByTestId("room-canvas").locator("canvas").evaluate((canvas: HTMLCanvasElement) => {
+    const gl = canvas.getContext("webgl2")!, debug = gl.getExtension("WEBGL_debug_renderer_info");
+    return { drawCalls: Number(canvas.dataset.drawCalls), triangles: Number(canvas.dataset.triangles), dpr: Number(canvas.dataset.dpr), shadows: canvas.dataset.shadows === "true", frameMs: Number(canvas.dataset.frameMs), renderMs: Number(canvas.dataset.renderMs), viewport: [innerWidth, innerHeight], renderer: debug ? String(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL)) : "undisclosed" };
+  });
+  expect(budget.drawCalls).toBeGreaterThan(0);
+  await info.attach("render-budget", { body: JSON.stringify(budget, null, 2), contentType: "application/json" });
+}
 
 test("Slytherin architecture and room shell", async ({ page }, testInfo) => {
   const errors: string[] = [];
@@ -13,6 +22,7 @@ test("Slytherin architecture and room shell", async ({ page }, testInfo) => {
   await expect(page.getByRole("navigation", { name: "Main Navigation" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Change house", exact: true })).toHaveCount(0);
   await expect(page.locator(".site-footer, .wand-cursor-viewport, .wand-sparks")).toHaveCount(0);
+  await recordBudget(page, testInfo);
   await page.screenshot({ path: `test-results/common-room/${testInfo.project.name}-slytherin.png` });
   expect(errors).toEqual([]);
   await page.getByRole("link", { name: "Leave the room" }).click();
@@ -31,6 +41,7 @@ test.describe("distinct house scenes", () => {
       await signInFixture(page, { house }); await enterRoom(page);
       await expect(page.getByTestId("room-canvas").locator("canvas")).toBeVisible();
       await expect(page.getByRole("heading", { name: title, exact: true })).toBeVisible();
+      await recordBudget(page, info);
       await page.screenshot({ path: `test-results/common-room/${info.project.name}-${house}.png` });
       for (const [id, panel] of Object.entries(panels)) {
         await pickObject(page, id, info.project.name === "mobile");
@@ -38,7 +49,7 @@ test.describe("distinct house scenes", () => {
         await page.keyboard.press("Escape");
         await expect(page.getByTestId("common-room")).toHaveAttribute("data-phase", "exploring");
       }
-      expect(chunks.some((chunk) => chunk.includes("slytherin-scene"))).toBe(false);
+      for (const candidate of ["gryffindor", "slytherin", "ravenclaw", "hufflepuff"]) expect(chunks.some((chunk) => chunk.includes(`${candidate}-scene`))).toBe(candidate === house);
       expect(errors).toEqual([]);
     });
   }

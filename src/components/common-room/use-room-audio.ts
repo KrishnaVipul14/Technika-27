@@ -64,7 +64,7 @@ export function useRoomAudio(house: AssignedHouse) {
       await sound.context.resume();
       if (!alive.current || graph.current !== sound || current !== operation.current) return true;
       if (document.hidden) await sound.context.suspend();
-      if (alive.current && current === operation.current) { setPaused(document.hidden); setUnavailable(false); }
+      if (alive.current && current === operation.current) { setPaused(document.hidden || sound.context.state !== "running"); setUnavailable(false); }
       return true;
     } catch {
       // Native resume acknowledgements can arrive after a newer mute/resume gesture.
