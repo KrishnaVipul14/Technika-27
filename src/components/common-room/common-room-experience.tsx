@@ -41,7 +41,6 @@ export function CommonRoomExperience({ participant, accountActions }: { particip
   const [fallback, setFallback] = useState<FallbackReason | null>(null);
   const [guideOpen, setGuideOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState<"open" | "closing" | null>(null);
-  const [audioPending, setAudioPending] = useState(false);
   const { settings, update, quality, motion } = useRoomSettings();
   const { setEnabled, play, unavailable, paused } = useRoomAudio(participant.house);
   const root = useRef<HTMLDivElement>(null); const entranceRef = useRef<HTMLDivElement>(null);
@@ -63,9 +62,8 @@ export function CommonRoomExperience({ participant, accountActions }: { particip
       setGuideOpen(false); setModelReady(false); setFallback(null); dispatch({ type: "RETRY" });
     }
     if (patch.ambient !== undefined || patch.effects !== undefined) {
-      setAudioPending(true);
       const enabled = await setEnabled(patch.ambient ?? settings.ambient, patch.effects ?? settings.effects);
-      if (root.current?.isConnected) { if (!enabled) update({ ambient: false, effects: false }); setAudioPending(false); }
+      if (!enabled && root.current?.isConnected) update({ ambient: false, effects: false });
     }
   };
   const onReady = useCallback(() => { setModelReady(true); dispatch({ type: "READY" }); }, []);
@@ -100,7 +98,7 @@ export function CommonRoomExperience({ participant, accountActions }: { particip
       <div className={styles.roomTitle}><span className={styles.eyebrow}>{houseLore[participant.house].location}</span><h1>{houseLore[participant.house].title}</h1><p>{houseThemes[participant.house].motto}</p></div>
       <footer className={styles.roomFooter}><span>TECHNIKA ’27 <i /> PROCEDURAL 3D PROTOTYPE</span><div><button type="button" disabled={!ready || state.phase !== "exploring"} onClick={() => void changeSettings({ lightweight: true })}>Reading mode</button><ObjectGuide disabled={!ready} onSelect={select} onOpenChange={setGuideOpen} /></div></footer>
     </>}
-    {settingsOpen && <RoomSettingsPanel house={participant.house} settings={{ ...settings, lightweight: showFallback }} motion={motion} open={settingsOpen === "open"} onClose={() => setSettingsOpen("closing")} onExited={onSettingsExited} onChange={changeSettings} audioUnavailable={unavailable} audioPending={audioPending} audioPaused={paused} onResume={() => void changeSettings({ ambient: settings.ambient, effects: settings.effects })} />}
+    {settingsOpen && <RoomSettingsPanel house={participant.house} settings={{ ...settings, lightweight: showFallback }} motion={motion} open={settingsOpen === "open"} onClose={() => setSettingsOpen("closing")} onExited={onSettingsExited} onChange={changeSettings} audioUnavailable={unavailable} audioPaused={paused} onResume={() => void changeSettings({ ambient: settings.ambient, effects: settings.effects })} />}
     {panelVisible && <MagicalOverlay motion={motion} open={state.phase === "panel"} title={roomObjects.find((object) => object.id === selected)!.label} house={participant.house} onClose={() => dispatch({ type: "CLOSE" })} onExited={onExited}>
       {selected === "archives" && <HouseArchivesPanel house={participant.house} />}
       {selected === "notices" && <NoticeBoardPanel />}

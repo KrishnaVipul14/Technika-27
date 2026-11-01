@@ -42,29 +42,35 @@ function createSound(house: AssignedHouse) {
 }
 export function useRoomAudio(house: AssignedHouse) {
   const graph = useRef<ReturnType<typeof createSound> | null>(null);
-  const desired = useRef({ ambient: false, effects: false }); const alive = useRef(true);
+  const desired = useRef({ ambient: false, effects: false }); const alive = useRef(true); const operation = useRef(0);
   const [unavailable, setUnavailable] = useState(false); const [paused, setPaused] = useState(false);
   useEffect(() => {
-    alive.current = true;
+    alive.current = true; operation.current++;
     const visibility = () => { const sound = graph.current; if (!document.hidden || !sound) return; sound.stopVoices(); void sound.context.suspend().catch(() => {}); if (desired.current.ambient || desired.current.effects) setPaused(true); };
     document.addEventListener("visibilitychange", visibility);
     return () => { alive.current = false; document.removeEventListener("visibilitychange", visibility); if (graph.current) graph.current.context.onstatechange = null; graph.current?.close(); graph.current = null; };
   }, [house]);
   const setEnabled = useCallback(async (ambient: boolean, effects: boolean): Promise<boolean> => {
+    const current = ++operation.current;
     desired.current = { ambient, effects };
     try {
-      if (!ambient && !effects) { if (graph.current) { graph.current.enable(false, false); await graph.current.context.suspend(); } if (alive.current) setPaused(false); return true; }
+      if (!ambient && !effects) { if (graph.current) { graph.current.enable(false, false); await graph.current.context.suspend(); } if (alive.current && current === operation.current) setPaused(false); return true; }
       if (!graph.current) {
         const sound = createSound(house); graph.current = sound;
         sound.context.onstatechange = () => { if (alive.current && graph.current === sound) setPaused(sound.context.state !== "running" && (desired.current.ambient || desired.current.effects)); };
       }
-      const sound = graph.current; sound.enable(ambient, effects);
+      const sound = graph.current; sound.enable(ambient, effects); setPaused(sound.context.state !== "running");
       // Only this explicitly invoked UI action may create or resume an AudioContext.
       await sound.context.resume();
-      if (!alive.current || graph.current !== sound) return false;
+      if (!alive.current || graph.current !== sound || current !== operation.current) return true;
       if (document.hidden) await sound.context.suspend();
-      setPaused(document.hidden); setUnavailable(false); return true;
-    } catch { graph.current?.close(); graph.current = null; desired.current = { ambient: false, effects: false }; if (alive.current) { setUnavailable(true); setPaused(false); } return false; }
+      if (alive.current && current === operation.current) { setPaused(document.hidden); setUnavailable(false); }
+      return true;
+    } catch {
+      // Native resume acknowledgements can arrive after a newer mute/resume gesture.
+      if (!alive.current || current !== operation.current) return true;
+      graph.current?.close(); graph.current = null; desired.current = { ambient: false, effects: false }; setUnavailable(true); setPaused(false); return false;
+    }
   }, [house]);
   const play = useCallback((cue: Cue) => { if (desired.current.effects && !document.hidden && graph.current?.context.state === "running") graph.current.play(cue); }, []);
   return { setEnabled, play, unavailable, paused };

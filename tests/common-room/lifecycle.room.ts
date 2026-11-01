@@ -52,6 +52,26 @@ test.describe("room settings and audio", () => {
     await expect(page.getByTestId("common-room")).toHaveAttribute("data-ready", "true");
     await expect(page.getByTestId("room-canvas").locator("canvas")).toBeVisible();
   });
+  test("pending audio acknowledgement cannot lock resume or roll back visual preferences", async ({ page }) => {
+    await installRuntimeProbe(page); await signInFixture(page);
+    await page.addInitScript(() => {
+      const resume = AudioContext.prototype.resume;
+      AudioContext.prototype.resume = function () {
+        void resume.call(this).catch(() => {}); // Keep the real audio operation; delay only its acknowledgement.
+        return new Promise<void>((_, reject) => window.addEventListener("room-test-reject", () => reject(new DOMException("Resume interrupted", "NotAllowedError")), { once: true }));
+      };
+    });
+    await enterRoom(page); await page.getByRole("button", { name: "Room settings", exact: true }).click();
+    await page.getByRole("combobox", { name: "Rendering quality" }).selectOption("low");
+    await page.getByLabel("Ambient sound", { exact: true }).check();
+    await expect.poll(async () => (await runtimeSnapshot(page)).states).toEqual(["running"]);
+    await page.getByRole("combobox", { name: "Rendering quality" }).selectOption("high");
+    await setRoomVisibility(page, true); await setRoomVisibility(page, false);
+    await expect(page.getByRole("button", { name: "Resume sound" })).toBeEnabled();
+    await page.evaluate(() => window.dispatchEvent(new Event("room-test-reject")));
+    await expect(page.getByLabel("Ambient sound", { exact: true })).not.toBeChecked();
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem("technika:common-room:v1")!).quality)).toBe("high");
+  });
   test("unsupported audio is nonfatal and stale stored audio is ignored", async ({ page }) => {
     await signInFixture(page);
     await page.addInitScript(() => { Object.defineProperty(window, "AudioContext", { value: undefined }); localStorage.setItem("technika:common-room:v1", JSON.stringify({ quality: "invented", motion: "system", ambient: true, effects: true })); });

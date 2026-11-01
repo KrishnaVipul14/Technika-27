@@ -25,6 +25,7 @@ export function useRoomSettings() {
   const settings = { ...saved, ...changes };
   const update = (patch: Partial<RoomSettings>) => {
     setChanges((current) => ({ ...current, ...patch }));
+    if (patch.quality === undefined && patch.motion === undefined && patch.lightweight === undefined) return;
     const next = { ...settings, ...patch };
     try { localStorage.setItem(key, JSON.stringify({ quality: next.quality, motion: next.motion, lightweight: next.lightweight })); } catch { /* Visual preferences still work for this visit. */ }
   };
