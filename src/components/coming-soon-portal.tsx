@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Instagram, MapPin } from "lucide-react";
 
 function TechParticleCanvas() {
@@ -84,63 +84,6 @@ function TechParticleCanvas() {
   return <canvas ref={canvasRef} className="reference-particle-canvas" aria-hidden="true" />;
 }
 
-function FestivalCountdown() {
-  const [timeLeft, setTimeLeft] = useState<{
-    days: number;
-    hours: number;
-    minutes: number;
-    seconds: number;
-  } | null>(null);
-
-  useEffect(() => {
-    const target = new Date("2027-01-08T09:00:00+05:30").getTime();
-    const update = () => {
-      const now = Date.now();
-      const diff = Math.max(0, target - now);
-      setTimeLeft({
-        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((diff / (1000 * 60)) % 60),
-        seconds: Math.floor((diff / 1000) % 60),
-      });
-    };
-    update();
-    const timer = setInterval(update, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  if (!timeLeft) {
-    return (
-      <div className="reference-countdown-skeleton" aria-hidden="true">
-        <span className="countdown-pill">Opening January 2027</span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="reference-countdown" aria-label="Countdown to Technika '27">
-      <div className="countdown-item">
-        <span className="countdown-num">{String(timeLeft.days).padStart(2, "0")}</span>
-        <span className="countdown-tag">DAYS</span>
-      </div>
-      <span className="countdown-sep" aria-hidden="true">:</span>
-      <div className="countdown-item">
-        <span className="countdown-num">{String(timeLeft.hours).padStart(2, "0")}</span>
-        <span className="countdown-tag">HOURS</span>
-      </div>
-      <span className="countdown-sep" aria-hidden="true">:</span>
-      <div className="countdown-item">
-        <span className="countdown-num">{String(timeLeft.minutes).padStart(2, "0")}</span>
-        <span className="countdown-tag">MINS</span>
-      </div>
-      <span className="countdown-sep" aria-hidden="true">:</span>
-      <div className="countdown-item">
-        <span className="countdown-num">{String(timeLeft.seconds).padStart(2, "0")}</span>
-        <span className="countdown-tag">SECS</span>
-      </div>
-    </div>
-  );
-}
 
 export function ComingSoonPortal() {
   return (
@@ -211,9 +154,6 @@ export function ComingSoonPortal() {
           A celebration of technology, innovation, and creativity is taking shape at
           Birla Institute of Technology, Patna.
         </p>
-
-        {/* Live Countdown */}
-        <FestivalCountdown />
 
         {/* Bottom Dual Card Box */}
         <div className="reference-status-card">

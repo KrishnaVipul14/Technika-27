@@ -300,70 +300,11 @@ html, body {
   font-family: var(--font-outfit), sans-serif;
   font-size: clamp(11px, 1.5vh, 14px);
   color: #94a3b8;
-  margin: 0 auto clamp(8px, 1.4vh, 18px);
+  margin: 0 auto clamp(14px, 2.2vh, 26px);
   max-width: 520px;
   line-height: 1.45;
 }
 
-/* Interactive Countdown Timer */
-.reference-countdown {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(6px, 1.2vw, 12px);
-  margin-bottom: clamp(10px, 2vh, 22px);
-}
-
-.countdown-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: clamp(42px, 6vw, 54px);
-  padding: clamp(5px, 0.8vh, 8px) clamp(6px, 1vw, 10px);
-  border-radius: 8px;
-  background: rgba(15, 23, 42, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.countdown-num {
-  font-family: var(--font-outfit), sans-serif;
-  font-size: clamp(16px, 2.5vh, 22px);
-  font-weight: 700;
-  color: #ffffff;
-  line-height: 1.1;
-  font-variant-numeric: tabular-nums;
-}
-
-.countdown-tag {
-  font-family: var(--font-outfit), sans-serif;
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  color: #64748b;
-  margin-top: 2px;
-}
-
-.countdown-sep {
-  font-family: var(--font-outfit), sans-serif;
-  font-size: clamp(14px, 2vh, 18px);
-  font-weight: 600;
-  color: #475569;
-  user-select: none;
-}
-
-.reference-countdown-skeleton {
-  margin-bottom: clamp(10px, 2vh, 22px);
-}
-
-.countdown-pill {
-  font-family: var(--font-outfit), sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  color: #64748b;
-  text-transform: uppercase;
-}
 
 /* Dual Column Status Card at Bottom */
 .reference-status-card {
@@ -526,6 +467,5 @@ html, body {
 @media (max-height: 600px) {
   .reference-seal-wrap { display: none; }
   .reference-description { margin-bottom: 6px; }
-  .reference-countdown { margin-bottom: 8px; }
   .reference-coming-soon { margin-top: 4px; margin-bottom: 6px; }
 }
