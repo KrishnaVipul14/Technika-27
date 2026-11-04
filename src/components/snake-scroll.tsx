@@ -221,10 +221,18 @@ export default function SnakeScroll({
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [scrollable, setScrollable] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   /* Hide the native scrollbar -------------------------------------- */
   useEffect(() => {
-    if (!hideNativeScrollbar) return;
+    if (!hideNativeScrollbar || isMobile) return;
     const style = document.createElement("style");
     style.setAttribute("data-snake-scroll", "");
     style.textContent =
@@ -232,31 +240,31 @@ export default function SnakeScroll({
       "html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}";
     document.head.appendChild(style);
     return () => style.remove();
-  }, [hideNativeScrollbar]);
+  }, [hideNativeScrollbar, isMobile]);
 
   /* Drawing + animation loop --------------------------------------- */
   useEffect(() => {
+    if (isMobile) return;
     const wrap = wrapRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!wrap || !canvas || !ctx) return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const pool: Pt[] = []; // reused every frame to avoid GC churn
+    const pool: Pt[] = [];
 
     let g = geometry(width, inset, window.innerHeight);
     let W = 0;
     let H = 0;
-    let target = 0; // real scroll progress 0..1
-    let cur = 0; // eased progress the snake actually shows
-    let speed = 0; // smoothed head speed (px/s), drives the extra wiggle
-    let phase = 0; // wave phase
+    let target = 0;
+    let cur = 0;
+    let speed = 0;
+    let phase = 0;
     let tongueClock = 0;
     let last = performance.now();
     let raf = 0;
     let dirty = true;
 
-    /* colours: fixed green, or read from the active theme */
     let pal: Palette = NAGINI;
     const reader = palette === "theme" ? makeReader() : null;
     const refreshColors = () => {
@@ -264,7 +272,7 @@ export default function SnakeScroll({
       dirty = true;
     };
     const observer = reader
-      ? new MutationObserver(refreshColors) // re-read when the house changes
+      ? new MutationObserver(refreshColors)
       : null;
     observer?.observe(document.documentElement, {
       attributes: true,
@@ -272,7 +280,6 @@ export default function SnakeScroll({
     });
     refreshColors();
 
-    /** Horizontal offset of the body at height y. */
     const wave = (y: number, y0: number, ph: number) => {
       const env = 0.45 + 0.55 * smoothstep(0, 90 * g.u, y - y0);
       return g.amp * env * Math.sin(g.k * (y - y0) + ph);
@@ -297,7 +304,6 @@ export default function SnakeScroll({
       readScroll();
     };
 
-    /* ---------------- head ---------------- */
     const drawHead = () => {
       const r = g.R;
 
@@ -596,10 +602,11 @@ export default function SnakeScroll({
       roWrap.disconnect();
       roDoc.disconnect();
     };
-  }, [width, inset, palette]);
+  }, [width, inset, palette, isMobile]);
 
   /* Click / drag the track to scrub the page ------------------------ */
   const scrub = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (isMobile) return;
     const wrap = wrapRef.current;
     if (!wrap) return;
     const g = geometry(width, inset, wrap.clientHeight);
@@ -620,6 +627,8 @@ export default function SnakeScroll({
     if (lenis) lenis.scrollTo(targetTop, { immediate: true });
     else window.scrollTo({ top: targetTop, behavior: "auto" });
   };
+
+  if (isMobile) return null;
 
   return (
     <div
@@ -646,6 +655,7 @@ export default function SnakeScroll({
       <canvas
         ref={canvasRef}
         className="block h-full w-full drop-shadow-[0_2px_3px_rgba(0,0,0,0.35)]"
+        data-testid="snake-scroll-canvas"
       />
     </div>
   );
