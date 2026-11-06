@@ -387,6 +387,22 @@ export function SignupExperience({
     setHatSubtext(lore.subtext);
   };
 
+  /** Helper: Retry API call with exponential backoff */
+  const fetchWithRetry = async (url: string, signal: AbortSignal, maxRetries = 3): Promise<Response> => {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const res = await fetch(url, { cache: "no-store", signal });
+        if (res.ok) return res;
+        if (i < maxRetries - 1) await new Promise(r => setTimeout(r, 500 * (i + 1)));
+      } catch (err) {
+        if (signal.aborted) throw err;
+        if (i < maxRetries - 1) await new Promise(r => setTimeout(r, 500 * (i + 1)));
+        else throw err;
+      }
+    }
+    throw new Error(`Failed after ${maxRetries} retries`);
+  };
+
   /** Reads the house the database assigned, announces it, then redirects. */
   const sortAndEnter = async (
     client: SupabaseBrowserClient,
@@ -402,11 +418,16 @@ export function SignupExperience({
       verification.current = controller;
       const timeout = setTimeout(() => controller.abort(), 10_000);
       try {
-        const response = await fetch("/api/common-room/arrival", { cache: "no-store", signal: controller.signal });
+        const response = await fetchWithRetry("/api/common-room/arrival", controller.signal);
         const result: { status?: string; participant?: Partial<ArrivalParticipant> } = await response.json();
         const saved = result?.participant;
         const verifiedHouse = houseFromValue(saved?.house);
-        if (!response.ok || result?.status !== "ready" || saved?.id !== userId || typeof saved.displayName !== "string" || !saved.displayName.trim() || !verifiedHouse || verifiedHouse === "default" || saved.house !== verifiedHouse) throw new Error("Arrival not verified");
+        if (!response.ok) throw new Error(`API returned ${response.status}: ${result?.status}`);
+        if (result?.status !== "ready") throw new Error(`Arrival not ready: ${result?.status}`);
+        if (saved?.id !== userId) throw new Error("User ID mismatch");
+        if (typeof saved.displayName !== "string" || !saved.displayName.trim()) throw new Error("No displayName");
+        if (!verifiedHouse || verifiedHouse === "default") throw new Error(`Invalid house: ${saved?.house}`);
+        if (saved.house !== verifiedHouse) throw new Error("House verification failed");
         if (!mounted.current) return;
         const participant: ArrivalParticipant = { id: userId, displayName: saved.displayName, house: verifiedHouse };
         setAssignedHouse(verifiedHouse); setHouse(verifiedHouse);

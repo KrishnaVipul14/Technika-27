@@ -229,7 +229,7 @@ export function Header() {
           >
             <Image
               src={houseLogoFor(house)}
-              width={56}
+              width={65}
               height={56}
               alt=""
               priority

@@ -93,12 +93,13 @@ export function RegistrationArrivalProvider({ children }: { children: ReactNode 
     {children}
     {active && journey && <dialog ref={dialog} className={styles.stage} aria-label="Your acceptance letter" data-testid="registration-arrival" data-house={journey.participant.house} data-phase={phase} data-motion={!reduced} data-lenis-prevent onCancel={(event) => { event.preventDefault(); travel(true); }}>
       <LetterBoundary key={journey.token}><Suspense fallback={<div className={styles.loading}><p>Preparing your acceptance letter…</p></div>}>
-        <AcceptanceLetter journey={journey} reduced={reduced} onRevealed={finish} />
+        <AcceptanceLetter journey={journey} reduced={reduced} onRevealed={finish} onEnter={() => travel(reduced)} />
       </Suspense></LetterBoundary>
       <header className={styles.controls}><span>THE OWLERY <i /> TECHNIKA ’27</span><button type="button" onClick={() => travel(true)}><SkipForward size={15} /> Skip animation</button></header>
       <footer className={styles.continue}>
-        <p role="status">{phase === "letter" ? "Registration confirmed. Read at your own pace." : phase === "travelling" ? "Your registration is safe. Opening your verified Common Room…" : `Welcome home, ${journey.participant.displayName}.`}</p>
-        {phase === "letter" ? <button type="button" onClick={() => travel(reduced)}>Enter your Common Room <ArrowRight size={18} /></button> : <a href="/account" data-no-transition>Taking too long? Open your room directly <ArrowRight size={15} /></a>}
+        {/* During the letter, its own CTA leads on; the status stays announced for screen readers. */}
+        <p role="status" className={phase === "letter" ? styles.srOnly : undefined}>{phase === "letter" ? "Registration confirmed. Read at your own pace." : phase === "travelling" ? "Your registration is safe. Opening your verified Common Room…" : `Welcome home, ${journey.participant.displayName}.`}</p>
+        {phase === "letter" ? null : <a href="/account" data-no-transition>Taking too long? Open your room directly <ArrowRight size={15} /></a>}
       </footer>
     </dialog>}
   </ArrivalContext.Provider>;

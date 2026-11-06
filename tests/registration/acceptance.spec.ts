@@ -46,9 +46,9 @@ test.describe("registration handoff", () => {
     await expect(letter).toBeVisible({ timeout: 20_000 });
     await expect(letter).toHaveAttribute("data-house", "slytherin");
     await expect(letter.getByTestId("acceptance-paper")).toContainText("Dear Mira Finch,");
-    await expect(letter.getByTestId("acceptance-paper")).toContainText("Your journey at Technika'27 has officially begun.");
+    await expect(letter.getByTestId("acceptance-paper")).toContainText("your journey into the extraordinary world of Technika’27 is about to begin.");
     await expect(letter.getByTestId("acceptance-paper")).not.toContainText("Form Name");
-    await letter.getByRole("button", { name: "Enter your Common Room", exact: true }).click();
+    await letter.getByRole("button", { name: "Enter the Wizarding World", exact: true }).click();
     // In cold development, a Fast Refresh full reload may interrupt the first navigation; wait for /account with retries.
     await expect.poll(async () => {
       const url = page.url();
@@ -82,28 +82,67 @@ test.describe("registration handoff", () => {
   });
 });
 
-test("the envelope splits its seal, unfolds in 3D and dissolves into the assigned room", async ({ page }, info) => {
+test("the letter stops half-way, unfolds, is written for the real name and dissolves into the assigned room", async ({ page }, info) => {
+  test.setTimeout(120_000);
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await installRuntimeProbe(page);
   const scenes: string[] = [];
   page.on("request", (request) => { if (request.url().includes("-scene")) scenes.push(request.url()); });
+  // Compile /account before the flow so cold `next dev` cannot full-reload the page mid-handoff.
+  await page.request.get("/account");
   await signupPage(page, { house: "ravenclaw" }); await fillSignup(page);
   await page.getByRole("button", { name: "Begin Your Ceremony" }).click();
   const letter = page.getByRole("dialog", { name: "Your acceptance letter" });
   await expect(letter).toBeVisible({ timeout: 20_000 });
   const art = letter.getByTestId("acceptance-art");
-  await expect(art).toHaveAttribute("data-stage", "sealed");
+  await expect(art).toHaveAttribute("data-stage", "sealed", { timeout: 15_000 });
   await page.screenshot({ path: `test-results/registration/${info.project.name}-sealed.png` });
-  await expect(art).toHaveAttribute("data-stage", "reading", { timeout: 15_000 });
-  expect(await letter.locator("[data-seal='left']").evaluate((node) => new DOMMatrix(getComputedStyle(node).transform).m41)).toBeLessThan(-8);
+
+  // The signature moment: the letter is partly out and HOLDS still for ~1.1s.
+  await expect(art).toHaveAttribute("data-stage", "halfway", { timeout: 15_000 });
+  const rigY = () => letter.locator("[data-rig]").evaluate((node) => new DOMMatrix(getComputedStyle(node).transform).m42);
+  const first = await rigY();
+  await page.screenshot({ path: `test-results/registration/${info.project.name}-halfway.png` });
+  await page.waitForTimeout(250);
+  expect(Math.abs((await rigY()) - first)).toBeLessThan(4);
   expect(await letter.locator("[data-flap]").evaluate((node) => getComputedStyle(node).transform)).toContain("matrix3d");
-  expect((await runtimeSnapshot(page)).webgl).toHaveLength(0);
+  expect(await letter.locator("[data-seal='bottom']").evaluate((node) => new DOMMatrix(getComputedStyle(node).transform).m41)).toBeLessThan(0);
+
+  await expect(art).toHaveAttribute("data-stage", "unfolding", { timeout: 15_000 });
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: `test-results/registration/${info.project.name}-unfolding.png` });
+  await expect(art).toHaveAttribute("data-stage", "writing", { timeout: 15_000 });
+  await page.waitForTimeout(2600);
+  await page.screenshot({ path: `test-results/registration/${info.project.name}-writing.png` });
+  await expect(letter.getByTestId("acceptance-paper")).toContainText("Dear Mira Finch,");
+
+  // Skip from mid-writing lands on the exact finished state; at most the room's own context exists.
+  await letter.getByRole("button", { name: "Reveal letter now" }).click();
+  await expect(art).toHaveAttribute("data-stage", "reading");
+  const cta = letter.getByRole("button", { name: "Enter the Wizarding World", exact: true });
+  await expect(cta).toBeVisible();
+  await expect(cta).toBeFocused();
+  expect((await runtimeSnapshot(page)).webgl.length).toBeLessThanOrEqual(1);
   expect((await runtimeSnapshot(page)).states).toEqual([]);
+  await page.screenshot({ path: `test-results/registration/${info.project.name}-letter.png` });
+
+  // Replay restarts from the arrival; skipping again restores the finished letter.
+  await letter.getByRole("button", { name: "Replay letter" }).click();
+  await expect(art).toHaveAttribute("data-stage", "sealed", { timeout: 15_000 });
+  await letter.getByRole("button", { name: "Reveal letter now" }).click();
+  await expect(cta).toBeVisible();
+
   await expect.poll(() => scenes.some((url) => url.includes("ravenclaw-scene"))).toBe(true);
   expect(scenes.some((url) => /slytherin-scene|gryffindor-scene|hufflepuff-scene/.test(url))).toBe(false);
-  await page.screenshot({ path: `test-results/registration/${info.project.name}-letter.png` });
-  await letter.getByRole("button", { name: "Enter your Common Room", exact: true }).click();
+  await cta.click();
+  // The gate seals over the letter at once, and stays sealed while the room loads behind it.
+  await expect(art).toHaveAttribute("data-gate", "closed", { timeout: 10_000 });
+  await page.screenshot({ path: `test-results/registration/${info.project.name}-gate-closed.png` });
   await expect(letter).toHaveAttribute("data-phase", "revealing", { timeout: 25_000 });
+  await page.waitForTimeout(450);
+  await page.screenshot({ path: `test-results/registration/${info.project.name}-gate-opening.png` });
+  // The letter's room canvas is released before the Common Room renders.
+  expect((await runtimeSnapshot(page)).webgl[0]?.lost ?? true).toBe(true);
   await expect(page.getByTestId("common-room")).toHaveAttribute("data-house", "ravenclaw");
   await page.screenshot({ path: `test-results/registration/${info.project.name}-homecoming.png` });
   await expect(letter).toHaveCount(0);

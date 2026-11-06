@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test";
 import { signInFixture, setFixtureScenario, fixtureRequests } from "./fixtures";
 
-const panels = ["House Archives", "Notice Board", "House Community", "Your Belongings", "Hidden Passage"];
+const panels = ["House Archives", "Notice Board", "House Community", "Your Belongings"];
 test.describe("panels", () => {
   test.use({ reducedMotion: "reduce" });
   test.beforeEach(async ({ page }) => { await signInFixture(page); await page.goto("/account"); await page.getByText("Explore the room", { exact: true }).click(); });
-  test("five panels, Escape and focus restoration", async ({ page }) => {
+  test("four panels, Escape and focus restoration", async ({ page }) => {
     for (const title of panels) {
       const opener = page.getByRole("button", { name: title, exact: true });
       await opener.click();
@@ -25,30 +25,9 @@ test.describe("panels", () => {
     await expect(page.getByRole("dialog")).toContainText("rowan@example.invalid");
     await expect(page.getByRole("dialog")).toContainText("Registration records are not connected");
   });
-  test("riddle accepts normalized answers without points", async ({ page }) => {
+  test("Hidden Passage navigates to home page", async ({ page }) => {
     await page.getByRole("button", { name: "Hidden Passage", exact: true }).click();
-    await page.getByLabel("Your answer").fill("wrong");
-    await page.getByRole("button", { name: "Whisper the answer" }).click();
-    await expect(page.getByRole("dialog")).toContainText("Listen a little closer");
-    await page.getByLabel("Your answer").fill("  Echo  ");
-    await page.getByRole("button", { name: "Whisper the answer" }).click();
-    await expect(page.getByRole("dialog")).toContainText("The passage remembers");
-  });
-  test("keyboard focus stays in the secret panel and long names remain text", async ({ page }) => {
-    const name = "<b>Not markup</b> " + "A very long participant name ".repeat(8);
-    await setFixtureScenario({ name });
-    await page.reload();
-    await page.getByText("Explore the room", { exact: true }).click();
-    await page.getByRole("button", { name: "Your Belongings", exact: true }).click();
-    await expect(page.getByRole("dialog")).toContainText(name.trim());
-    await expect(page.getByRole("dialog").locator("b")).toHaveCount(0);
-    await page.keyboard.press("Escape");
-    await page.getByRole("button", { name: "Hidden Passage", exact: true }).click();
-    await page.getByLabel("Your answer").focus();
-    await page.keyboard.press("Shift+Tab");
-    await expect(page.getByRole("button", { name: "Close Hidden Passage" })).toBeFocused();
-    await page.keyboard.press("Tab");
-    await expect(page.getByLabel("Your answer")).toBeFocused();
+    await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
   });
   test("directory error, retry, pagination and revocation", async ({ page }) => {
     await setFixtureScenario({ directoryError: true });

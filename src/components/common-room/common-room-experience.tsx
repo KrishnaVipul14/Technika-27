@@ -73,18 +73,21 @@ export function CommonRoomExperience({ participant, accountActions }: { particip
   };
   const onReady = useCallback(() => { setModelReady(true); dispatch({ type: "READY" }); }, []);
   const ready = showFallback || (modelReady && state.phase !== "loading" && state.phase !== "entering");
-  useEffect(() => { if (ready && !expired) roomReady(participant); }, [ready, expired, participant, roomReady]);
+  // The arrival gate opens as soon as the room has loaded, so the entrance fly-in plays through it.
+  const arrivalReady = showFallback || (modelReady && state.phase !== "loading");
+  useEffect(() => { if (arrivalReady && !expired) roomReady(participant); }, [arrivalReady, expired, participant, roomReady]);
   useEffect(() => { if (arrival.journey?.skipped && arrivalPhase && state.phase === "entering") dispatch({ type: "SKIP" }); }, [arrival.journey?.skipped, arrivalPhase, state.phase]);
   const router = useRouter();
   const onSessionExpired = useCallback(() => { void setEnabled(false, false); setExpired(true); router.refresh(); }, [router, setEnabled]);
   const onExited = useCallback(() => { dispatch({ type: "PANEL_EXITED" }); if (showFallback) dispatch({ type: "RESTORED" }); }, [showFallback]);
   const select = useCallback((id: ObjectId) => {
     if (state.phase !== "exploring" || selecting.current) return;
+    if (id === "secret") { router.push("/"); return; }
     selecting.current = true; opener.current = document.activeElement as HTMLElement | null;
-    play(id === "members" || id === "notices" ? "book" : id === "secret" || id === "profile" ? "door" : "magic");
+    play(id === "members" || id === "notices" ? "book" : id === "profile" ? "door" : "magic");
     dispatch({ type: "SELECT", id });
     if (showFallback) dispatch({ type: "FOCUSED" });
-  }, [state.phase, showFallback, play]);
+  }, [state.phase, showFallback, play, router]);
   useEffect(() => {
     if (state.phase !== "exploring") return;
     selecting.current = false;

@@ -1,6 +1,6 @@
 import { expect, type Page } from "@playwright/test";
 
-export const panels = { archives: "House Archives", notices: "Notice Board", members: "House Community", profile: "Your Belongings", secret: "Hidden Passage" };
+export const panels = { archives: "House Archives", notices: "Notice Board", members: "House Community", profile: "Your Belongings" };
 export async function enterRoom(page: Page) {
   await page.goto("/account");
   await expect(page.getByTestId("common-room")).toHaveAttribute("data-phase", "exploring", { timeout: 25_000 });
