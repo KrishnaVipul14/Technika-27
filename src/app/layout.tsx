@@ -5,7 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { Experience } from "@/components/experience";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { PageTransition } from "@/components/page-transition";
+import PageTransition from "@/components/PageTransition";
 import { SiteSchema } from "@/components/structured-data";
 import {
   absoluteUrl,
@@ -19,8 +19,7 @@ import {
 import { HouseProvider } from "@/components/house-provider";
 import { RegistrationArrivalProvider } from "@/components/registration-arrival";
 import { AuthProvider } from "@/components/auth-provider";
-import { SmoothScroll } from "@/components/smoothScroll";
-
+import SmoothScroll from "@/components/SmoothScroll";
 import {
   houseAppleIconFor,
   houseBootScript,
@@ -191,7 +190,8 @@ export default function RootLayout({
               <SmoothScroll>
                 <Experience header={<Header />} footer={<Footer />}>
                   <main id="main-content" tabIndex={-1}>
-                    <PageTransition>{children}</PageTransition>
+                    {children}
+                    <PageTransition />
                   </main>
                 </Experience>
               </SmoothScroll>

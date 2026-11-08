@@ -1,9 +1,6 @@
 "use client";
 
-<<<<<<< HEAD
-import { useEffect, useRef } from "react";
 import Link from "next/link";
-=======
 /**
  * Hero, styled with Tailwind + the theme tokens from houseThemes.css.
  * The GSAP animation code is unchanged; only markup classes and colours moved to Tailwind.
@@ -12,7 +9,6 @@ import Link from "next/link";
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
->>>>>>> 2acf31bbde9b4d88311ed58dcabef235f371347e
 import {
   ArrowDown,
   ArrowUpRight,
@@ -46,7 +42,7 @@ const HERO_CSS = `
 
 /* Buttons */
 const BTN =
-  "group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full px-7 py-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring";
+  "group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full px-5 py-2.5 sm:px-7 sm:py-3.5 text-xs sm:text-[13px] font-semibold uppercase tracking-[0.1em] outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ring";
 const BTN_GOLD = `${BTN} bg-brand text-brand-on shadow-glow-brand hover:bg-brand-hover active:bg-brand-active`;
 const BTN_GLASS = `${BTN} border border-line-strong bg-surface/40 text-fg shadow-inset backdrop-blur-xl backdrop-saturate-150 hover:border-brand/40 hover:bg-brand-soft`;
 
@@ -141,226 +137,7 @@ function GoldenSnitch() {
 
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
-<<<<<<< HEAD
-  const { setReady } = useMagic();
-=======
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const introDoneRef = useRef(false);
-  const entered = useRef(false);
-  const [loadVideo, setLoadVideo] = useState(false);
-  const { enabled, ready, setReady } = useMagic();
->>>>>>> 2acf31bbde9b4d88311ed58dcabef235f371347e
 
-  useEffect(() => {
-    setReady(true);
-  }, [setReady]);
-
-<<<<<<< HEAD
-=======
-  // Video intro controller: autoplays base.mp4 from 0s and halts at castle scene (3.75s)
-  useEffect(() => {
-    if (ready) {
-      introDoneRef.current = true;
-      const video = videoRef.current;
-      if (video) {
-        video.pause();
-        try {
-          video.currentTime = CASTLE_SCENE_TIME;
-        } catch {
-          // ignore
-        }
-      }
-      return;
-    }
-
-    // If page is already scrolled on load, skip intro directly
-    if (typeof window !== "undefined" && window.scrollY > 30) {
-      finishIntro();
-      return;
-    }
-
-    const video = videoRef.current;
-    if (!video || !loadVideo) return;
-
-    video.currentTime = 0;
-    video.play().catch(() => {
-      // Autoplay with muted is usually allowed, but if blocked, user interaction will resume
-    });
-
-    let rafId = 0;
-    const trackTime = () => {
-      if (introDoneRef.current) return;
-      if (video.currentTime >= CASTLE_SCENE_TIME || video.ended) {
-        finishIntro();
-        return;
-      }
-      rafId = requestAnimationFrame(trackTime);
-    };
-    rafId = requestAnimationFrame(trackTime);
-
-    const onTimeUpdate = () => {
-      if (introDoneRef.current) return;
-      if (video.currentTime >= CASTLE_SCENE_TIME || video.ended) {
-        finishIntro();
-      }
-    };
-
-    const onEnded = () => {
-      finishIntro();
-    };
-
-    video.addEventListener("timeupdate", onTimeUpdate);
-    video.addEventListener("ended", onEnded);
-
-    // Skip intro on user scroll
-    const onSkipScroll = () => {
-      finishIntro();
-    };
-
-    window.addEventListener("wheel", onSkipScroll, { passive: true, once: true });
-    window.addEventListener("touchmove", onSkipScroll, { passive: true, once: true });
-
-    // Safety fallback: if video stalls or takes too long, reveal elements
-    const fallbackTimer = window.setTimeout(finishIntro, 4500);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      clearTimeout(fallbackTimer);
-      video.removeEventListener("timeupdate", onTimeUpdate);
-      video.removeEventListener("ended", onEnded);
-      window.removeEventListener("wheel", onSkipScroll);
-      window.removeEventListener("touchmove", onSkipScroll);
-    };
-  }, [ready, finishIntro, loadVideo]);
-
-  useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-    if (reduced || connection?.saveData) {
-      finishIntro();
-      return;
-    }
-    const start = () => setLoadVideo(true);
-    const timer = window.setTimeout(start, 350);
-    return () => window.clearTimeout(timer);
-  }, [finishIntro]);
-
-  // GSAP scroll trigger & entrance animations once castle scene is reached
-  useEffect(() => {
-    const hero = ref.current;
-    if (!hero || !ready) return;
-    const ctx = gsap.context(() => {
-      if (!enabled) {
-        gsap.set(
-          ".hero-presents, .hero-edition, .title-letter, .hero-subtitle, .hero-details, .hero-bottom",
-          { opacity: 1, clearProps: "transform,filter" },
-        );
-        return;
-      }
-      if (!entered.current) {
-        const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
-        intro
-          .fromTo(
-            ".hero-presents, .hero-edition",
-            { opacity: 0, y: 22 },
-            { opacity: 1, y: 0, duration: 1, stagger: 0.15 },
-            0.15,
-          )
-          .fromTo(
-            ".title-letter",
-            { opacity: 0, yPercent: 110, rotationX: -70, filter: "blur(12px)" },
-            {
-              opacity: 1,
-              yPercent: 0,
-              rotationX: 0,
-              filter: "blur(0px)",
-              duration: 1.25,
-              stagger: 0.065,
-              clearProps: "transform,filter",
-            },
-            0.28,
-          )
-          .fromTo(
-            ".hero-subtitle",
-            { opacity: 0, y: 25 },
-            { opacity: 1, y: 0, duration: 1 },
-            0.8,
-          )
-          .fromTo(
-            ".hero-details",
-            { opacity: 0, y: 30 },
-            { opacity: 1, y: 0, duration: 1 },
-            1.05,
-          )
-          .fromTo(
-            ".hero-bottom",
-            { opacity: 0, y: 15 },
-            { opacity: 1, y: 0, duration: 0.8 },
-            1.3,
-          );
-        entered.current = true;
-      }
-
-      const scroll = {
-        trigger: hero,
-        start: "top top",
-        end: "bottom top",
-        scrub: 0.7,
-        invalidateOnRefresh: true,
-      };
-
-      // Video timeline scrub: starts at CASTLE_SCENE_TIME (3.75s),
-      // scrubs backwards towards 0.05s as user scrolls down, and back to 3.75s on scroll up
-      const videoPlayhead = { time: CASTLE_SCENE_TIME };
-      gsap.to(videoPlayhead, {
-        time: 0.05,
-        ease: "none",
-        scrollTrigger: scroll,
-        onUpdate: () => {
-          const video = videoRef.current;
-          if (video && !isNaN(video.duration) && video.readyState >= 2) {
-            try {
-              video.currentTime = videoPlayhead.time;
-            } catch {
-              // ignore
-            }
-          }
-        },
-      });
-
-      gsap.to(".hero-castle", {
-        y: () => hero.clientHeight * 0.22,
-        ease: "none",
-        scrollTrigger: scroll,
-      });
-      gsap.to(".hero-moon-aura", {
-        y: () => hero.clientHeight * 0.16,
-        ease: "none",
-        scrollTrigger: scroll,
-      });
-      gsap.to(".hero-mist", {
-        y: -160,
-        xPercent: 8,
-        ease: "none",
-        scrollTrigger: scroll,
-      });
-      gsap.to(".floating-candles", {
-        y: -100,
-        ease: "none",
-        scrollTrigger: scroll,
-      });
-      gsap.to(".hero-content", {
-        y: -75,
-        opacity: 0.12,
-        ease: "none",
-        scrollTrigger: { ...scroll, end: "bottom 15%" },
-      });
-      ScrollTrigger.refresh();
-    }, hero);
-    return () => ctx.revert();
-  }, [enabled, ready]);
-
->>>>>>> 2acf31bbde9b4d88311ed58dcabef235f371347e
   return (
     <section
       ref={ref}
@@ -368,41 +145,6 @@ export function Hero() {
       aria-labelledby="hero-title"
     >
       <style dangerouslySetInnerHTML={{ __html: HERO_CSS }} />
-
-<<<<<<< HEAD
-      {/* Ambient Atmospheric Overlays */}
-=======
-      {/* Video Background with GSAP Scroll scrubbing */}
-      <video
-        ref={videoRef}
-        src={loadVideo ? "/videos/base.mp4" : undefined}
-        poster="/images/hogwarts.webp"
-        className="hero-castle absolute inset-0 h-full w-full object-cover object-center scale-[1.06] will-change-transform pointer-events-none"
-        playsInline
-        muted
-        autoPlay={loadVideo}
-        preload="metadata"
-        disablePictureInPicture
-        disableRemotePlayback
-        aria-hidden="true"
-      />
-
-      {/* Atmosphere overlays (smoothly illuminate when castle scene is reached) */}
->>>>>>> 2acf31bbde9b4d88311ed58dcabef235f371347e
-      <div
-        className="hero-shade pointer-events-none absolute inset-0 z-[1]"
-        style={{ backgroundImage: FX.shade }}
-      />
-      <div
-        className="hero-moon-aura pointer-events-none absolute inset-x-0 -top-[14%] z-[1] mx-auto aspect-square w-[min(92vw,85vh)] rounded-full opacity-80"
-        style={{ backgroundImage: FX.moon }}
-        aria-hidden="true"
-      />
-      <div
-        className="castle-house-light pointer-events-none absolute inset-0 z-[2] mix-blend-screen opacity-90"
-        style={{ backgroundImage: FX.windows }}
-        aria-hidden="true"
-      />
 
       <HouseBanners />
       <AmbientParticles count={36} />
@@ -440,31 +182,32 @@ export function Hero() {
 
           <div className="mt-5 flex flex-col items-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-brand/40 bg-brand-soft/60 px-4 py-1.5 text-[10px] font-medium uppercase tracking-[0.25em] text-fg-brand backdrop-blur-md sm:text-[11px]">
-              <Sparkles size={12} /> THE MAKERS&apos; CHAPTER <Sparkles size={12} />
+              <Sparkles size={12} /> THE MAKERS&apos; CHAPTER{" "}
+              <Sparkles size={12} />
             </span>
             <h1
               id="hero-title"
-              className="mt-4 font-serif text-[clamp(2.8rem,11vw,9rem)] font-semibold leading-[0.95] tracking-[0.08em] drop-shadow-[0_0_35px_rgba(217,119,6,0.35)]"
+              className="mt-4 font-harryp text-[clamp(3rem,12vw,10.5rem)] font-normal leading-[0.9] tracking-[0.06em] uppercase select-none transition-all duration-500 inline-block bg-gradient-to-b from-fg-strong via-primary-300 to-primary-500 bg-clip-text text-transparent"
+              style={{
+                fontFamily: "var(--font-harryp), var(--font-garamond), Georgia, serif",
+                textShadow: "none",
+                filter:
+                  "drop-shadow(0 0 25px color-mix(in oklab, var(--primary-400) 65%, transparent)) drop-shadow(0 0 55px color-mix(in oklab, var(--primary-500) 40%, transparent)) drop-shadow(0 4px 14px rgba(0, 0, 0, 0.95))",
+              }}
             >
-              {"TECHNIKA".split("").map((letter, i) => (
-                <span
-                  key={i}
-                  className="inline-block bg-gradient-to-b from-fg-strong via-primary-300 to-primary-500 bg-clip-text text-transparent"
-                >
-                  {letter}
-                </span>
-              ))}
+              TECHNIKA
             </h1>
-            <p className="mt-3 font-serif text-base italic tracking-wide text-fg-muted sm:text-xl">
+            <p className="mt-3 font-serif text-sm italic tracking-wide text-fg-muted sm:text-xl">
               The annual techno-cultural festival
             </p>
           </div>
 
           <div className="mt-6 flex flex-col items-center gap-4">
-            <p className="font-serif text-lg tracking-[0.16em] text-fg-brand sm:text-2xl">
-              16 <i className="px-1 not-italic text-fg-subtle">—</i> 18 JANUARY, 2026
+            <p className="font-serif text-base tracking-[0.16em] text-fg-brand sm:text-2xl">
+              16 <i className="px-1 not-italic text-fg-subtle">—</i> 18 JANUARY,
+              2026
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-3">
+            <div className="flex flex-row flex-wrap items-center justify-center gap-2.5 sm:gap-3">
               <Link href="/registrations" className={BTN_GOLD}>
                 <span>Register Now</span>
                 <ArrowUpRight size={16} />

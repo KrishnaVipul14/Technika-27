@@ -208,7 +208,7 @@ export function Header() {
       `}</style>
 
       <header
-        className={`fixed inset-x-0 top-3 sm:top-5 z-50 pointer-events-none px-3 sm:px-6 transition-all duration-700 ${
+        className={`fixed inset-x-0 top-3 sm:top-5 z-50 pointer-events-none px-3 sm:px-6 transition-all duration-1000 ease-out ${
           ready
             ? "opacity-100 translate-y-0"
             : "opacity-0 -translate-y-4"

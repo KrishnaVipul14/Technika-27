@@ -1,18 +1,12 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { MotionConfig } from "motion/react";
 import { ScrollTrigger } from "@/lib/gsap";
 import { MagicInteractions } from "./magic-interactions";
 import { WandCursor } from "./wand-cursor";
-import SnakeScroll from "@/components/snake-scroll";
+import { isHomeIntroCompleted } from "@/lib/intro-state";
 import { HouseSwitcher } from "./house-switcher";
 import { useRegistrationArrival } from "./registration-arrival";
 
@@ -132,45 +126,46 @@ function WandSparks({ enabled }: { enabled: boolean }) {
   return <canvas className="wand-sparks" ref={canvasRef} aria-hidden="true" />;
 }
 
-export function Experience({ children, header, footer }: { children: React.ReactNode; header?: React.ReactNode; footer?: React.ReactNode }) {
+export function Experience({
+  children,
+  header,
+  footer,
+}: {
+  children: React.ReactNode;
+  header?: React.ReactNode;
+  footer?: React.ReactNode;
+}) {
   const pathname = usePathname();
   const { active: arrivalActive } = useRegistrationArrival();
   const immersive = pathname === "/account" || arrivalActive;
   const isHome = pathname === "/";
   // On the home page, the intro video controls when ready becomes true (at the castle scene).
-  // On all other routes, ready is immediately true.
-  const [homeReady, setReady] = useState(() => !isHome);
-  const ready = !isHome || homeReady;
+  // On all other routes (or when returning to home after intro has completed), ready is immediately true.
+  const [homeReady, setReady] = useState(
+    () => !isHome || isHomeIntroCompleted(),
+  );
+  const ready = !isHome || homeReady || isHomeIntroCompleted();
   const enabled = true;
 
-  useEffect(() => {
-    if (immersive) return;
-    document.documentElement.dataset.magic = enabled ? "on" : "off";
-    if (!ready) return;
-    const globalLenis = (
-      window as unknown as { lenis?: { start: () => void; resize: () => void } }
-    ).lenis;
-    globalLenis?.start();
-    globalLenis?.resize();
-    ScrollTrigger.refresh();
-  }, [enabled, ready, immersive]);
-
   return (
-    <MotionConfig reducedMotion={immersive ? "user" : enabled ? "never" : "always"}>
+    <MotionConfig
+      reducedMotion={immersive ? "user" : enabled ? "never" : "always"}
+    >
       <MagicContext.Provider value={{ enabled, ready, setReady }}>
-        <div className="experience-content">
+        <div className="experience-content" data-home-ready={ready}>
           {!immersive && header}
           {children}
           {!immersive && footer}
         </div>
-        {!immersive && <>
-          <WandSparks enabled={enabled} />
-          <WandCursor />
-          <SnakeScroll />
-          <MagicInteractions />
-          <HouseSwitcher />
-          <div className="scroll-progress" aria-hidden="true" />
-        </>}
+        {!immersive && ready && (
+          <>
+            <WandSparks enabled={enabled} />
+            <WandCursor />
+            <MagicInteractions />
+            <HouseSwitcher />
+            <div className="scroll-progress" aria-hidden="true" />
+          </>
+        )}
       </MagicContext.Provider>
     </MotionConfig>
   );

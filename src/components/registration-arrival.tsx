@@ -1,6 +1,7 @@
 "use client";
 
 import { Component, createContext, lazy, Suspense, useCallback, useContext, useEffect, useReducer, useRef, type ReactNode } from "react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useReducedMotion } from "motion/react";
 import { ArrowRight, SkipForward } from "lucide-react";
@@ -99,7 +100,7 @@ export function RegistrationArrivalProvider({ children }: { children: ReactNode 
       <footer className={styles.continue}>
         {/* During the letter, its own CTA leads on; the status stays announced for screen readers. */}
         <p role="status" className={phase === "letter" ? styles.srOnly : undefined}>{phase === "letter" ? "Registration confirmed. Read at your own pace." : phase === "travelling" ? "Your registration is safe. Opening your verified Common Room…" : `Welcome home, ${journey.participant.displayName}.`}</p>
-        {phase === "letter" ? null : <a href="/account" data-no-transition>Taking too long? Open your room directly <ArrowRight size={15} /></a>}
+        {phase === "letter" ? null : <Link href="/account" data-no-transition>Taking too long? Open your room directly <ArrowRight size={15} /></Link>}
       </footer>
     </dialog>}
   </ArrivalContext.Provider>;

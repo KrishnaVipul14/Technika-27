@@ -225,6 +225,7 @@ export function WizardingManifesto() {
               fill
               sizes="(max-width: 900px) 100vw, 48vw"
               alt="Hogwarts-inspired castle at night"
+              className="opacity-20 object-cover"
             />
             <div className="manifesto-portrait-shade" />
             <div className="manifesto-seal">

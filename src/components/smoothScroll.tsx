@@ -1,149 +1,90 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  type ReactNode,
-} from "react";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
-import { useRegistrationArrival } from "./registration-arrival";
 
-type LenisContextValue = {
-  getLenis: () => Lenis | null;
-  scrollTo: (
-    target: string | number | HTMLElement,
-    options?: {
-      offset?: number;
-      duration?: number;
-      immediate?: boolean;
-      lock?: boolean;
-    },
-  ) => void;
-};
+export { gsap, ScrollTrigger };
 
-const LenisContext = createContext<LenisContextValue>({
-  getLenis: () => null,
-  scrollTo: () => {},
-});
-
-export const useLenis = () => useContext(LenisContext);
-
-export interface SmoothScrollProps {
-  children: ReactNode;
-}
-
-export function SmoothScroll({ children }: SmoothScrollProps) {
+export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<Lenis | null>(null);
   const pathname = usePathname();
-  const { active: arrivalActive } = useRegistrationArrival();
-  const immersive = pathname === "/account" || arrivalActive;
 
   useEffect(() => {
-    if (immersive) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    // Instantiate Lenis with optimal fluid lerp smoothing
+    // 1. Initialize Lenis instance with super smooth scrolling settings
     const lenis = new Lenis({
-      lerp: 0.088, // Silky smooth deceleration without sluggishness
-      wheelMultiplier: 0.95,
-      touchMultiplier: 1.25,
+      duration: 1.4,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: "vertical",
+      gestureOrientation: "vertical",
       smoothWheel: true,
       syncTouch: false,
-      // Let the browser preference disable smoothing for accessibility and
-      // avoid a permanent animation-frame loop on reduced-motion devices.
-      respectReducedMotion: true,
-      prevent: (node) =>
-        node instanceof HTMLElement &&
-        (node.hasAttribute("data-lenis-prevent") ||
-          node.closest("[data-lenis-prevent]") !== null),
+      autoResize: true,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.5,
     });
 
     lenisRef.current = lenis;
+    (window as unknown as { lenis?: Lenis }).lenis = lenis;
 
-    // Expose globally for devtools, custom scripts, and external controls
-    if (typeof window !== "undefined") {
-      (window as unknown as { lenis: Lenis }).lenis = lenis;
-    }
-
-    // Sync Lenis scroll position with GSAP ScrollTrigger on every frame
+    // 2. Sync Lenis scroll with GSAP ScrollTrigger
     lenis.on("scroll", ScrollTrigger.update);
 
-    // Drive Lenis from GSAP's ticker for unified animation frame timing
-    const handleTicker = (time: number) => {
+    // 3. Drive Lenis updates using GSAP's ticker
+    const updateTicker = (time: number) => {
       lenis.raf(time * 1000);
     };
 
-    gsap.ticker.add(handleTicker);
-    // Allow graceful lag smoothing so heavy scenes don't cause sudden jerks
-    gsap.ticker.lagSmoothing(500, 33);
+    gsap.ticker.add(updateTicker);
+    gsap.ticker.lagSmoothing(0);
 
-    // Smooth scroll for in-page anchor links (e.g., href="#timeline", href="#about")
+    // 4. Smooth anchor clicks (#timeline, #journey, #about, etc.)
     const handleAnchorClick = (e: MouseEvent) => {
       const target = (e.target as HTMLElement)?.closest("a");
       if (!target) return;
       const href = target.getAttribute("href");
       if (href && href.startsWith("#") && href.length > 1) {
-        const element = document.querySelector(href);
-        if (element) {
+        const el = document.querySelector(href);
+        if (el) {
           e.preventDefault();
-          lenis.scrollTo(element as HTMLElement, {
-            offset: -90,
-            duration: 1.2,
-          });
+          lenis.scrollTo(el as HTMLElement, { offset: -60, duration: 1.3 });
         }
       }
     };
-
     document.addEventListener("click", handleAnchorClick, { capture: true });
 
-    // Initial resize calculation
-    lenis.resize();
-
+    // 5. Cleanup
     return () => {
       document.removeEventListener("click", handleAnchorClick, { capture: true });
+      gsap.ticker.remove(updateTicker);
       lenis.off("scroll", ScrollTrigger.update);
-      gsap.ticker.remove(handleTicker);
       lenis.destroy();
       lenisRef.current = null;
-      if (typeof window !== "undefined") {
-        delete (window as unknown as { lenis?: Lenis }).lenis;
-      }
+      delete (window as unknown as { lenis?: Lenis }).lenis;
     };
-  }, [immersive]);
+  }, []);
 
-  // On route changes, recalculate dimensions and update ScrollTrigger
+  // 6. Handle route changes across every page so smooth scroll always measures correct height
   useEffect(() => {
-    if (!lenisRef.current) return;
+    const lenis = lenisRef.current;
+    if (!lenis) return;
+
+    // Reset scroll to top if not navigating to a specific hash anchor
+    if (!window.location.hash) {
+      lenis.scrollTo(0, { immediate: true });
+    }
+
+    // Allow new page DOM to mount and settle, then recompute dimensions & ScrollTrigger
     const timer = setTimeout(() => {
-      lenisRef.current?.resize();
+      lenis.resize();
       ScrollTrigger.refresh();
-    }, 150);
+    }, 120);
+
     return () => clearTimeout(timer);
   }, [pathname]);
 
-  const scrollTo = (
-    target: string | number | HTMLElement,
-    options?: {
-      offset?: number;
-      duration?: number;
-      immediate?: boolean;
-      lock?: boolean;
-    },
-  ) => {
-    lenisRef.current?.scrollTo(target, options);
-  };
-
-  const getLenis = () => lenisRef.current;
-
-  return (
-    <LenisContext.Provider value={{ getLenis, scrollTo }}>
-      {children}
-    </LenisContext.Provider>
-  );
+  return <>{children}</>;
 }
 
 export default SmoothScroll;
-

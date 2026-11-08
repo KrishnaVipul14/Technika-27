@@ -358,12 +358,8 @@
   --home-panel: color-mix(in oklab, var(--surface-1) 84%, transparent);
   --home-line: color-mix(in oklab, var(--fg-brand) 24%, transparent);
   position: relative;
-  isolation: isolate;
   overflow: clip;
-  background:
-    radial-gradient(ellipse at 14% 8%, color-mix(in oklab, var(--primary-500) 11%, transparent), transparent 31%),
-    radial-gradient(ellipse at 90% 26%, color-mix(in oklab, var(--secondary-500) 8%, transparent), transparent 28%),
-    var(--bg-sunken);
+  background: transparent;
 }
 
 .home-atelier::before {
@@ -377,16 +373,26 @@
   mix-blend-mode: screen;
 }
 
-.home-atelier>* {
+.home-atelier > :not(.home-canvas-layer) {
   position: relative;
   z-index: 1;
+}
+
+.home-atelier > .home-canvas-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  transform: translateZ(0);
+  will-change: contents;
+  contain: strict;
 }
 
 .home-atelier .hero {
   min-height: 100svh;
   max-height: 1000px;
   border-bottom: 1px solid color-mix(in oklab, var(--fg-brand) 16%, transparent);
-  background: var(--bg-sunken);
+  background: transparent;
 }
 
 .home-atelier .hero-castle {
@@ -2291,7 +2297,7 @@
 .home-atelier .hero {
   min-height: min(920px, 100svh);
   max-height: none;
-  background: #050710;
+  background: transparent;
 }
 
 .home-atelier .hero-castle {
@@ -2531,9 +2537,6 @@
   .home-atelier .hero-bottom {
     padding-inline: 20px 17px;
   }
-<<<<<<< HEAD
-}
-=======
 }
 
 /* Mobile editorial pass: preserve the full visual story while improving
@@ -2792,4 +2795,78 @@
     font-size: 34px;
   }
 }
->>>>>>> 2acf31bbde9b4d88311ed58dcabef235f371347e
+
+/* ==========================================================================
+   Full Canvas Transparency: Remove backgrounds from child elements
+   so that the 2D frame canvas is always visible behind all content.
+   ========================================================================== */
+
+.home-atelier::before,
+.home-atelier .hero::before,
+.home-atelier .hero-shade,
+.home-atelier .hero-castle {
+  display: none !important;
+}
+
+.home-atelier,
+.home-atelier section,
+.home-atelier .hero,
+.home-atelier .journey-section,
+.home-atelier .journey-sticky,
+.home-atelier .journey-visual,
+.home-atelier .journey-visual > *,
+.home-atelier .journey-station-layer,
+.home-atelier .journey-station-layer::before,
+.home-atelier .journey-station-layer::after,
+.home-atelier .journey-ridge-layer,
+.home-atelier .journey-copy,
+.home-atelier .wizarding-manifesto,
+.home-atelier .manifesto-portrait,
+.home-atelier .manifesto-portrait-shade,
+.home-atelier .timeline-section,
+.home-atelier .day-tabs,
+.home-atelier .event-card.parchment-card,
+.home-atelier .event-card.parchment-card::after,
+.home-atelier .wizarding-campus,
+.home-atelier .dispatch-card,
+.home-atelier .campus-ticket,
+.home-atelier .wizarding-sponsors,
+.home-atelier .partner-ledger,
+.home-atelier .sponsors-cta,
+.home-atelier .wizarding-invitation,
+.home-atelier .invitation-card {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+/* Clean glowing outlines and contrast shadows so text remains crisp over the video */
+.home-atelier .journey-copy,
+.home-atelier .event-card.parchment-card,
+.home-atelier .dispatch-card,
+.home-atelier .campus-ticket,
+.home-atelier .invitation-card,
+.home-atelier .day-tabs {
+  border: 1px solid color-mix(in oklab, var(--fg-brand) 30%, transparent) !important;
+}
+
+.home-atelier .day-tabs button.active {
+  background-color: color-mix(in oklab, var(--fg-brand) 18%, transparent) !important;
+  border-color: var(--fg-brand) !important;
+}
+
+.home-atelier h1:not(#hero-title),
+.home-atelier h2,
+.home-atelier h3,
+.home-atelier h4,
+.home-atelier p,
+.home-atelier small,
+.home-atelier em,
+.home-atelier time,
+.home-atelier b,
+.home-atelier strong {
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 2px 14px rgba(0, 0, 0, 0.75);
+}

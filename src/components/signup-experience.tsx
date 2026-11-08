@@ -456,44 +456,40 @@ export function SignupExperience({
     delay: number,
   ) => {
     setLeaving(true);
-<<<<<<< HEAD
     const house = normalizeHouse(knownHouse) || (await resolveHouse(client, userId));
-=======
-    const house = await resolveHouse(client, userId);
     if (!mounted.current) return;
     if (isSignup) {
       const controller = new AbortController();
       verification.current = controller;
       const timeout = setTimeout(() => controller.abort(), 10_000);
       try {
-        const response = await fetchWithRetry("/api/common-room/arrival", controller.signal);
+        const response = await fetchWithRetry('/api/common-room/arrival', controller.signal);
         const result: { status?: string; participant?: Partial<ArrivalParticipant> } = await response.json();
         const saved = result?.participant;
         const verifiedHouse = houseFromValue(saved?.house);
         if (!response.ok) throw new Error(`API returned ${response.status}: ${result?.status}`);
-        if (result?.status !== "ready") throw new Error(`Arrival not ready: ${result?.status}`);
-        if (saved?.id !== userId) throw new Error("User ID mismatch");
-        if (typeof saved.displayName !== "string" || !saved.displayName.trim()) throw new Error("No displayName");
-        if (!verifiedHouse || verifiedHouse === "default") throw new Error(`Invalid house: ${saved?.house}`);
-        if (saved.house !== verifiedHouse) throw new Error("House verification failed");
+        if (result?.status !== 'ready') throw new Error(`Arrival not ready: ${result?.status}`);
+        if (saved?.id !== userId) throw new Error('User ID mismatch');
+        if (typeof saved.displayName !== 'string' || !saved.displayName.trim()) throw new Error('No displayName');
+        if (!verifiedHouse || verifiedHouse === 'default') throw new Error(`Invalid house: ${saved?.house}`);
+        if (saved.house !== verifiedHouse) throw new Error('House verification failed');
         if (!mounted.current) return;
         const participant: ArrivalParticipant = { id: userId, displayName: saved.displayName, house: verifiedHouse };
         setAssignedHouse(verifiedHouse); setHouse(verifiedHouse);
-        setHatMood("revealed"); setHatSpeech("Your acceptance letter has arrived.");
+        setHatMood('revealed'); setHatSpeech('Your acceptance letter has arrived.');
         setHatSubtext(houseThemes[verifiedHouse].motto);
-        setMessage("Your registration is confirmed. Your acceptance letter is ready.");
-        void syncHouseMetadata(client, verifiedHouse, metaHouse);
+        setMessage('Your registration is confirmed. Your acceptance letter is ready.');
+        void syncHouseMetadata(client, verifiedHouse, knownHouse);
         (onSignupSuccess ?? beginArrival)(participant);
       } catch {
         if (!mounted.current) return;
-        setAssignedHouse(null); setHatMood("idle");
-        setHatSpeech("Your record is safe. The profile ledger needs another look.");
-        setMessage("Your registration succeeded, but we could not verify your session and saved house. Continue to your Common Room to retry.");
-        setContinuation("/account");
+        setAssignedHouse(null); setHatMood('idle');
+        setHatSpeech('Your record is safe. The profile ledger needs another look.');
+        setMessage('Your registration succeeded, but we could not verify your session and saved house. Continue to your Common Room to retry.');
+        setContinuation('/account');
       } finally { clearTimeout(timeout); verification.current = null; }
       return;
     }
->>>>>>> 2acf31bbde9b4d88311ed58dcabef235f371347e
     setAssignedHouse(house);
     setHouse(house);
     setHatMood("revealed");
@@ -594,16 +590,9 @@ export function SignupExperience({
         );
         setHatSubtext(msg);
       } else if (isSignup) {
-<<<<<<< HEAD
         // 1. Balance and assign house across the 4 canonical houses
         const chosenHouse = await getBalancedHouse(client);
-
-        // 2. Pass house directly in options.data alongside full_name, college, phone
-=======
-        // Loading public animation code is not a success signal; rendering waits for verification.
-        void import("./acceptance-letter").catch(() => {});
-        // The profile row (incl. a balanced house) is created by the DB trigger.
->>>>>>> 2acf31bbde9b4d88311ed58dcabef235f371347e
+        void import('./acceptance-letter').catch(() => {});
         const { data: signUpData, error: signUpErr } = await client.auth.signUp(
           {
             email,
