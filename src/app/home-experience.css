@@ -2405,3 +2405,260 @@
     padding-inline: 20px 17px;
   }
 }
+
+/* Mobile editorial pass: preserve the full visual story while improving
+   reading size, density, touch flow and section rhythm on narrow screens. */
+@media (max-width: 640px) {
+  .home-atelier section {
+    scroll-margin-top: 96px;
+  }
+
+  .home-atelier .hero-tilt-layer {
+    padding: 92px 22px 88px 34px;
+  }
+
+  .home-atelier .hero-heading h1 {
+    font-size: clamp(49px, 14.5vw, 64px);
+    letter-spacing: 0;
+  }
+
+  .home-atelier .hero-subtitle {
+    max-width: 250px;
+    font-size: 20px;
+    line-height: 1.25;
+  }
+
+  .home-atelier .hero-description {
+    max-width: 280px;
+    font-size: 12px;
+    line-height: 1.65;
+  }
+
+  .home-atelier .hero-date p {
+    font-size: 8px;
+    letter-spacing: 0.11em;
+  }
+
+  .home-atelier .hero-actions {
+    width: min(100%, 282px);
+    flex-direction: column;
+  }
+
+  .home-atelier .hero-actions .button {
+    width: 100%;
+    min-height: 46px;
+    font-size: 9px;
+  }
+
+  .journey-section {
+    height: 185svh;
+    min-height: 1190px;
+  }
+
+  .journey-copy-shell {
+    width: calc(100% - 32px);
+  }
+
+  .journey-copy {
+    padding: 20px 18px 21px;
+  }
+
+  .journey-copy h2 {
+    margin-block: 11px 12px;
+    font-size: clamp(34px, 10.5vw, 43px);
+    line-height: 1.02;
+  }
+
+  .journey-copy p {
+    font-size: 12px;
+    line-height: 1.62;
+  }
+
+  .journey-signal {
+    margin: 13px 0 15px;
+  }
+
+  .home-atelier .timeline-section,
+  .wizarding-manifesto,
+  .wizarding-campus,
+  .wizarding-sponsors {
+    padding-block: 64px;
+  }
+
+  .home-atelier .timeline-section .section-intro {
+    margin-bottom: 28px;
+  }
+
+  .home-atelier .timeline-section .section-intro h2,
+  .manifesto-copy h2,
+  .chapter-heading h2,
+  .sponsors-heading h2 {
+    font-size: clamp(36px, 10.8vw, 44px);
+    line-height: 1.03;
+  }
+
+  .home-atelier .timeline-section .section-intro p,
+  .chapter-heading > p,
+  .sponsors-heading > p,
+  .manifesto-copy p {
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .home-atelier .day-tabs {
+    margin-bottom: 22px;
+    padding: 3px;
+  }
+
+  .home-atelier .day-tabs button {
+    min-height: 58px;
+    padding: 9px 3px;
+  }
+
+  .home-atelier .day-tabs button span {
+    font-size: 7px;
+    letter-spacing: 0.02em;
+  }
+
+  .home-atelier .day-tabs button small {
+    font-size: 14px;
+  }
+
+  .home-atelier .event-grid {
+    gap: 12px;
+  }
+
+  .home-atelier .event-card.parchment-card {
+    min-height: 285px;
+    padding: 19px 16px 15px;
+  }
+
+  .home-atelier .event-card.parchment-card h3 {
+    margin-top: 16px;
+    font-size: 27px;
+  }
+
+  .home-atelier .event-card.parchment-card > p {
+    min-height: 0;
+    font-size: 12px;
+    line-height: 1.62;
+  }
+
+  .home-atelier .event-card.parchment-card .event-footer {
+    margin-top: 18px;
+  }
+
+  .manifesto-grid {
+    gap: 35px;
+  }
+
+  .manifesto-portrait {
+    min-height: 340px;
+  }
+
+  .manifesto-copy .manifesto-lead {
+    font-size: 17px;
+    line-height: 1.55;
+  }
+
+  .manifesto-stats {
+    gap: 9px;
+  }
+
+  .manifesto-stats b {
+    font-size: 19px;
+  }
+
+  .manifesto-stats small {
+    font-size: 7px;
+  }
+
+  .chapter-heading,
+  .sponsors-heading {
+    gap: 13px;
+    margin-bottom: 24px;
+  }
+
+  .dispatch-card {
+    min-height: 0;
+    padding: 20px 19px 18px;
+  }
+
+  .dispatch-card > svg {
+    margin-top: 22px;
+  }
+
+  .dispatch-card h3 {
+    margin-top: 13px;
+    font-size: 24px;
+  }
+
+  .dispatch-card p {
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .dispatch-rule {
+    margin-top: 19px;
+  }
+
+  .campus-ticket,
+  .sponsors-cta {
+    padding: 20px 18px;
+  }
+
+  .partner-ledger-row {
+    min-height: 60px;
+  }
+
+  .partner-ledger-row b {
+    font-size: 18px;
+  }
+
+  .sponsors-cta h3 {
+    font-size: 24px;
+  }
+
+  .wizarding-invitation {
+    padding: 8px 0 64px;
+  }
+
+  .invitation-card {
+    min-height: 410px;
+    padding: 34px 17px;
+  }
+
+  .invitation-card h2 {
+    font-size: clamp(36px, 10.5vw, 44px);
+    line-height: 1.08;
+  }
+
+  .invitation-card > p {
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  body:has(.home-atelier) .house-switcher {
+    bottom: 8px;
+    left: 8px;
+    transform: scale(0.82);
+    transform-origin: bottom left;
+  }
+}
+
+@media (max-width: 360px) {
+  .home-atelier .hero-tilt-layer {
+    padding-inline: 28px 18px;
+  }
+
+  .home-atelier .hero-heading h1 {
+    font-size: 13.5vw;
+  }
+
+  .manifesto-copy h2,
+  .chapter-heading h2,
+  .sponsors-heading h2,
+  .home-atelier .timeline-section .section-intro h2 {
+    font-size: 34px;
+  }
+}
