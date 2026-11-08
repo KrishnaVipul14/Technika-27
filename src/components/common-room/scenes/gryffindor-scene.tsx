@@ -3,7 +3,8 @@ import { useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import { Path, Shape, Vector2, type Mesh, type PointLight } from "three";
 import type { SceneProps, Vec3 } from "@/lib/common-room/config";
-import { Arch, Box, Blocks, Floor, Lantern, Motes, Sofa, Table, Tube, archShape, useMaterials, type Block } from "./scene-primitives";
+import { Arch, Box, Blocks, Floor, Motes, Sofa, Tube, archShape, useMaterials, type Block } from "./scene-primitives";
+import { Broomstick, FloatingCandles, Portrait, Rug, Sconce, Snitch, WizardTable, paintings } from "./wizard-props";
 
 function Tapestry({ at, motion }: { at: Vec3; motion: boolean }) {
   const { materials } = useMaterials(); const cloth = useRef<Mesh>(null); const time = useRef(0);
@@ -57,10 +58,14 @@ function GryffindorScene({ quality, motion }: SceneProps) {
     <pointLight position={[-5.5, 4.8, -5.2]} color="#ffd5a0" intensity={62} distance={18} decay={2} />
     <pointLight position={[5.7, 3.8, -4.8]} color="#e7b277" intensity={42} distance={16} decay={2} />
     <Box at={[0, .05, -5]} size={[5.7, .16, 3.2]} material="trim" />
-    <Box at={[0, -.015, .55]} size={[7.4, .025, 7.6]} material="fabric" />
-    <Box at={[-3.45, .003, .55]} size={[.045, .015, 7.3]} material="metal" /><Box at={[3.45, .003, .55]} size={[.045, .015, 7.3]} material="metal" />
-    <Sofa at={[-2.5, 0, -.7]} rotation={.42} width={3.7} /><Sofa at={[2.5, 0, .8]} rotation={-.6} width={2.2} /><Table at={[-.3, 0, 2.1]} width={3.3} />
-    <Lantern at={[-7.9, 4.1, 2]} motion={motion} /><Lantern at={[7.9, 4.1, 2]} motion={motion} />
+    <Rug at={[0, .005, .55]} size={[7.4, 7.6]} field="#7a2430" accent="#c99a4a" />
+    <Sofa at={[-2.5, 0, -.7]} rotation={.42} width={3.7} /><Sofa at={[2.5, 0, .8]} rotation={-.6} width={2.2} /><WizardTable at={[-.3, 0, 2.1]} width={3.3} motion={motion} />
+    <Portrait at={[-8.65, 4.7, -2.7]} rotation={Math.PI / 2} image={paintings[1]} size={[2, 1.12]} />
+    <Portrait at={[8.65, 4.7, -2.7]} rotation={-Math.PI / 2} image={paintings[4]} size={[2, 1.12]} />
+    <Broomstick at={[-3.3, 0, -7.45]} rotation={.1} />
+    <Snitch at={[1.6, 4.3, -1.5]} motion={motion} />
+    <Sconce at={[-8.65, 3.4, 2]} rotation={Math.PI / 2} motion={motion} /><Sconce at={[8.65, 3.4, 2]} rotation={-Math.PI / 2} motion={motion} />
+    <FloatingCandles center={[0, 6.7, 2.5]} area={[12, .8, 7]} count={quality === "low" ? 10 : 16} motion={motion} />
     <Motes motion={motion} color="#e9bc7c" count={quality === "low" ? 22 : 48} speed={.09} />
   </group>;
 }

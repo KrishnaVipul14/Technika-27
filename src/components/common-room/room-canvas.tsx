@@ -2,6 +2,7 @@
 
 import { lazy, Suspense, useCallback, useRef, useState, type Dispatch, type RefObject } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
+import { Environment, Lightformer } from "@react-three/drei";
 import { ACESFilmicToneMapping, PCFShadowMap } from "three";
 import { roomConfigs, type Quality } from "@/lib/common-room/config";
 import type { ObjectId, RoomParticipant } from "@/lib/common-room/types";
@@ -43,6 +44,13 @@ export default function RoomCanvas({ participant, quality, motion, state, dispat
       <hemisphereLight args={["#c4d7cf", "#17130f", 1.5]} />
       <directionalLight position={[2, 8, 7]} color={config.palette.light} intensity={2.5} castShadow={quality !== "low"} shadow-mapSize={[1024, 1024]} shadow-camera-left={-12} shadow-camera-right={12} shadow-camera-top={12} shadow-camera-bottom={-12} shadow-normalBias={.06} />
       <Suspense fallback={null}><RoomMaterials palette={config.palette}>
+        {/* Local, generated reflection environment (no HDR download) so gold, brass and glass read as metal. */}
+        <Environment resolution={64} frames={1} environmentIntensity={.45}>
+          <color attach="background" args={[config.palette.fog]} />
+          <Lightformer form="rect" intensity={3} color={config.palette.light} position={[0, 6, -9]} scale={[14, 6, 1]} />
+          <Lightformer form="circle" intensity={4} color="#ffa253" position={[-6, 2, -4]} scale={3} />
+          <Lightformer form="rect" intensity={1.2} color={config.palette.fabric} position={[0, 2, 12]} scale={[20, 4, 1]} />
+        </Environment>
         <CameraController house={house} state={state} dispatch={dispatch} motion={motion} controlsLocked={controlsLocked} progress={progress} entranceRef={entranceRef} />
         {house === "slytherin" && <SlytherinScene house={house} motion={motion} quality={quality} />}
         {house === "gryffindor" && <GryffindorScene house={house} motion={motion} quality={quality} />}

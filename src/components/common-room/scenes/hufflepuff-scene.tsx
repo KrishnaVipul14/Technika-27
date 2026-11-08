@@ -4,6 +4,7 @@ import { RoundedBox } from "@react-three/drei";
 import { DoubleSide, Object3D, Path, Shape, type Group, type InstancedMesh } from "three";
 import type { SceneProps, Vec3 } from "@/lib/common-room/config";
 import { Box, Floor, Lantern, Motes, Orb, Tube, useMaterials } from "./scene-primitives";
+import { Banner, Candelabra, FloatingCandles, Rug } from "./wizard-props";
 
 function Plant({ at, scale = 1, motion, hanging = false }: { at: Vec3; scale?: number; motion: boolean; hanging?: boolean }) {
   const { materials } = useMaterials(); const leaves = useRef<InstancedMesh>(null); const canopy = useRef<Group>(null); const time = useRef(at[0]);
@@ -60,7 +61,10 @@ function HufflepuffScene({ motion, quality }: SceneProps) {
     <Plant at={[-7.1, 0, -1.1]} scale={1.55} motion={motion} /><Plant at={[7.25, 0, -3.5]} scale={1.5} motion={motion} />
     <Plant at={[-2.2, 3.5, -2.6]} scale={.75} motion={motion} hanging /><Plant at={[2.4, 3.3, -2.6]} scale={.75} motion={motion} hanging />
     <GardenChair at={[-2.25, 0, .7]} rotation={.6} /><GardenChair at={[2.1, 0, -.2]} rotation={-.7} /><TeaTable />
-    <mesh position={[0, -.005, .5]} rotation-x={-Math.PI / 2}><circleGeometry args={[3.25, 72]} /><meshStandardMaterial color="#a39162" roughness={1} /></mesh>
+    <Rug at={[0, .004, .5]} size={[3.25, 3.25]} round field="#b8973f" accent="#3b2a1a" />
+    {[-3.75, 3.75].map((x) => <Banner key={x} at={[x, 4.75, -7.85]} crest="/images/hufflepuff.png" width={.8} length={2.4} motion={motion} />)}
+    <Candelabra at={[-.5, 1.16, .7]} motion={motion} />
+    <FloatingCandles center={[0, 4.5, 1]} area={[8, .5, 6]} count={quality === "low" ? 6 : 12} motion={motion} />
     {[2.95, 3.05, 3.15].map((r) => <mesh key={r} position={[0, .001, .5]} rotation-x={Math.PI / 2} material={materials.wood}><torusGeometry args={[r, .018, 5, 80]} /></mesh>)}
     <Butterfly at={[1.6, 2.8, -1.3]} motion={motion} phase={0} />{quality !== "low" && <Butterfly at={[-2, 2.4, 1.4]} motion={motion} phase={2} />}
     <Lantern at={[-7.8, 2.7, 3.3]} motion={motion} /><Lantern at={[7.8, 2.7, 3.3]} motion={motion} />

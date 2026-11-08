@@ -11,10 +11,13 @@ import { roomObjects } from "@/lib/common-room/content";
 import { Arch, Box, Blocks, Motes, Orb, Lantern, archShape, useMaterials, type Block } from "./scenes/scene-primitives";
 
 function Fire({ motion, active }: { motion: boolean; active: boolean }) {
-  const { glow } = useMaterials(); const flames = useRef<Group>(null); const light = useRef<PointLight>(null); const time = useRef(0);
+  const { glow, materials } = useMaterials(); const flames = useRef<Group>(null); const light = useRef<PointLight>(null); const time = useRef(0);
   useFrame((_, delta) => { if (motion) time.current += Math.min(delta, .05); if (flames.current) flames.current.children.forEach((child, i) => { child.scale.y = motion ? .9 + Math.sin(time.current * (5 + i) + i * 3) * .13 + (active ? .15 : 0) : 1; }); if (light.current) light.current.intensity = (active ? 34 : 22) + (motion ? Math.sin(time.current * 9) * 2 + Math.sin(time.current * 17) : 0); });
   return <group position={[0, .65, .4]}>
-    {[-.38, .38].map((x) => <Box key={x} at={[x, -.28, 0]} size={[.72, .18, .3]} material="wood" rotation={[0, x, .1]} />)}
+    <mesh position={[0, -.37, 0]} rotation-x={-Math.PI / 2}><planeGeometry args={[1.5, .7]} /><meshBasicMaterial map={glow} color="#ff5a1c" transparent opacity={.9} blending={AdditiveBlending} depthWrite={false} /></mesh>
+    {[-.3, .3].map((x) => <mesh key={x} position={[x, -.29, .02]} rotation={[0, x * 1.4, Math.PI / 2]} material={materials.wood} castShadow><cylinderGeometry args={[.1, .12, .85, 10]} /></mesh>)}
+    <mesh position={[0, -.14, -.05]} rotation={[0, .08, Math.PI / 2]} material={materials.wood}><cylinderGeometry args={[.09, .11, .95, 10]} /></mesh>
+    {[-.62, .62].map((x) => <group key={x} position={[x, -.2, .28]}><Box at={[0, 0, 0]} size={[.05, .4, .05]} material="metal" /><Orb at={[0, .24, 0]} scale={[.07, .07, .07]} material="metal" /><Box at={[0, -.17, -.25]} size={[.05, .05, .55]} material="metal" /></group>)}
     <group ref={flames}>{[-.42, -.2, 0, .2, .42].map((x, i) => <mesh key={x} position={[x, .33 + (i % 2) * .11, .04 * i]}><planeGeometry args={[.58, 1.3 - Math.abs(x)]} /><meshBasicMaterial map={glow} color={i % 2 ? "#ffb14a" : "#ffe1a0"} transparent opacity={.86} blending={AdditiveBlending} depthWrite={false} /></mesh>)}</group>
     <pointLight ref={light} position={[0, .3, .5]} color="#ff994e" intensity={22} distance={12} decay={2} />
     <Motes color="#ffb869" count={18} size={.037} at={[0, 1.2, 0]} area={[1.5, 2.7, .55]} speed={.3} motion={motion} />

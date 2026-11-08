@@ -3,7 +3,8 @@ import { useFrame } from "@react-three/fiber";
 import { BackSide, Path, Shape, Vector2, type Group, type Points, type PointsMaterial } from "three";
 import type { SceneProps, Vec3 } from "@/lib/common-room/config";
 import { BookRows } from "../room-objects";
-import { Arch, Box, Floor, Lantern, Motes, Sofa, Table, Tube, useMaterials } from "./scene-primitives";
+import { Arch, Box, Floor, Lantern, Motes, Sofa, Tube, useMaterials } from "./scene-primitives";
+import { Banner, FloatingCandles, WizardTable } from "./wizard-props";
 
 function TowerShelves({ at, rotation }: { at: Vec3; rotation: number }) {
   return <group position={at} rotation-y={rotation}><Box at={[0, 3.3, -.27]} size={[2.4, 6.6, .24]} material="wood" />{[-1.17, 1.17].map((x) => <Box key={x} at={[x, 3.3, .04]} size={[.17, 6.6, .7]} material="wood" />)}{Array.from({ length: 10 }, (_, i) => <Box key={i} at={[0, .36 + i * .66, .08]} size={[2.45, .09, .8]} material="wood" />)}<BookRows rows={8} /><Arch at={[0, 0, .28]} width={2.6} height={7.1} thickness={.09} depth={.08} material="metal" /></group>;
@@ -60,7 +61,9 @@ function RavenclawScene({ quality, motion }: SceneProps) {
     {[3.4, 6.5, 6.65].map((r) => <mesh key={r} position={[0, .001, -.2]} rotation-x={-Math.PI / 2} material={materials.metal}><ringGeometry args={[r, r + .025, 96]} /></mesh>)}
     {Array.from({ length: 8 }, (_, i) => <mesh key={i} position={[0, .003, -.2]} rotation={[-Math.PI / 2, 0, i * Math.PI / 4]} material={materials.metal}><shapeGeometry args={[compass]} /></mesh>)}
     <Armillary motion={motion} /><Telescope />
-    <Sofa at={[-2.3, 0, 1.5]} width={2.2} rotation={.28} /><Table at={[.4, 0, 2.7]} width={2.3} />
+    <Sofa at={[-2.3, 0, 1.5]} width={2.2} rotation={.28} /><WizardTable at={[.4, 0, 2.7]} width={2.3} motion={motion} />
+    {[-4.95, 4.95].map((x) => <Banner key={x} at={[x, 7.5, -8.2]} crest="/images/ravenclaw.png" width={.95} length={3.2} motion={motion} />)}
+    <FloatingCandles center={[0, 8, .5]} area={[13, 1.4, 9]} count={quality === "low" ? 10 : 20} motion={motion} />
     <FloatingBook at={[-2, 3.8, -2.8]} phase={0} motion={motion} />{quality !== "low" && <><FloatingBook at={[.9, 4.7, -4.2]} phase={1} motion={motion} /><FloatingBook at={[2.6, 4.1, -.4]} phase={2} motion={motion} /></>}
     <pointLight position={[0, 5.4, -6]} color="#aac6f7" intensity={85} distance={25} decay={2} /><pointLight position={[0, 8, 2]} color="#8ba8e4" intensity={65} distance={22} decay={2} />
     <Lantern at={[-7.9, 3.9, 4]} motion={motion} /><Lantern at={[7.9, 3.9, 4]} motion={motion} /><Motes motion={motion} color="#b1c7e2" count={quality === "low" ? 18 : 38} />

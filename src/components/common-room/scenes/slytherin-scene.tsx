@@ -2,7 +2,8 @@ import { memo, useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { CanvasTexture, Path, RepeatWrapping, Shape, SRGBColorSpace, Vector2, type Group, type PointLight } from "three";
 import type { SceneProps, Vec3 } from "@/lib/common-room/config";
-import { Arch, Box, Blocks, Floor, Lantern, Motes, Orb, Sofa, Table, Tube, archShape, useMaterials, type Block } from "./scene-primitives";
+import { Arch, Box, Blocks, Floor, Motes, Orb, Sofa, Tube, archShape, useMaterials, type Block } from "./scene-primitives";
+import { Banner, Cauldron, FloatingCandles, Portrait, Rug, Sconce, WizardTable, paintings } from "./wizard-props";
 
 function waterTexture() {
   const canvas = document.createElement("canvas"); canvas.width = canvas.height = 512;
@@ -68,10 +69,14 @@ function SlytherinScene({ quality, motion }: SceneProps) {
     <pointLight position={[6, 4, -4]} color="#75b597" intensity={28} distance={13} decay={2} />
     <Serpent at={[-7.8, 0, -5.3]} motion={motion} /><Serpent at={[7.8, 0, -5.3]} mirror={-1} motion={motion} />
     <Sofa at={[0, 0, -1.8]} width={4.6} /><Sofa at={[-2.9, 0, .65]} rotation={.8} width={2.2} />
-    <Table at={[0, 0, 1.3]} />
-    <mesh rotation-x={-Math.PI / 2} position={[0, -.015, .1]}><circleGeometry args={[3.6, 64]} /><meshStandardMaterial color="#152f25" roughness={1} /></mesh>
-    <mesh rotation-x={-Math.PI / 2} position={[0, -.009, .1]}><ringGeometry args={[3.4, 3.44, 64]} /><meshStandardMaterial color="#89947a" roughness={.8} /></mesh>
-    <Lantern at={[-7.9, 4.2, 2.1]} motion={motion} /><Lantern at={[7.9, 4.2, 2.1]} motion={motion} />
+    <WizardTable at={[0, 0, 1.3]} motion={motion} />
+    <Rug at={[0, .005, .1]} size={[3.6, 3.6]} round field="#1d5a45" accent="#a9bcb0" />
+    {[-2.55, 2.55].map((x) => <Banner key={x} at={[x, 8.35, -7.55]} crest="/images/slytherin.png" width={.9} length={3} motion={motion} />)}
+    <Portrait at={[-8.6, 4.7, -2.8]} rotation={Math.PI / 2} image={paintings[0]} size={[2, 1.12]} />
+    <Portrait at={[8.6, 4.7, -2.8]} rotation={-Math.PI / 2} image={paintings[3]} size={[2, 1.09]} />
+    <Cauldron at={[3.7, 0, -.4]} motion={motion} />
+    <Sconce at={[-8.6, 3.4, 2.1]} rotation={Math.PI / 2} motion={motion} /><Sconce at={[8.6, 3.4, 2.1]} rotation={-Math.PI / 2} motion={motion} />
+    <FloatingCandles center={[0, 7.4, 1]} area={[12, 1, 8]} count={quality === "low" ? 10 : 18} motion={motion} />
     <Motes motion={motion} count={quality === "low" ? 30 : 65} />
   </group>;
 }

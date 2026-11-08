@@ -11,6 +11,8 @@ An authenticated, procedural 3D prototype at **`/account`**. The existing `/dash
 
 These are four independent compositions, not palette swaps. Shared materials and primitives live in `src/components/common-room/scenes/scene-primitives.tsx`; placement/framing lives in `src/lib/common-room/config.ts`.
 
+Shared wizarding set dressing lives in `scenes/wizard-props.tsx`: floating candles, gilded portraits (reusing existing `public/images` artwork), swallow-tailed house banners, Persian rugs, candelabra, spellbook/quill/inkwell table dressing, wall sconces, plus a cauldron (Slytherin) and broom/Golden Snitch (Gryffindor). Stone uses world-space (triplanar) ashlar with derived mortar relief; sofas are tufted Chesterfields; metals reflect a locally generated `Environment` (no HDR download). Generated canvases are cached per page because `RoomMaterials` sits inside Suspense and would otherwise regenerate them on every suspend/retry. Decorative props are not interactive and do not change interaction IDs or placements.
+
 | Physical object | Accessible panel |
 | --- | --- |
 | Fireplace | House Archives |
