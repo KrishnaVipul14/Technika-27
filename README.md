@@ -85,6 +85,8 @@ NEXT_PUBLIC_SITE_URL=https://your-production-domain.example
 
 The supplied local configuration is stored in ignored `.env.local`. No live keys are committed. Copy the project’s **publishable** key from Supabase; a service-role/secret key is never needed in the frontend. Redeploy after setting `NEXT_PUBLIC_*` values because Next.js embeds them during the build.
 
+If a Vercel deployment shows `Internal Server Error`, verify that both Supabase variables are assigned to the deployment’s **Production** environment (and Preview when testing preview URLs), then redeploy without reusing an older build cache. The auth proxy is limited to authentication/protected routes and safely bypasses session refresh when those variables are unavailable, so missing auth configuration cannot take down public pages or static assets.
+
 ### Supabase dashboard settings
 
 1. In **Authentication → URL Configuration**, set **Site URL** to the production origin.
