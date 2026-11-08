@@ -153,15 +153,13 @@ export function WizardingJourney() {
   useJourneyMotion(ref);
 
   return (
-    <section ref={ref} className="journey-section" aria-labelledby="journey-title">
-      <div className="journey-sticky">
-        <div className="journey-visual" aria-hidden="true">
-          <div className="journey-sky-layer" />
-          <div className="journey-ridge-layer" />
-          <div className="journey-castle-layer" />
-          <div className="journey-station-layer">
-            <StationArt />
-          </div>
+    <section ref={ref} className="journey-section !bg-transparent" aria-labelledby="journey-title" id="journey">
+      <div className="journey-sticky !bg-transparent">
+        <div className="journey-visual !bg-transparent" aria-hidden="true">
+          <div className="journey-sky-layer !bg-transparent" />
+          <div className="journey-ridge-layer !opacity-30" />
+          <div className="journey-castle-layer !bg-transparent" />
+          <div className="journey-station-layer !bg-transparent" />
           <div className="journey-gold-glow" />
           <div className="journey-grain" />
         </div>
@@ -218,7 +216,7 @@ export function WizardingManifesto() {
   const { house, theme } = useHouse();
 
   return (
-    <section id="about" className="section wizarding-manifesto">
+    <section id="about" className="section wizarding-manifesto !bg-transparent">
       <div className="shell">
         <Reveal className="manifesto-grid">
           <div className="manifesto-portrait">
@@ -298,7 +296,7 @@ const dispatches = [
 
 export function WizardingCampus() {
   return (
-    <section id="campus" className="section wizarding-campus">
+    <section id="campus" className="section wizarding-campus !bg-transparent">
       <div className="shell">
         <Reveal className="chapter-heading">
           <div>
@@ -352,7 +350,7 @@ const partners = ["GAIL", "PANIKA", "tiqr event", "ADBARK THREADS", "unique PATN
 
 export function WizardingSponsors() {
   return (
-    <section id="sponsors" className="section wizarding-sponsors">
+    <section id="sponsors" className="section wizarding-sponsors !bg-transparent">
       <div className="shell">
         <Reveal className="sponsors-heading">
           <div>
@@ -393,7 +391,7 @@ export function WizardingSponsors() {
 
 export function WizardingInvitation() {
   return (
-    <section className="section wizarding-invitation">
+    <section className="section wizarding-invitation !bg-transparent">
       <Reveal className="invitation-card">
         <div className="invitation-orbit invitation-orbit-one" />
         <div className="invitation-orbit invitation-orbit-two" />

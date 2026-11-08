@@ -16,7 +16,7 @@
     linear-gradient(180deg, #040715 0%, var(--bg-sunken) 100%);
 }
 
-.arrival-scene > * {
+.arrival-scene>* {
   position: absolute;
   inset: 0;
 }
@@ -164,8 +164,13 @@
 }
 
 @keyframes arrival-cloud-drift {
-  from { transform: translate3d(-2%, 0, 0) scale(0.98); }
-  to { transform: translate3d(3%, -6%, 0) scale(1.04); }
+  from {
+    transform: translate3d(-2%, 0, 0) scale(0.98);
+  }
+
+  to {
+    transform: translate3d(3%, -6%, 0) scale(1.04);
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -212,7 +217,7 @@
   box-shadow: 0 0 18px color-mix(in oklab, var(--fg-brand) 18%, transparent);
 }
 
-.site-header .brand > span {
+.site-header .brand>span {
   font-size: 21px;
   letter-spacing: 0.04em;
 }
@@ -280,13 +285,37 @@
   background: color-mix(in oklab, var(--fg-accent) 70%, transparent);
 }
 
-.book-menu-icon .book-bottom { top: 18px; right: 1px; transform: rotate(-1deg); }
-.book-menu-icon .book-middle { top: 10px; right: 4px; transform: rotate(2deg); }
-.book-menu-icon .book-top { top: 2px; right: 7px; transform: rotate(-3deg); }
+.book-menu-icon .book-bottom {
+  top: 18px;
+  right: 1px;
+  transform: rotate(-1deg);
+}
 
-.book-menu-icon.is-open .book-bottom { transform: translateX(-2px) rotate(3deg); }
-.book-menu-icon.is-open .book-middle { transform: translateX(-1px) rotate(-4deg); }
-.book-menu-icon.is-open .book-top { top: -1px; right: 10px; transform: translateX(8px) rotate(26deg); }
+.book-menu-icon .book-middle {
+  top: 10px;
+  right: 4px;
+  transform: rotate(2deg);
+}
+
+.book-menu-icon .book-top {
+  top: 2px;
+  right: 7px;
+  transform: rotate(-3deg);
+}
+
+.book-menu-icon.is-open .book-bottom {
+  transform: translateX(-2px) rotate(3deg);
+}
+
+.book-menu-icon.is-open .book-middle {
+  transform: translateX(-1px) rotate(-4deg);
+}
+
+.book-menu-icon.is-open .book-top {
+  top: -1px;
+  right: 10px;
+  transform: translateX(8px) rotate(26deg);
+}
 
 .site-header .mobile-menu-button {
   display: none;
@@ -309,8 +338,15 @@
 }
 
 @keyframes mobile-menu-rise {
-  from { opacity: 0; transform: translateY(-14px) scale(0.97); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -341,7 +377,7 @@
   mix-blend-mode: screen;
 }
 
-.home-atelier > * {
+.home-atelier>* {
   position: relative;
   z-index: 1;
 }
@@ -419,7 +455,7 @@
   position: relative;
   height: 220svh;
   min-height: 1550px;
-  background: var(--bg-sunken);
+  background: transparent;
 }
 
 .journey-sticky {
@@ -429,11 +465,11 @@
   min-height: 720px;
   overflow: hidden;
   isolation: isolate;
-  background: var(--bg-sunken);
+  background: transparent;
 }
 
 .journey-visual,
-.journey-visual > * {
+.journey-visual>* {
   position: absolute;
   inset: 0;
 }
@@ -444,47 +480,27 @@
 }
 
 .journey-sky-layer {
-  background:
-    radial-gradient(ellipse at 53% 25%, color-mix(in oklab, var(--fg-brand) 12%, transparent), transparent 24%),
-    linear-gradient(180deg, #050816 0%, color-mix(in oklab, var(--bg) 92%, #08152a) 55%, var(--bg-sunken) 100%);
+  background: transparent;
 }
 
 .journey-ridge-layer {
   z-index: 1;
-  opacity: 0.72;
+  opacity: 0.35;
   background:
-    linear-gradient(150deg, transparent 0 54%, color-mix(in oklab, var(--bg-sunken) 92%, transparent) 54.5% 72%, transparent 72.5%),
-    linear-gradient(32deg, transparent 0 62%, color-mix(in oklab, var(--bg-sunken) 82%, transparent) 62.5% 75%, transparent 75.5%),
-    linear-gradient(180deg, transparent 50%, color-mix(in oklab, var(--bg-sunken) 86%, transparent) 76%, var(--bg-sunken) 100%);
+    linear-gradient(150deg, transparent 0 54%, color-mix(in oklab, var(--bg-sunken) 70%, transparent) 54.5% 72%, transparent 72.5%),
+    linear-gradient(180deg, transparent 50%, color-mix(in oklab, var(--bg-sunken) 60%, transparent) 76%, transparent 100%);
   filter: blur(1px);
 }
 
 .journey-castle-layer {
   z-index: 2;
-  background:
-    linear-gradient(180deg, color-mix(in oklab, var(--bg-sunken) 20%, transparent), transparent 36%, color-mix(in oklab, var(--bg-sunken) 90%, transparent) 100%),
-    url("/images/hogwarts.jpg") center 42% / cover no-repeat;
-  filter: saturate(0.72) contrast(1.08) brightness(0.66) hue-rotate(var(--house-tower-hue));
+  background: transparent;
   transform-origin: 50% 60%;
 }
 
 .journey-castle-layer::before,
 .journey-castle-layer::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.journey-castle-layer::before {
-  background:
-    radial-gradient(circle at 52% 36%, color-mix(in oklab, var(--fg-brand) 12%, transparent), transparent 18%),
-    linear-gradient(90deg, color-mix(in oklab, var(--bg-sunken) 46%, transparent), transparent 34%, transparent 68%, color-mix(in oklab, var(--bg-sunken) 55%, transparent));
-  mix-blend-mode: screen;
-}
-
-.journey-castle-layer::after {
-  background: linear-gradient(180deg, transparent 48%, var(--bg-sunken) 100%);
+  display: none;
 }
 
 .journey-station-layer {
@@ -493,9 +509,8 @@
   transform-origin: 50% 72%;
   background:
     radial-gradient(ellipse at 50% 52%, color-mix(in oklab, var(--fg-brand) 12%, transparent), transparent 36%),
-    linear-gradient(180deg, color-mix(in oklab, var(--bg-sunken) 18%, transparent), color-mix(in oklab, var(--bg-sunken) 78%, transparent) 70%, var(--bg-sunken)),
-    repeating-linear-gradient(0deg, color-mix(in oklab, var(--tertiary-900) 40%, transparent) 0 15px, color-mix(in oklab, var(--bg-sunken) 48%, transparent) 16px 31px),
-    var(--bg-sunken);
+    linear-gradient(180deg, transparent, color-mix(in oklab, var(--bg-sunken) 55%, transparent) 70%, color-mix(in oklab, var(--bg-sunken) 75%, transparent));
+  backdrop-filter: blur(8px);
 }
 
 .journey-station-layer::before {
@@ -594,8 +609,14 @@
   background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--fg-brand) 65%, transparent));
 }
 
-.station-sign::before { right: 100%; }
-.station-sign::after { left: 100%; transform: rotate(180deg); }
+.station-sign::before {
+  right: 100%;
+}
+
+.station-sign::after {
+  left: 100%;
+  transform: rotate(180deg);
+}
 
 .station-sign small,
 .station-sign span {
@@ -650,8 +671,13 @@
   filter: blur(7px);
 }
 
-.station-lamp-one { left: 20%; }
-.station-lamp-two { right: 20%; }
+.station-lamp-one {
+  left: 20%;
+}
+
+.station-lamp-two {
+  right: 20%;
+}
 
 .station-tracks {
   position: absolute;
@@ -676,8 +702,13 @@
   border-bottom: 1px solid color-mix(in oklab, var(--fg-brand) 10%, transparent);
 }
 
-.station-tracks span:first-child { top: 32%; }
-.station-tracks span:last-child { top: 67%; }
+.station-tracks span:first-child {
+  top: 32%;
+}
+
+.station-tracks span:last-child {
+  top: 67%;
+}
 
 .journey-steam {
   position: absolute;
@@ -700,15 +731,44 @@
   animation: station-steam 5.5s ease-in-out infinite;
 }
 
-.journey-steam i:nth-child(1) { left: 18px; animation-delay: -0.2s; }
-.journey-steam i:nth-child(2) { left: 50px; bottom: 14px; animation-delay: -1.4s; }
-.journey-steam i:nth-child(3) { left: 84px; bottom: 6px; animation-delay: -2.8s; }
-.journey-steam i:nth-child(4) { left: 104px; bottom: 28px; animation-delay: -4s; }
+.journey-steam i:nth-child(1) {
+  left: 18px;
+  animation-delay: -0.2s;
+}
+
+.journey-steam i:nth-child(2) {
+  left: 50px;
+  bottom: 14px;
+  animation-delay: -1.4s;
+}
+
+.journey-steam i:nth-child(3) {
+  left: 84px;
+  bottom: 6px;
+  animation-delay: -2.8s;
+}
+
+.journey-steam i:nth-child(4) {
+  left: 104px;
+  bottom: 28px;
+  animation-delay: -4s;
+}
 
 @keyframes station-steam {
-  0%, 100% { opacity: 0.12; transform: translate3d(0, 0, 0) scale(0.74); }
-  48% { opacity: 0.52; }
-  100% { transform: translate3d(18px, -96px, 0) scale(1.6); }
+
+  0%,
+  100% {
+    opacity: 0.12;
+    transform: translate3d(0, 0, 0) scale(0.74);
+  }
+
+  48% {
+    opacity: 0.52;
+  }
+
+  100% {
+    transform: translate3d(18px, -96px, 0) scale(1.6);
+  }
 }
 
 .journey-gold-glow {
@@ -774,8 +834,14 @@
   border-bottom: 1px solid;
 }
 
-.journey-copy-castle { opacity: 1; }
-.journey-copy-station { opacity: 0; margin-left: auto; }
+.journey-copy-castle {
+  opacity: 1;
+}
+
+.journey-copy-station {
+  opacity: 0;
+  margin-left: auto;
+}
 
 .journey-index {
   display: block;
@@ -868,8 +934,15 @@
 }
 
 @keyframes journey-bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(5px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(5px);
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -883,8 +956,9 @@
 .wizarding-manifesto {
   padding-block: 145px 128px;
   background:
-    radial-gradient(ellipse at 80% 50%, color-mix(in oklab, var(--secondary-500) 7%, transparent), transparent 30%),
-    var(--bg-sunken);
+    radial-gradient(ellipse at 80% 50%, color-mix(in oklab, var(--secondary-500) 8%, transparent), transparent 35%),
+    color-mix(in oklab, var(--bg-sunken) 35%, transparent);
+  backdrop-filter: blur(12px);
 }
 
 .manifesto-grid {
@@ -1024,7 +1098,7 @@
   border-top: 1px solid color-mix(in oklab, var(--fg-brand) 18%, transparent);
 }
 
-.manifesto-stats > span {
+.manifesto-stats>span {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1056,8 +1130,9 @@
 .wizarding-campus {
   padding-block: 132px 145px;
   background:
-    linear-gradient(180deg, var(--bg-sunken), color-mix(in oklab, var(--surface-1) 44%, var(--bg-sunken)) 50%, var(--bg-sunken)),
-    radial-gradient(ellipse at 10% 30%, color-mix(in oklab, var(--primary-500) 8%, transparent), transparent 35%);
+    radial-gradient(ellipse at 10% 30%, color-mix(in oklab, var(--primary-500) 8%, transparent), transparent 35%),
+    color-mix(in oklab, var(--bg-sunken) 35%, transparent);
+  backdrop-filter: blur(12px);
 }
 
 .chapter-heading,
@@ -1077,8 +1152,8 @@
   letter-spacing: -0.055em;
 }
 
-.chapter-heading > p,
-.sponsors-heading > p {
+.chapter-heading>p,
+.sponsors-heading>p {
   max-width: 350px;
   font-size: 13px;
   line-height: 1.85;
@@ -1120,7 +1195,7 @@
   box-shadow: 0 18px 44px color-mix(in oklab, var(--bg-sunken) 54%, transparent), 0 0 28px color-mix(in oklab, var(--fg-brand) 10%, transparent);
 }
 
-.dispatch-card > svg {
+.dispatch-card>svg {
   margin-top: 52px;
   color: var(--fg-brand);
 }
@@ -1236,7 +1311,8 @@
   padding-block: 142px 110px;
   background:
     radial-gradient(ellipse at 88% 40%, color-mix(in oklab, var(--primary-500) 9%, transparent), transparent 31%),
-    var(--bg-sunken);
+    color-mix(in oklab, var(--bg-sunken) 35%, transparent);
+  backdrop-filter: blur(12px);
 }
 
 .partner-ledger {
@@ -1329,7 +1405,8 @@
 
 .wizarding-invitation {
   padding-block: 30px 135px;
-  background: var(--bg-sunken);
+  background: color-mix(in oklab, var(--bg-sunken) 35%, transparent);
+  backdrop-filter: blur(12px);
 }
 
 .invitation-card {
@@ -1390,7 +1467,7 @@
 .invitation-mark,
 .invitation-card .eyebrow,
 .invitation-card h2,
-.invitation-card > p,
+.invitation-card>p,
 .invitation-actions {
   position: relative;
   z-index: 3;
@@ -1413,7 +1490,7 @@
   letter-spacing: -0.06em;
 }
 
-.invitation-card > p {
+.invitation-card>p {
   font-family: var(--font-garamond), Georgia, serif;
   font-size: 21px;
 }
@@ -1446,12 +1523,29 @@
   animation: invitation-sparkle 3s ease-in-out infinite;
 }
 
-.invitation-spark-one { top: 23%; left: 23%; }
-.invitation-spark-two { right: 24%; bottom: 25%; animation-delay: -1.6s; }
+.invitation-spark-one {
+  top: 23%;
+  left: 23%;
+}
+
+.invitation-spark-two {
+  right: 24%;
+  bottom: 25%;
+  animation-delay: -1.6s;
+}
 
 @keyframes invitation-sparkle {
-  0%, 100% { opacity: 0.35; transform: scale(0.84) rotate(0); }
-  50% { opacity: 1; transform: scale(1.15) rotate(45deg); }
+
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.84) rotate(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(45deg);
+  }
 }
 
 /* The existing timeline keeps its tested tabs and event content, but adopts
@@ -1514,7 +1608,7 @@
   font-size: 34px;
 }
 
-.home-atelier .event-card.parchment-card > p {
+.home-atelier .event-card.parchment-card>p {
   color: var(--fg-muted);
   font-family: var(--font-outfit), sans-serif;
   font-size: 13px;
@@ -1522,7 +1616,7 @@
 }
 
 .home-atelier .event-card.parchment-card .event-meta,
-.home-atelier .event-card.parchment-card .event-footer > span {
+.home-atelier .event-card.parchment-card .event-footer>span {
   color: var(--fg-subtle);
 }
 
@@ -1583,15 +1677,37 @@
 }
 
 @keyframes brick-close {
-  0% { opacity: 0; transform: scale(0.05) translate3d(0, 18px, 0); }
-  55% { opacity: 1; transform: scale(1.05) translate3d(0, -2px, 0); }
-  100% { opacity: 1; transform: scale(1) translate3d(0, 0, 0); }
+  0% {
+    opacity: 0;
+    transform: scale(0.05) translate3d(0, 18px, 0);
+  }
+
+  55% {
+    opacity: 1;
+    transform: scale(1.05) translate3d(0, -2px, 0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
 }
 
 @keyframes brick-open {
-  0% { opacity: 1; transform: scale(1) translate3d(0, 0, 0); }
-  42% { opacity: 1; transform: scale(1.04) translate3d(0, -5px, 0); }
-  100% { opacity: 0; transform: scale(0.05) translate3d(0, -18px, 0); }
+  0% {
+    opacity: 1;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+
+  42% {
+    opacity: 1;
+    transform: scale(1.04) translate3d(0, -5px, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.05) translate3d(0, -18px, 0);
+  }
 }
 
 @media (max-width: 1120px) {
@@ -1744,7 +1860,7 @@
     height: 39px;
   }
 
-  .site-header .brand > span {
+  .site-header .brand>span {
     font-size: 18px;
   }
 
@@ -1764,7 +1880,7 @@
     display: none;
   }
 
-  .site-header .nav-account > span,
+  .site-header .nav-account>span,
   .site-header .nav-account small {
     display: none;
   }
@@ -1887,8 +2003,13 @@
     border-width: 10px;
   }
 
-  .station-arch-one { left: -16%; }
-  .station-arch-two { right: -22%; }
+  .station-arch-one {
+    left: -16%;
+  }
+
+  .station-arch-two {
+    right: -22%;
+  }
 
   .station-sign {
     top: 24%;
@@ -1910,8 +2031,13 @@
     height: 19%;
   }
 
-  .station-lamp-one { left: 11%; }
-  .station-lamp-two { right: 11%; }
+  .station-lamp-one {
+    left: 11%;
+  }
+
+  .station-lamp-two {
+    right: 11%;
+  }
 
   .station-tracks {
     bottom: 8%;
@@ -1989,8 +2115,8 @@
     margin-bottom: 30px;
   }
 
-  .chapter-heading > p,
-  .sponsors-heading > p {
+  .chapter-heading>p,
+  .sponsors-heading>p {
     font-size: 12px;
   }
 
@@ -2004,7 +2130,7 @@
     padding: 22px 20px 20px;
   }
 
-  .dispatch-card > svg {
+  .dispatch-card>svg {
     margin-top: 39px;
   }
 
@@ -2094,7 +2220,7 @@
     font-size: 29px;
   }
 
-  .home-atelier .event-card.parchment-card > p {
+  .home-atelier .event-card.parchment-card>p {
     font-size: 11px;
   }
 
@@ -2125,7 +2251,7 @@
     font-size: clamp(43px, 12.5vw, 57px);
   }
 
-  .invitation-card > p {
+  .invitation-card>p {
     font-size: 18px;
   }
 
@@ -2136,6 +2262,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .arrival-cloud,
   .journey-scroll-note svg,
   .journey-steam i,
@@ -2237,7 +2364,7 @@
   letter-spacing: 0.2em;
 }
 
-.home-atelier .hero-presents > span {
+.home-atelier .hero-presents>span {
   width: 40px;
   flex: 0 0 auto;
 }
@@ -2357,7 +2484,7 @@
     letter-spacing: 0.13em;
   }
 
-  .home-atelier .hero-presents > span {
+  .home-atelier .hero-presents>span {
     width: 17px;
   }
 

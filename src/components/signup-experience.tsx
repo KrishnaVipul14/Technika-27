@@ -141,10 +141,52 @@ function normalizeHouse(value: unknown): CanonicalHouse | null {
 }
 
 /**
- * The house is assigned by the DATABASE (trigger `handle_new_user` on signup,
- * balanced across the 4 houses). The client only reads it. If a legacy user has
- * no profile row yet, the `ensure_my_profile` RPC creates one and returns the house.
+ * Evenly and randomly distributes house assignment across the 4 canonical houses:
+ * gryffindor, slytherin, ravenclaw, hufflepuff.
+ * Queries current counts from `profiles`, finds the house(s) with the minimum member count,
+ * and breaks ties by picking uniformly at random among the minimum-count houses.
  */
+async function getBalancedHouse(
+  client: SupabaseBrowserClient,
+): Promise<CanonicalHouse> {
+  try {
+    const { data, error } = await client.from("profiles").select("house");
+
+    if (!error && Array.isArray(data)) {
+      const counts: Record<CanonicalHouse, number> = {
+        gryffindor: 0,
+        slytherin: 0,
+        ravenclaw: 0,
+        hufflepuff: 0,
+      };
+
+      for (const row of data) {
+        const h = normalizeHouse(row?.house);
+        if (h && h in counts) {
+          counts[h]++;
+        }
+      }
+
+      const minCount = Math.min(
+        counts.gryffindor,
+        counts.slytherin,
+        counts.ravenclaw,
+        counts.hufflepuff,
+      );
+
+      const candidates = HOUSES.filter((h) => counts[h] === minCount);
+      if (candidates.length > 0) {
+        return candidates[Math.floor(Math.random() * candidates.length)];
+      }
+    }
+  } catch (err) {
+    console.warn("Could not determine balanced house from profiles:", err);
+  }
+
+  // Fallback if querying profiles fails
+  return HOUSES[Math.floor(Math.random() * HOUSES.length)];
+}
+
 async function resolveHouse(
   client: SupabaseBrowserClient,
   userId: string,
@@ -161,17 +203,17 @@ async function resolveHouse(
     console.warn("Could not read profile house:", err);
   }
 
+  // Assign balanced house and persist
+  const assigned = await getBalancedHouse(client);
   try {
-    const { data, error } = await client.rpc("ensure_my_profile");
-    const assigned = normalizeHouse(data);
-    if (assigned && !error) return assigned;
-    if (error) console.warn("ensure_my_profile failed:", error.message);
-  } catch (err) {
-    console.warn("ensure_my_profile threw:", err);
+    await client
+      .from("profiles")
+      .upsert({ id: userId, house: assigned }, { onConflict: "id" });
+  } catch {
+    /* best-effort */
   }
 
-  // Last-resort fallback so the UI never breaks (not persisted).
-  return HOUSES[Math.floor(Math.random() * HOUSES.length)];
+  return assigned;
 }
 
 async function syncHouseMetadata(
@@ -191,7 +233,10 @@ function parseAuthError(caught: unknown): string {
   const message =
     caught instanceof Error
       ? caught.message
-      : "The Owlery could not complete that request. Please try again.";
+      : typeof caught === "string"
+        ? caught
+        : (caught as { message?: string })?.message ||
+          "The Owlery could not complete that request. Please try again.";
   if (/invalid login credentials/i.test(message))
     return "That email and password do not match. Please verify your credentials or reset your password.";
   if (/already registered|already exists/i.test(message))
@@ -203,7 +248,7 @@ function parseAuthError(caught: unknown): string {
   if (/rate limit|too many/i.test(message))
     return "Too many attempts reached the Owlery. Please wait a moment before trying again.";
   if (/database error saving new user/i.test(message))
-    return "Your account could not be created because of a server-side profile error. Please contact the organisers.";
+    return "The castle ledger encountered an error saving your student record. Please try again or sign in directly.";
   return message;
 }
 
@@ -383,11 +428,11 @@ export function SignupExperience({
   const sortAndEnter = async (
     client: SupabaseBrowserClient,
     userId: string,
-    metaHouse: unknown,
+    knownHouse: unknown,
     delay: number,
   ) => {
     setLeaving(true);
-    const house = await resolveHouse(client, userId);
+    const house = normalizeHouse(knownHouse) || (await resolveHouse(client, userId));
     setAssignedHouse(house);
     setHouse(house);
     setHatMood("revealed");
@@ -396,14 +441,14 @@ export function SignupExperience({
     setMessage(
       `${houseThemes[house].name} welcomes you! ${houseThemes[house].motto}`,
     );
-    void syncHouseMetadata(client, house, metaHouse);
+    void syncHouseMetadata(client, house, knownHouse);
 
     if (isSignup && onSignupSuccess) {
       onSignupSuccess();
       return;
     }
     timerRef.current = setTimeout(() => {
-      router.push("/account");
+      router.push("/dashboard");
       router.refresh();
     }, delay);
   };
@@ -492,13 +537,23 @@ export function SignupExperience({
         );
         setHatSubtext(msg);
       } else if (isSignup) {
-        // The profile row (incl. a balanced house) is created by the DB trigger.
+        // 1. Balance and assign house across the 4 canonical houses
+        const chosenHouse = await getBalancedHouse(client);
+
+        // 2. Pass house directly in options.data alongside full_name, college, phone
         const { data: signUpData, error: signUpErr } = await client.auth.signUp(
           {
             email,
             password,
             options: {
-              data: { display_name: name, college, phone },
+              data: {
+                full_name: name,
+                display_name: name,
+                name,
+                college,
+                phone,
+                house: chosenHouse,
+              },
               emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(
                 "/login",
               )}`,
@@ -507,6 +562,24 @@ export function SignupExperience({
         );
         if (signUpErr) throw signUpErr;
 
+        // 3. Upsert profiles record if user/session was returned
+        if (signUpData.user) {
+          try {
+            await client.from("profiles").upsert(
+              {
+                id: signUpData.user.id,
+                full_name: name,
+                college,
+                phone,
+                house: chosenHouse,
+              },
+              { onConflict: "id" },
+            );
+          } catch {
+            /* best-effort sync */
+          }
+        }
+
         const emailConfirmed = Boolean(
           signUpData.user?.email_confirmed_at || signUpData.user?.confirmed_at,
         );
@@ -514,12 +587,12 @@ export function SignupExperience({
         if (!emailConfirmed) {
           if (signUpData.session) await client.auth.signOut();
           const signupMsg =
-            "Your account was created! Check your inbox for the confirmation email, then return to sign in.";
+            `Your enrollment is written in the castle ledger! The Sorting Hat has foreseen you in ${chosenHouse.toUpperCase()}! Confirm the verification email sent to your inbox to enter your common room.`;
           setMessage(signupMsg);
-          setHatMood("idle");
-          setHatSpeech(
-            "Your letter has been recorded in the castle ledger. Confirm the parchment sent to your inbox!",
-          );
+          setAssignedHouse(chosenHouse);
+          setHouse(chosenHouse);
+          setHatMood("revealed");
+          setHatSpeech(houseLore[chosenHouse].speech);
           setHatSubtext(signupMsg);
           return;
         }
@@ -528,7 +601,7 @@ export function SignupExperience({
           await sortAndEnter(
             client,
             signUpData.user.id,
-            signUpData.user.user_metadata?.house,
+            chosenHouse,
             1800,
           );
         }
@@ -565,10 +638,56 @@ export function SignupExperience({
           throw new Error("Email not confirmed");
         }
 
+        // Determine user house from profiles or assign balanced house if missing
+        let userHouse: CanonicalHouse | null = null;
+        try {
+          const { data: prof } = await client
+            .from("profiles")
+            .select("house")
+            .eq("id", authData.user.id)
+            .maybeSingle();
+          userHouse = normalizeHouse(prof?.house);
+        } catch {
+          // ignore
+        }
+
+        if (!userHouse) {
+          userHouse = normalizeHouse(authData.user.user_metadata?.house);
+        }
+
+        if (!userHouse) {
+          userHouse = await getBalancedHouse(client);
+          try {
+            await client.from("profiles").upsert(
+              {
+                id: authData.user.id,
+                full_name:
+                  (authData.user.user_metadata?.full_name as string) ||
+                  (authData.user.user_metadata?.display_name as string) ||
+                  authData.user.email?.split("@")[0] ||
+                  "Wizard",
+                college: (authData.user.user_metadata?.college as string) || "",
+                phone: (authData.user.user_metadata?.phone as string) || "",
+                house: userHouse,
+              },
+              { onConflict: "id" },
+            );
+            await client.auth.updateUser({ data: { house: userHouse } });
+          } catch {
+            /* best-effort sync */
+          }
+        }
+
+        setAssignedHouse(userHouse);
+        setHouse(userHouse);
+        setHatMood("revealed");
+        setHatSpeech(houseLore[userHouse].speech);
+        setHatSubtext(houseLore[userHouse].subtext);
+
         await sortAndEnter(
           client,
           authData.user.id,
-          authData.user.user_metadata?.house,
+          userHouse,
           enabled ? 1750 : 850,
         );
       }
