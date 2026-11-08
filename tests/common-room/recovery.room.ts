@@ -90,7 +90,7 @@ test("entrance visibility suspension does not fast-forward the welcome", async (
   expect(sample.percent).toBeLessThanOrEqual(Math.min(100, sample.elapsed / 40 + 5));
 });
 
-test("responsive parchment has contrast, touch targets and independent scrolling", async ({ page }, info) => {
+test("responsive parchment has contrast, touch targets and independent scrolling", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" }); await signInFixture(page); await enterRoom(page);
   for (const [width, height] of [[320, 740], [390, 844], [844, 390], [768, 1024]]) {
     await page.setViewportSize({ width, height });

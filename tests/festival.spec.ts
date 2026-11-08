@@ -246,8 +246,13 @@ test("public routes ship unique server-side SEO and crawler documents", async ({
   }
   expect(new Set(titles).size).toBe(publicRoutes.length);
   const robots = await request.get("/robots.txt");
-  expect(await robots.text()).toContain("Allow: /");
-  expect(await robots.text()).toContain("Sitemap:");
+  const robotsText = await robots.text();
+  if (process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    expect(robotsText).toContain("Allow: /");
+    expect(robotsText).toContain("Sitemap:");
+  } else {
+    expect(robotsText).toContain("Disallow: /");
+  }
   const sitemap = await request.get("/sitemap.xml");
   expect((await sitemap.text()).match(/<loc>/g)).toHaveLength(publicRoutes.length);
   const socialImage = await request.get("/images/social-card.jpg");

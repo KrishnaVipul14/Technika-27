@@ -79,7 +79,10 @@ export function SiteSchema() {
             logo: {
               "@type": "ImageObject",
               url: absoluteUrl("/images/crest.webp"),
+              width: 500,
+              height: 500,
             },
+            image: absoluteUrl("/images/social-card.jpg"),
             parentOrganization: { "@id": `${siteUrl}/#bit-patna` },
           },
           {

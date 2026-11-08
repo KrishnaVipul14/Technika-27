@@ -249,7 +249,9 @@ export const ChamberDoor = forwardRef<ChamberDoorHandle, { speed?: number }>(
       const layout = () => {
         const vw = window.innerWidth;
         const vh = window.innerHeight;
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        // Capping decorative canvas resolution prevents 4K/high-DPI devices
+        // from drawing millions of unnecessary pixels during transitions.
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
         R = clamp(Math.min(vw, vh) * 0.35, 125, 310);
         S = Math.ceil(R * 3.3);
         for (const c of [back, front]) {

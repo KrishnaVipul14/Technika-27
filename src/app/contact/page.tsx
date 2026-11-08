@@ -11,7 +11,6 @@ import {
 import { BackLink, SoonBadge } from "@/components/coming-soon";
 import { Divider, Eyebrow } from "@/components/ornaments";
 import { Reveal } from "@/components/reveal";
-import { ContactForm } from "@/components/contact-form";
 
 export const metadata = createPageMetadata("/contact");
 

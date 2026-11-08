@@ -264,6 +264,8 @@ export default function SnakeScroll({
     let last = performance.now();
     let raf = 0;
     let dirty = true;
+    let pageVisible = !document.hidden;
+    let lastPaint = 0;
 
     let pal: Palette = NAGINI;
     const reader = palette === "theme" ? makeReader() : null;
@@ -554,7 +556,12 @@ export default function SnakeScroll({
     /* ---------------- frame loop ---------------- */
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
-      if (!W || !H) return;
+      if (!W || !H || !pageVisible) return;
+
+      // The canvas is decorative; 30fps keeps its motion fluid while leaving
+      // the main thread available for page transitions and scroll effects.
+      if (now - lastPaint < 1000 / 30) return;
+      lastPaint = now;
 
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
@@ -585,8 +592,15 @@ export default function SnakeScroll({
     cur = target; // no slide-in when the page loads already scrolled
     raf = requestAnimationFrame(frame);
 
+    const onVisibilityChange = () => {
+      pageVisible = !document.hidden;
+      last = performance.now();
+      dirty = true;
+    };
+
     window.addEventListener("scroll", readScroll, { passive: true });
     window.addEventListener("resize", resize);
+    document.addEventListener("visibilitychange", onVisibilityChange);
     const roWrap = new ResizeObserver(resize);
     roWrap.observe(wrap);
     const roDoc = new ResizeObserver(readScroll); // content height changes
@@ -599,6 +613,7 @@ export default function SnakeScroll({
       reader?.dispose();
       window.removeEventListener("scroll", readScroll);
       window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       roWrap.disconnect();
       roDoc.disconnect();
     };

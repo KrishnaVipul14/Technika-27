@@ -44,6 +44,7 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
 
   useEffect(() => {
     if (immersive) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     // Instantiate Lenis with optimal fluid lerp smoothing
     const lenis = new Lenis({
       lerp: 0.088, // Silky smooth deceleration without sluggishness
@@ -51,9 +52,9 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
       touchMultiplier: 1.25,
       smoothWheel: true,
       syncTouch: false,
-      // Do not disable smooth scroll based on OS reduced motion;
-      // ensures the experience remains fluid across all systems
-      respectReducedMotion: false,
+      // Let the browser preference disable smoothing for accessibility and
+      // avoid a permanent animation-frame loop on reduced-motion devices.
+      respectReducedMotion: true,
       prevent: (node) =>
         node instanceof HTMLElement &&
         (node.hasAttribute("data-lenis-prevent") ||

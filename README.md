@@ -121,14 +121,24 @@ The original references are preserved in `image refs/`. Optimised versions of th
 ## SEO & crawl management
 
 - Every public page has a unique title, description, canonical URL, Open Graph card, Twitter preview, server-rendered breadcrumbs, and JSON-LD through `src/lib/seo.ts`.
-- `/sitemap.xml` includes the indexable festival, delegate, contact, and privacy pages. `/robots.txt` allows production crawling, blocks private account routes, and advertises the sitemap. Vercel preview environments are marked `noindex` and disallow crawling.
+- `/sitemap.xml` includes the indexable festival, delegate, contact, and privacy pages. `/robots.txt` allows production crawling, blocks private account, authentication, dashboard, and API routes, and advertises the sitemap. Vercel preview environments are marked `noindex` and disallow crawling.
 - Login, sign-up, password recovery, and private account pages have `noindex` metadata and are excluded from the public sitemap.
-- Server-rendered JSON-LD describes the website, festival organisation, BIT Patna, and page breadcrumbs. The site is intentionally dynamic/server-rendered because the root layout reads the current authenticated house theme on the server.
+- Server-rendered JSON-LD describes the website, festival organisation, BIT Patna, branded imagery, and page breadcrumbs. Public pages are statically prerendered for fast delivery; authenticated profile and house state synchronize in the browser while protected account/dashboard routes remain dynamic.
+- `/manifest.webmanifest` provides installable app identity, theme colours, categories, and icons. Production builds without a valid public origin are automatically marked `noindex` to prevent localhost canonical URLs entering search indexes.
 - The provisional dates are **not** advertised as a confirmed Event rich result.
 - Set `NEXT_PUBLIC_SITE_URL` in Vercel to the final public origin, especially for a custom domain. Otherwise Vercel’s production URL is used automatically.
 - Optionally set `GOOGLE_SITE_VERIFICATION` to your Search Console HTML verification token, then submit the production `/sitemap.xml` URL in Search Console.
 - Optionally set `NEXT_PUBLIC_GA_MEASUREMENT_ID` to enable Google Analytics 4 page-view tracking. Analytics is not loaded when the variable is absent.
 - Keep page descriptions, content, dates, and the sponsor list current when the festival details are confirmed.
+
+## Performance and delivery improvements
+
+- Public festival pages are statically prerendered instead of waiting for an authenticated Supabase request in the root layout. Account, dashboard, callback, and API routes remain request-rendered where required.
+- All existing visual effects are retained, including the Chamber of Secrets route transition, hero fly-through, Golden Snitch, ScrollTrigger reveals and parallax, Lenis scrolling, wand sparks, card tilts, and animated snake scrollbar.
+- The hero video now displays an optimized poster immediately and defers the MP4 request briefly so initial HTML, CSS, fonts, and navigation can become interactive first. Data-saver and reduced-motion visitors skip the video decode without blocking the page.
+- Continuous canvas work is managed explicitly: the snake renderer pauses while the tab is hidden and uses a controlled decorative frame budget, while the Chamber canvas caps high-DPI resolution to prevent excessive pixel overdraw on 4K/Retina screens.
+- Smooth scrolling respects reduced-motion preferences, route loading has immediate themed feedback, and static fonts/media receive immutable browser caching headers. Next.js image AVIF/WebP optimization remains enabled.
+- GitHub Actions validates every pull request and pushes to `main`, `latest-update`, or `latest-build` with clean-install lint, TypeScript, and production-build checks. Hosting deployment remains managed by the connected Vercel project after CI succeeds.
 
 ## Contact form
 

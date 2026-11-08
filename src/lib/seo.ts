@@ -5,6 +5,7 @@ export const siteDescription =
   "Technika '27 is the techno-cultural festival of Birla Institute of Technology, Patna — where technology, creativity, and extraordinary possibilities meet.";
 export const socialImage = "/images/social-card.jpg";
 export const googleSiteVerification =
+  process.env.GOOGLE_SITE_VERIFICATION ||
   "o2R9wl2JjVxm9frnLSPwNKWtry-DVPyp9IsaI4pdgjU";
 
 function normalizeOrigin(value?: string) {
@@ -22,7 +23,9 @@ export const siteUrl =
   normalizeOrigin(process.env.VERCEL_PROJECT_PRODUCTION_URL) ||
   "http://localhost:3000";
 export const indexable =
-  process.env.NODE_ENV === "production" && process.env.VERCEL_ENV !== "preview";
+  process.env.NODE_ENV === "production" &&
+  process.env.VERCEL_ENV !== "preview" &&
+  !siteUrl.includes("localhost");
 
 export function absoluteUrl(path = "/") {
   return new URL(path, siteUrl).toString();
@@ -194,6 +197,9 @@ export function createPageMetadata(path: SitePath): Metadata {
       description: page.description,
       images: [absoluteUrl(socialImage)],
     },
+    robots: indexable
+      ? { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } }
+      : { index: false, follow: false },
   };
 }
 

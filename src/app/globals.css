@@ -73,6 +73,19 @@ html {
   }
 }
 
+.route-loading {
+  min-height: 70svh; display: grid; place-content: center; justify-items: center;
+  gap: 1rem; color: var(--fg-muted); letter-spacing: .14em; text-transform: uppercase;
+  font: 600 .7rem/1 var(--font-outfit), sans-serif;
+}
+.route-loading__orb {
+  width: 2.25rem; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, var(--primary-300), transparent 70%);
+  animation: route-loading-pulse 1s ease-in-out infinite alternate;
+}
+@keyframes route-loading-pulse { to { transform: scale(1.35); opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .route-loading__orb { animation: none; } }
+
 body {
   margin: 0;
   background: var(--bg);

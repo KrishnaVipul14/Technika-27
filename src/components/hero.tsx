@@ -7,7 +7,7 @@
  * so the whole hero recolours with the active theme.
  */
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowDown,
   MapPin,
@@ -164,6 +164,7 @@ export function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const introDoneRef = useRef(false);
   const entered = useRef(false);
+  const [loadVideo, setLoadVideo] = useState(false);
   const { enabled, ready, setReady } = useMagic();
 
   const finishIntro = useCallback(() => {
@@ -204,7 +205,7 @@ export function Hero() {
     }
 
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !loadVideo) return;
 
     video.currentTime = 0;
     video.play().catch(() => {
@@ -255,7 +256,19 @@ export function Hero() {
       window.removeEventListener("wheel", onSkipScroll);
       window.removeEventListener("touchmove", onSkipScroll);
     };
-  }, [ready, finishIntro]);
+  }, [ready, finishIntro, loadVideo]);
+
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    if (reduced || connection?.saveData) {
+      finishIntro();
+      return;
+    }
+    const start = () => setLoadVideo(true);
+    const timer = window.setTimeout(start, 350);
+    return () => window.clearTimeout(timer);
+  }, [finishIntro]);
 
   // GSAP scroll trigger & entrance animations once castle scene is reached
   useEffect(() => {
@@ -383,12 +396,13 @@ export function Hero() {
       {/* Video Background with GSAP Scroll scrubbing */}
       <video
         ref={videoRef}
-        src="/videos/base.mp4"
+        src={loadVideo ? "/videos/base.mp4" : undefined}
+        poster="/images/hogwarts.webp"
         className="hero-castle absolute inset-0 h-full w-full object-cover object-center scale-[1.06] will-change-transform pointer-events-none"
         playsInline
         muted
-        autoPlay
-        preload="auto"
+        autoPlay={loadVideo}
+        preload="metadata"
         disablePictureInPicture
         disableRemotePlayback
         aria-hidden="true"

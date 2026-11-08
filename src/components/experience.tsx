@@ -139,14 +139,9 @@ export function Experience({ children, header, footer }: { children: React.React
   const isHome = pathname === "/";
   // On the home page, the intro video controls when ready becomes true (at the castle scene).
   // On all other routes, ready is immediately true.
-  const [ready, setReady] = useState(() => !isHome);
+  const [homeReady, setReady] = useState(() => !isHome);
+  const ready = !isHome || homeReady;
   const enabled = true;
-
-  useEffect(() => {
-    if (pathname !== "/") {
-      setReady(true);
-    }
-  }, [pathname]);
 
   useEffect(() => {
     if (immersive) return;
