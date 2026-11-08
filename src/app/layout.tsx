@@ -17,17 +17,15 @@ import {
   socialImage,
 } from "@/lib/seo";
 import { HouseProvider } from "@/components/house-provider";
+import { RegistrationArrivalProvider } from "@/components/registration-arrival";
 import { AuthProvider } from "@/components/auth-provider";
 import { SmoothScroll } from "@/components/smoothScroll";
-import { getServerSupabase } from "@/lib/supabase/server";
 
 import {
   houseAppleIconFor,
   houseBootScript,
-  houseFromValue,
   houseIconFor,
   themeAttributeForHouse,
-  type House,
 } from "@/lib/houses";
 import "lenis/dist/lenis.css";
 import "./globals.css";
@@ -37,40 +35,6 @@ import "./reference-portals.css";
 import "./houseThemes.css";
 import "./theme-utilities.css";
 import "./home-experience.css";
-
-export const dynamic = "force-dynamic";
-
-async function getInitialTheme(): Promise<{
-  theme: House;
-  fromDatabase: boolean;
-}> {
-  const supabase = await getServerSupabase();
-  if (!supabase) return { theme: "default", fromDatabase: false };
-
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) return { theme: "default", fromDatabase: false };
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("house")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    return {
-      theme:
-        houseFromValue(profile?.house) ??
-        houseFromValue(user.user_metadata?.house) ??
-        "default",
-      fromDatabase: true,
-    };
-  } catch {
-    return { theme: "default", fromDatabase: false };
-  }
-}
 
 const garamond = localFont({
   src: [
@@ -115,6 +79,7 @@ export const metadata: Metadata = {
   },
   description: siteDescription,
   applicationName: siteName,
+  manifest: "/manifest.webmanifest",
   keywords: [
     "Technika 27",
     "Technika 2027",
@@ -132,6 +97,10 @@ export const metadata: Metadata = {
   classification: "Technology and cultural festival",
   referrer: "origin-when-cross-origin",
   formatDetection: { email: false, address: false, telephone: false },
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/apple-icon.png", type: "image/png" }],
+  },
   alternates: { canonical: absoluteUrl("/") },
   robots: {
     index: indexable,
@@ -174,10 +143,12 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const { theme, fromDatabase } = await getInitialTheme();
+  // Keep the public shell static. The boot script restores the saved house
+  // before hydration; authenticated profile data synchronizes client-side.
+  const theme = "default" as const;
   const icon = houseIconFor(theme);
   const appleIcon = houseAppleIconFor(theme);
 
@@ -204,7 +175,7 @@ export default async function RootLayout({
           id="restore-house-theme"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
-            __html: houseBootScript(theme, fromDatabase),
+            __html: houseBootScript(theme),
           }}
         />
       </head>
@@ -214,17 +185,17 @@ export default async function RootLayout({
         </a>
         <SiteSchema />
         <Analytics />
-        <HouseProvider initialHouse={theme} preferInitialHouse={fromDatabase}>
+        <HouseProvider initialHouse={theme}>
           <AuthProvider>
-            <SmoothScroll>
-              <Experience>
-                <Header />
-                <main id="main-content" tabIndex={-1}>
-                  <PageTransition>{children}</PageTransition>
-                </main>
-                <Footer />
-              </Experience>
-            </SmoothScroll>
+            <RegistrationArrivalProvider>
+              <SmoothScroll>
+                <Experience header={<Header />} footer={<Footer />}>
+                  <main id="main-content" tabIndex={-1}>
+                    <PageTransition>{children}</PageTransition>
+                  </main>
+                </Experience>
+              </SmoothScroll>
+            </RegistrationArrivalProvider>
           </AuthProvider>
         </HouseProvider>
       </body>

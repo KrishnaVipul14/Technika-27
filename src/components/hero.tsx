@@ -1,7 +1,18 @@
 "use client";
 
+<<<<<<< HEAD
 import { useEffect, useRef } from "react";
 import Link from "next/link";
+=======
+/**
+ * Hero, styled with Tailwind + the theme tokens from houseThemes.css.
+ * The GSAP animation code is unchanged; only markup classes and colours moved to Tailwind.
+ * Every colour below is a token (bg-bg, text-fg-brand, primary-300, var(--primary-400) ...),
+ * so the whole hero recolours with the active theme.
+ */
+
+import { useCallback, useEffect, useRef, useState } from "react";
+>>>>>>> 2acf31bbde9b4d88311ed58dcabef235f371347e
 import {
   ArrowDown,
   ArrowUpRight,
@@ -130,12 +141,226 @@ function GoldenSnitch() {
 
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
+<<<<<<< HEAD
   const { setReady } = useMagic();
+=======
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const introDoneRef = useRef(false);
+  const entered = useRef(false);
+  const [loadVideo, setLoadVideo] = useState(false);
+  const { enabled, ready, setReady } = useMagic();
+>>>>>>> 2acf31bbde9b4d88311ed58dcabef235f371347e
 
   useEffect(() => {
     setReady(true);
   }, [setReady]);
 
+<<<<<<< HEAD
+=======
+  // Video intro controller: autoplays base.mp4 from 0s and halts at castle scene (3.75s)
+  useEffect(() => {
+    if (ready) {
+      introDoneRef.current = true;
+      const video = videoRef.current;
+      if (video) {
+        video.pause();
+        try {
+          video.currentTime = CASTLE_SCENE_TIME;
+        } catch {
+          // ignore
+        }
+      }
+      return;
+    }
+
+    // If page is already scrolled on load, skip intro directly
+    if (typeof window !== "undefined" && window.scrollY > 30) {
+      finishIntro();
+      return;
+    }
+
+    const video = videoRef.current;
+    if (!video || !loadVideo) return;
+
+    video.currentTime = 0;
+    video.play().catch(() => {
+      // Autoplay with muted is usually allowed, but if blocked, user interaction will resume
+    });
+
+    let rafId = 0;
+    const trackTime = () => {
+      if (introDoneRef.current) return;
+      if (video.currentTime >= CASTLE_SCENE_TIME || video.ended) {
+        finishIntro();
+        return;
+      }
+      rafId = requestAnimationFrame(trackTime);
+    };
+    rafId = requestAnimationFrame(trackTime);
+
+    const onTimeUpdate = () => {
+      if (introDoneRef.current) return;
+      if (video.currentTime >= CASTLE_SCENE_TIME || video.ended) {
+        finishIntro();
+      }
+    };
+
+    const onEnded = () => {
+      finishIntro();
+    };
+
+    video.addEventListener("timeupdate", onTimeUpdate);
+    video.addEventListener("ended", onEnded);
+
+    // Skip intro on user scroll
+    const onSkipScroll = () => {
+      finishIntro();
+    };
+
+    window.addEventListener("wheel", onSkipScroll, { passive: true, once: true });
+    window.addEventListener("touchmove", onSkipScroll, { passive: true, once: true });
+
+    // Safety fallback: if video stalls or takes too long, reveal elements
+    const fallbackTimer = window.setTimeout(finishIntro, 4500);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(fallbackTimer);
+      video.removeEventListener("timeupdate", onTimeUpdate);
+      video.removeEventListener("ended", onEnded);
+      window.removeEventListener("wheel", onSkipScroll);
+      window.removeEventListener("touchmove", onSkipScroll);
+    };
+  }, [ready, finishIntro, loadVideo]);
+
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    if (reduced || connection?.saveData) {
+      finishIntro();
+      return;
+    }
+    const start = () => setLoadVideo(true);
+    const timer = window.setTimeout(start, 350);
+    return () => window.clearTimeout(timer);
+  }, [finishIntro]);
+
+  // GSAP scroll trigger & entrance animations once castle scene is reached
+  useEffect(() => {
+    const hero = ref.current;
+    if (!hero || !ready) return;
+    const ctx = gsap.context(() => {
+      if (!enabled) {
+        gsap.set(
+          ".hero-presents, .hero-edition, .title-letter, .hero-subtitle, .hero-details, .hero-bottom",
+          { opacity: 1, clearProps: "transform,filter" },
+        );
+        return;
+      }
+      if (!entered.current) {
+        const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
+        intro
+          .fromTo(
+            ".hero-presents, .hero-edition",
+            { opacity: 0, y: 22 },
+            { opacity: 1, y: 0, duration: 1, stagger: 0.15 },
+            0.15,
+          )
+          .fromTo(
+            ".title-letter",
+            { opacity: 0, yPercent: 110, rotationX: -70, filter: "blur(12px)" },
+            {
+              opacity: 1,
+              yPercent: 0,
+              rotationX: 0,
+              filter: "blur(0px)",
+              duration: 1.25,
+              stagger: 0.065,
+              clearProps: "transform,filter",
+            },
+            0.28,
+          )
+          .fromTo(
+            ".hero-subtitle",
+            { opacity: 0, y: 25 },
+            { opacity: 1, y: 0, duration: 1 },
+            0.8,
+          )
+          .fromTo(
+            ".hero-details",
+            { opacity: 0, y: 30 },
+            { opacity: 1, y: 0, duration: 1 },
+            1.05,
+          )
+          .fromTo(
+            ".hero-bottom",
+            { opacity: 0, y: 15 },
+            { opacity: 1, y: 0, duration: 0.8 },
+            1.3,
+          );
+        entered.current = true;
+      }
+
+      const scroll = {
+        trigger: hero,
+        start: "top top",
+        end: "bottom top",
+        scrub: 0.7,
+        invalidateOnRefresh: true,
+      };
+
+      // Video timeline scrub: starts at CASTLE_SCENE_TIME (3.75s),
+      // scrubs backwards towards 0.05s as user scrolls down, and back to 3.75s on scroll up
+      const videoPlayhead = { time: CASTLE_SCENE_TIME };
+      gsap.to(videoPlayhead, {
+        time: 0.05,
+        ease: "none",
+        scrollTrigger: scroll,
+        onUpdate: () => {
+          const video = videoRef.current;
+          if (video && !isNaN(video.duration) && video.readyState >= 2) {
+            try {
+              video.currentTime = videoPlayhead.time;
+            } catch {
+              // ignore
+            }
+          }
+        },
+      });
+
+      gsap.to(".hero-castle", {
+        y: () => hero.clientHeight * 0.22,
+        ease: "none",
+        scrollTrigger: scroll,
+      });
+      gsap.to(".hero-moon-aura", {
+        y: () => hero.clientHeight * 0.16,
+        ease: "none",
+        scrollTrigger: scroll,
+      });
+      gsap.to(".hero-mist", {
+        y: -160,
+        xPercent: 8,
+        ease: "none",
+        scrollTrigger: scroll,
+      });
+      gsap.to(".floating-candles", {
+        y: -100,
+        ease: "none",
+        scrollTrigger: scroll,
+      });
+      gsap.to(".hero-content", {
+        y: -75,
+        opacity: 0.12,
+        ease: "none",
+        scrollTrigger: { ...scroll, end: "bottom 15%" },
+      });
+      ScrollTrigger.refresh();
+    }, hero);
+    return () => ctx.revert();
+  }, [enabled, ready]);
+
+>>>>>>> 2acf31bbde9b4d88311ed58dcabef235f371347e
   return (
     <section
       ref={ref}
@@ -144,7 +369,26 @@ export function Hero() {
     >
       <style dangerouslySetInnerHTML={{ __html: HERO_CSS }} />
 
+<<<<<<< HEAD
       {/* Ambient Atmospheric Overlays */}
+=======
+      {/* Video Background with GSAP Scroll scrubbing */}
+      <video
+        ref={videoRef}
+        src={loadVideo ? "/videos/base.mp4" : undefined}
+        poster="/images/hogwarts.webp"
+        className="hero-castle absolute inset-0 h-full w-full object-cover object-center scale-[1.06] will-change-transform pointer-events-none"
+        playsInline
+        muted
+        autoPlay={loadVideo}
+        preload="metadata"
+        disablePictureInPicture
+        disableRemotePlayback
+        aria-hidden="true"
+      />
+
+      {/* Atmosphere overlays (smoothly illuminate when castle scene is reached) */}
+>>>>>>> 2acf31bbde9b4d88311ed58dcabef235f371347e
       <div
         className="hero-shade pointer-events-none absolute inset-0 z-[1]"
         style={{ backgroundImage: FX.shade }}

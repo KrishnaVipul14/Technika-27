@@ -14,6 +14,7 @@ import { MagicInteractions } from "./magic-interactions";
 import { WandCursor } from "./wand-cursor";
 import SnakeScroll from "@/components/snake-scroll";
 import { HouseSwitcher } from "./house-switcher";
+import { useRegistrationArrival } from "./registration-arrival";
 
 interface MagicContextValue {
   enabled: boolean;
@@ -131,21 +132,19 @@ function WandSparks({ enabled }: { enabled: boolean }) {
   return <canvas className="wand-sparks" ref={canvasRef} aria-hidden="true" />;
 }
 
-export function Experience({ children }: { children: React.ReactNode }) {
+export function Experience({ children, header, footer }: { children: React.ReactNode; header?: React.ReactNode; footer?: React.ReactNode }) {
   const pathname = usePathname();
+  const { active: arrivalActive } = useRegistrationArrival();
+  const immersive = pathname === "/account" || arrivalActive;
   const isHome = pathname === "/";
   // On the home page, the intro video controls when ready becomes true (at the castle scene).
   // On all other routes, ready is immediately true.
-  const [ready, setReady] = useState(() => !isHome);
+  const [homeReady, setReady] = useState(() => !isHome);
+  const ready = !isHome || homeReady;
   const enabled = true;
 
   useEffect(() => {
-    if (pathname !== "/") {
-      setReady(true);
-    }
-  }, [pathname]);
-
-  useEffect(() => {
+    if (immersive) return;
     document.documentElement.dataset.magic = enabled ? "on" : "off";
     if (!ready) return;
     const globalLenis = (
@@ -154,20 +153,24 @@ export function Experience({ children }: { children: React.ReactNode }) {
     globalLenis?.start();
     globalLenis?.resize();
     ScrollTrigger.refresh();
-  }, [enabled, ready]);
+  }, [enabled, ready, immersive]);
 
   return (
-    <MotionConfig reducedMotion={enabled ? "never" : "always"}>
+    <MotionConfig reducedMotion={immersive ? "user" : enabled ? "never" : "always"}>
       <MagicContext.Provider value={{ enabled, ready, setReady }}>
         <div className="experience-content">
+          {!immersive && header}
           {children}
+          {!immersive && footer}
         </div>
-        <WandSparks enabled={enabled} />
-        <WandCursor />
-        <SnakeScroll />
-        <MagicInteractions />
-        <HouseSwitcher />
-        <div className="scroll-progress" aria-hidden="true" />
+        {!immersive && <>
+          <WandSparks enabled={enabled} />
+          <WandCursor />
+          <SnakeScroll />
+          <MagicInteractions />
+          <HouseSwitcher />
+          <div className="scroll-progress" aria-hidden="true" />
+        </>}
       </MagicContext.Provider>
     </MotionConfig>
   );

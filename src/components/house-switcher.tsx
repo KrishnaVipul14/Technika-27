@@ -50,7 +50,7 @@ export function HouseSwitcher() {
   };
 
   return (
-    <div className="fixed bottom-4 left-4 z-[75] sm:bottom-6 sm:left-6">
+    <div className="house-switcher fixed bottom-4 left-4 z-[75] sm:bottom-6 sm:left-6">
       {open && (
         <div
           className="absolute bottom-full left-0 mb-3 w-[min(19rem,calc(100vw-2rem))] rounded-2xl border border-brand/35 bg-surface/95 p-3 shadow-lg backdrop-blur-2xl"
