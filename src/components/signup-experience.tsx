@@ -461,9 +461,10 @@ export function SignupExperience({
     if (isSignup) {
       const controller = new AbortController();
       verification.current = controller;
-      const timeout = setTimeout(() => controller.abort(), 10_000);
+      // Mobile networks + a cold serverless start can take well over 10s on the first call.
+      const timeout = setTimeout(() => controller.abort(), 30_000);
       try {
-        const response = await fetchWithRetry('/api/common-room/arrival', controller.signal);
+        const response = await fetchWithRetry('/api/common-room/arrival', controller.signal, 5);
         const result: { status?: string; participant?: Partial<ArrivalParticipant> } = await response.json();
         const saved = result?.participant;
         const verifiedHouse = houseFromValue(saved?.house);
@@ -481,7 +482,8 @@ export function SignupExperience({
         setMessage('Your registration is confirmed. Your acceptance letter is ready.');
         void syncHouseMetadata(client, verifiedHouse, knownHouse);
         (onSignupSuccess ?? beginArrival)(participant);
-      } catch {
+      } catch (err) {
+        console.warn('[signup] arrival verification failed:', err);
         if (!mounted.current) return;
         setAssignedHouse(null); setHatMood('idle');
         setHatSpeech('Your record is safe. The profile ledger needs another look.');
