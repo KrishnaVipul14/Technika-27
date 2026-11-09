@@ -179,7 +179,7 @@ export default function Home() {
 
         // On mobile view where drawY > 0, feather the top and bottom into the background
         if (drawY > 0 || drawY + drawHeight < canvasHeight) {
-          const featherHeight = Math.min(80, Math.round(drawHeight * 0.2));
+          const featherHeight = Math.round(drawHeight * 0.3);
 
           // Soft top feather into obsidian void
           const topFeather = ctx.createLinearGradient(0, drawY, 0, drawY + featherHeight);

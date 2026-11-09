@@ -251,7 +251,7 @@ function Scene({ fx, tier }: { fx: LetterFx; tier: Tier }) {
       <ambientLight intensity={0.3} color="#4f5c86" />
       <hemisphereLight args={["#34436e", "#1a0f08", 0.35]} />
       <directionalLight ref={moon} position={[windowX - 1.6, 5.5, -6]} intensity={2.1} color="#a9bcff" castShadow={shadows}
-        shadow-mapSize={[1024, 1024]} shadow-camera-left={-5} shadow-camera-right={5} shadow-camera-top={5} shadow-camera-bottom={-5} shadow-bias={-0.0004} />
+        shadow-mapSize={[2048, 2048]} shadow-camera-left={-5} shadow-camera-right={5} shadow-camera-top={5} shadow-camera-bottom={-5} shadow-bias={-0.0004} />
       <pointLight ref={glow} position={[0, 1.7, 0.9]} color="#ffc777" distance={5} decay={1.5} intensity={0} />
 
       <mesh position={[0, 3, -3.25]} receiveShadow><planeGeometry args={[20, 10]} /><meshStandardMaterial map={stone} roughness={0.95} /></mesh>
@@ -278,9 +278,9 @@ export default function LetterRoom({ fx, tier }: { fx: LetterFx; tier: Tier }) {
   return (
     <Canvas
       style={{ position: "absolute", inset: 0 }}
-      dpr={tier === "desktop" ? [1, 1.75] : tier === "tablet" ? [1, 1.5] : 1}
+      dpr={tier === "desktop" ? [1, 2] : [1, 1.5]}
       shadows={tier === "desktop" ? { type: THREE.PCFShadowMap } : false}
-      gl={{ antialias: tier !== "mobile", powerPreference: "high-performance", alpha: false }}
+      gl={{ antialias: true, powerPreference: "high-performance", alpha: false }}
       camera={{ position: [0, 3.2, 8.6], fov: 40, near: 0.1, far: 40 }}
     >
       <Scene fx={fx} tier={tier} />

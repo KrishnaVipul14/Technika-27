@@ -174,10 +174,10 @@ export function Hero() {
       {/* Hero Typography & Content */}
       <div className="relative z-[6] flex flex-1 items-center justify-center px-4 pb-20 pt-28 sm:pt-32">
         <div className="mx-auto flex w-full max-w-4xl flex-col items-center text-center">
-          <div className="flex items-center justify-center gap-3 text-[10px] uppercase tracking-[0.35em] text-fg-muted sm:text-xs">
-            <span className="h-px w-8 bg-gradient-to-r from-transparent to-primary-400/70 sm:w-14" />
+          <div className="flex items-center justify-center gap-3 text-[10px] uppercase tracking-[0.2em] text-fg-muted sm:text-xs sm:tracking-[0.35em]">
+            <span className="h-px w-8 bg-gradient-to-r from-transparent to-primary-400/70 max-sm:hidden sm:w-14" />
             BIRLA INSTITUTE OF TECHNOLOGY · PATNA
-            <span className="h-px w-8 bg-gradient-to-l from-transparent to-primary-400/70 sm:w-14" />
+            <span className="h-px w-8 bg-gradient-to-l from-transparent to-primary-400/70 max-sm:hidden sm:w-14" />
           </div>
 
           <div className="mt-5 flex flex-col items-center">
@@ -224,13 +224,13 @@ export function Hero() {
       </div>
 
       {/* Bottom Scroll Cue */}
-      <div className="relative z-[7] flex items-center justify-between px-6 pb-6 text-[10px] uppercase tracking-[0.25em] text-neutral-400 sm:px-12">
-        <span className="max-sm:hidden font-mono">
+      <div className="relative z-[7] flex w-full items-center justify-between gap-6 px-6 pb-6 text-[10px] uppercase tracking-[0.25em] text-neutral-400 sm:px-12 lg:px-60">
+        <span className="max-lg:hidden font-mono">
           VOL. XVI ✦ A NEW CHAPTER
         </span>
         <a
           href="#journey"
-          className="flex items-center gap-2 text-fg-muted transition-colors hover:text-fg-brand mx-auto sm:mx-0"
+          className="flex items-center gap-2 text-fg-muted transition-colors hover:text-fg-brand mx-auto lg:mx-0"
         >
           <span>Scroll to enter the castle</span>
           <ArrowDown
@@ -238,7 +238,7 @@ export function Hero() {
             className="animate-[hx-bob_2s_ease-in-out_infinite] text-amber-400"
           />
         </a>
-        <span className="max-sm:hidden font-mono text-right">
+        <span className="max-lg:hidden font-mono text-right">
           BUILD WHAT COMES NEXT.
         </span>
       </div>

@@ -1410,7 +1410,7 @@
 }
 
 .wizarding-invitation {
-  padding-block: 30px 135px;
+  padding-block: 30px 56px;
   background: color-mix(in oklab, var(--bg-sunken) 35%, transparent);
   backdrop-filter: blur(12px);
 }
@@ -2231,7 +2231,7 @@
   }
 
   .wizarding-invitation {
-    padding: 10px 0 84px;
+    padding: 10px 0 40px;
   }
 
   .invitation-card {
@@ -2753,7 +2753,7 @@
   }
 
   .wizarding-invitation {
-    padding: 8px 0 64px;
+    padding: 8px 0 32px;
   }
 
   .invitation-card {

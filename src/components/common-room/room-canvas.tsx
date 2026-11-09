@@ -28,11 +28,11 @@ function SceneReady({ onReady }: { onReady: () => void }) {
 export default function RoomCanvas({ participant, quality, motion, state, dispatch, controlsLocked, entranceRef, onSelect, onReady, onFailure }: { participant: RoomParticipant; quality: Quality; motion: boolean; state: RoomState; dispatch: Dispatch<RoomAction>; controlsLocked: boolean; entranceRef: RefObject<HTMLDivElement | null>; onSelect: (id: ObjectId) => void; onReady: () => void; onFailure: (reason: RoomFailure) => void }) {
   const progress = useRef({ value: 0 });
   const { house } = participant; const config = roomConfigs[house];
-  const [budgetDpr, setBudgetDpr] = useState(() => Math.min(window.devicePixelRatio || 1, 1.75));
+  const [budgetDpr, setBudgetDpr] = useState(() => Math.min(window.devicePixelRatio || 1, 2));
   const onDecline = useCallback(() => setBudgetDpr((dpr) => Math.max(.65, dpr * .8)), []);
-  const dpr = Math.min(budgetDpr, quality === "low" ? 1 : quality === "medium" ? 1.25 : 1.75);
+  const dpr = Math.min(budgetDpr, quality === "low" ? 1.5 : quality === "medium" ? 1.5 : 2);
   return <div className={styles.canvas} data-testid="room-canvas" data-hovered={state.hovered || ""}>
-    <Canvas frameloop="demand" dpr={dpr} shadows={quality === "low" ? false : { type: PCFShadowMap }} camera={{ position: config.camera.position, fov: config.camera.fov, near: .08, far: 110 }} gl={{ antialias: quality !== "low", powerPreference: "high-performance", alpha: false }} onCreated={({ gl, camera, size }) => {
+    <Canvas frameloop="demand" dpr={dpr} shadows={quality === "low" ? false : { type: PCFShadowMap }} camera={{ position: config.camera.position, fov: config.camera.fov, near: .08, far: 110 }} gl={{ antialias: true, powerPreference: "high-performance", alpha: false }} onCreated={({ gl, camera, size }) => {
       gl.toneMapping = ACESFilmicToneMapping; gl.toneMappingExposure = 1.35;
       gl.domElement.tabIndex = 0; gl.domElement.setAttribute("aria-label", "Interactive 3D common room. Use Explore the room for keyboard navigation.");
       const view = explorationView(house, size.width / size.height);
@@ -42,7 +42,7 @@ export default function RoomCanvas({ participant, quality, motion, state, dispat
       <RenderLifecycle motion={motion} quality={quality} onDecline={onDecline} onFailure={onFailure} />
       <color attach="background" args={[config.palette.fog]} /><fog attach="fog" args={[config.palette.fog, 24, 65]} />
       <hemisphereLight args={["#c4d7cf", "#17130f", 1.5]} />
-      <directionalLight position={[2, 8, 7]} color={config.palette.light} intensity={2.5} castShadow={quality !== "low"} shadow-mapSize={[1024, 1024]} shadow-camera-left={-12} shadow-camera-right={12} shadow-camera-top={12} shadow-camera-bottom={-12} shadow-normalBias={.06} />
+      <directionalLight position={[2, 8, 7]} color={config.palette.light} intensity={2.5} castShadow={quality !== "low"} shadow-mapSize={quality === "high" ? [2048, 2048] : [1024, 1024]} shadow-camera-left={-12} shadow-camera-right={12} shadow-camera-top={12} shadow-camera-bottom={-12} shadow-normalBias={.06} />
       <Suspense fallback={null}><RoomMaterials palette={config.palette}>
         {/* Local, generated reflection environment (no HDR download) so gold, brass and glass read as metal. */}
         <Environment resolution={64} frames={1} environmentIntensity={.45}>

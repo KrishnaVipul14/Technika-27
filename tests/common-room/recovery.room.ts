@@ -48,7 +48,7 @@ test.describe("room recovery", () => {
     await signInFixture(page); await installRuntimeProbe(page);
     await page.addInitScript(() => { for (const method of ["getItem", "setItem"] as const) { Object.defineProperty(Storage.prototype, method, { value: new Proxy(Storage.prototype[method], { apply(original, storage, args) { if (args[0] === "technika:common-room:v1") throw new DOMException("Storage blocked", "SecurityError"); return Reflect.apply(original, storage, args); } }) }); } });
     await enterRoom(page); await page.getByRole("button", { name: "Room settings", exact: true }).click();
-    for (const [quality, cap] of [["high", 1.75], ["medium", 1.25], ["low", 1]] as const) {
+    for (const [quality, cap] of [["high", 2], ["medium", 1.5], ["low", 1.5]] as const) {
       const before = (await runtimeSnapshot(page)).draws;
       await page.getByRole("combobox", { name: "Rendering quality", exact: true }).selectOption(quality);
       await expect(page.getByTestId("common-room")).toHaveAttribute("data-quality", quality);

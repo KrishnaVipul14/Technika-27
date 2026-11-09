@@ -29,6 +29,6 @@ export function useRoomSettings() {
     const next = { ...settings, ...patch };
     try { localStorage.setItem(key, JSON.stringify({ quality: next.quality, motion: next.motion, lightweight: next.lightweight })); } catch { /* Visual preferences still work for this visit. */ }
   };
-  const quality: Quality = settings.quality === "auto" ? device & 2 ? "low" : "medium" : settings.quality;
+  const quality: Quality = settings.quality === "auto" ? device & 2 ? "low" : "high" : settings.quality;
   return { settings, update, quality, motion: settings.motion === "system" ? !(device & 1) : settings.motion === "on" };
 }
