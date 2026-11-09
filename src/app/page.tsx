@@ -300,8 +300,11 @@ export default function Home() {
         if (isMounted) render(SCROLL_START_FRAME, true);
       });
 
-      setIsLoaded(true);
-      setReady(true);
+      queueMicrotask(() => {
+        if (!isMounted) return;
+        setIsLoaded(true);
+        setReady(true);
+      });
       initScrollTrigger();
       preloadScrollFrames();
 
