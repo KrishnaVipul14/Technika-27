@@ -82,7 +82,7 @@ Both desktop and mobile fail these existing `tests/festival.spec.ts` cases:
 1. `login exposes the Supabase password recovery flow`
 2. `house crest logo and website icons follow the equipped house`
 3. `snitch is autonomous, and motion can be paused`
-4. `scroll snake is visible and grows down the page`
+4. `firework dragon is visible and grows down the page`
 5. `reduced motion and narrow phone screens remain usable`
 6. `the loading sequence reaches 100 before revealing the website`
 7. `explicit motion controls can override a reduced-motion system preference`

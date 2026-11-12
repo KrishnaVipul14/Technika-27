@@ -27,13 +27,7 @@ import {
   themeAttributeForHouse,
 } from "@/lib/houses";
 import "lenis/dist/lenis.css";
-import "./globals.css";
-import "./wizarding.css";
-import "./marauders-map.css";
-import "./reference-portals.css";
-import "./houseThemes.css";
-import "./theme-utilities.css";
-import "./home-experience.css";
+import "./main.css";
 
 const garamond = localFont({
   src: [

@@ -136,15 +136,16 @@ test("snitch is autonomous, and motion can be paused", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("data-magic", "on");
 });
 
-test("scroll snake is visible and grows down the page", async ({ page }) => {
+test("firework dragon is visible and grows down the page", async ({ page }) => {
+  test.skip(page.viewportSize()!.width < 640, "the dragon scrollbar is a decorative desktop effect like the snake was");
   await arrive(page);
-  const snake = page.getByTestId("scroll-snake");
-  await expect(snake).toBeVisible();
-  const startLength = Number(await snake.getAttribute("data-snake-length"));
+  const dragon = page.getByTestId("fireworks-dragon");
+  await expect(dragon).toBeVisible();
+  const startLength = Number(await dragon.getAttribute("data-dragon-length"));
 
   await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }));
-  await expect.poll(async () => Number(await snake.getAttribute("data-snake-length"))).toBeGreaterThan(startLength);
-  await expect(snake).toHaveAttribute("data-scroll-progress", "100");
+  await expect.poll(async () => Number(await dragon.getAttribute("data-dragon-length"))).toBeGreaterThan(startLength);
+  await expect(dragon).toHaveAttribute("data-scroll-progress", "100");
 });
 
 test("reduced motion and narrow phone screens remain usable", async ({ page }) => {

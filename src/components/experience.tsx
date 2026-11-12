@@ -7,6 +7,7 @@ import { ScrollTrigger } from "@/lib/gsap";
 import { MagicInteractions } from "./magic-interactions";
 import { WandCursor } from "./wand-cursor";
 import { isHomeIntroCompleted } from "@/lib/intro-state";
+import FireworkDragon from "@/components/fireworks-dragon";
 import { HouseSwitcher } from "./house-switcher";
 import { useRegistrationArrival } from "./registration-arrival";
 
@@ -161,6 +162,7 @@ export function Experience({
           <>
             <WandSparks enabled={enabled} />
             <WandCursor />
+            <FireworkDragon />
             <MagicInteractions />
             <HouseSwitcher />
             <div className="scroll-progress" aria-hidden="true" />

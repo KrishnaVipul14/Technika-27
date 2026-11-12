@@ -136,9 +136,9 @@ The original references are preserved in `image refs/`. Optimised versions of th
 ## Performance and delivery improvements
 
 - Public festival pages are statically prerendered instead of waiting for an authenticated Supabase request in the root layout. Account, dashboard, callback, and API routes remain request-rendered where required.
-- All existing visual effects are retained, including the Chamber of Secrets route transition, hero fly-through, Golden Snitch, ScrollTrigger reveals and parallax, Lenis scrolling, wand sparks, card tilts, and animated snake scrollbar.
+- All existing visual effects are retained, including the Chamber of Secrets route transition, hero fly-through, Golden Snitch, ScrollTrigger reveals and parallax, Lenis scrolling, wand sparks, card tilts, and the animated fireworks-dragon scrollbar (Weasleys' Wildfire Whiz-bangs: crackers burst along the edge and assemble into a fire dragon as you scroll).
 - The hero video now displays an optimized poster immediately and defers the MP4 request briefly so initial HTML, CSS, fonts, and navigation can become interactive first. Data-saver and reduced-motion visitors skip the video decode without blocking the page.
-- Continuous canvas work is managed explicitly: the snake renderer pauses while the tab is hidden and uses a controlled decorative frame budget, while the Chamber canvas caps high-DPI resolution to prevent excessive pixel overdraw on 4K/Retina screens.
+- Continuous canvas work is managed explicitly: the fireworks-dragon renderer pauses while the tab is hidden and uses a controlled decorative frame budget, while the Chamber canvas caps high-DPI resolution to prevent excessive pixel overdraw on 4K/Retina screens.
 - Smooth scrolling respects reduced-motion preferences, route loading has immediate themed feedback, and static fonts/media receive immutable browser caching headers. Next.js image AVIF/WebP optimization remains enabled.
 - GitHub Actions validates every pull request and pushes to `main`, `latest-update`, or `latest-build` with clean-install lint, TypeScript, and production-build checks. Hosting deployment remains managed by the connected Vercel project after CI succeeds.
 

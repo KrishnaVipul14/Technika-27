@@ -64,7 +64,7 @@ test.describe("alumni registry integration boundaries", () => {
     await registry.getByLabel("Year of Graduation", { exact: true }).fill("2012");
     const isMobileViewport = await page.evaluate(() => window.innerWidth < 640);
     if (!isMobileViewport) {
-      await page.locator("[data-testid='snake-scroll-canvas']").locator("..").evaluate((wrapper) => { wrapper.style.display = "none"; });
+      await page.locator("[data-testid='fireworks-dragon']").evaluate((wrapper) => { wrapper.style.display = "none"; });
     }
     await registry.getByRole("button", { name: "Sign out", exact: true }).click();
     await expect(registry.getByRole("link", { name: "Sign in", exact: true })).toBeVisible();
