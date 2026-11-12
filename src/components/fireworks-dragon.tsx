@@ -93,6 +93,7 @@ type Spark = {
   v: number; // launch speed
   c: string; // colour
   tw: number; // twinkle phase
+  ox: number; // gathered offset toward the dragon body
 };
 
 type Burst = {
@@ -173,6 +174,9 @@ export default function FireworkDragon({
     let boost = 0;
     let burstClock = 0.4;
     let bodyLen = 0;
+    let bodyTop = 0;
+    let bodyBottom = 0;
+    let bodyCx = 0;
     let roared = false;
     let last = performance.now();
     let raf = 0;
@@ -194,6 +198,7 @@ export default function FireworkDragon({
           v: rand(52, 190) * g.u,
           c: pick(SPARK_COLORS),
           tw: Math.random() * TAU,
+          ox: 0,
         });
       }
       bursts.push({ x, y, t: 0, life: rand(0.55, 1.0), sparks });
@@ -558,6 +563,9 @@ export default function FireworkDragon({
       const y0 = inset; // tail pinned near the top of the track
       const y1 = y0 + g.minLen + cur * g.span; // head travels with scroll
       bodyLen = y1 - y0;
+      bodyTop = y0;
+      bodyBottom = y1;
+      bodyCx = cx;
 
       // Sample the centre line from tail to head
       const step = 2.2;
@@ -899,8 +907,14 @@ export default function FireworkDragon({
         }
         for (const sp of b.sparks) {
           const d = b.t * sp.v;
-          const sx = b.x + Math.cos(sp.a) * d;
+          const sx = b.x + Math.cos(sp.a) * d + sp.ox;
           const sy = b.y + Math.sin(sp.a) * d + b.t * b.t * 60 * g.u;
+          // sparks drifting near the dragon are drawn into its body
+          if (cur > 0.15 && sy > bodyTop && sy < bodyBottom) {
+            const xt = bodyCx + g.amp * Math.sin(g.k * (sy - bodyTop) + phase);
+            const dx = xt - sx;
+            if (Math.abs(dx) < g.amp * 4) sp.ox += dx * dt * 2.6;
+          }
           ctx.globalAlpha = Math.max(0, k * (0.45 + 0.55 * Math.sin(b.t * 21 + sp.tw)));
           ctx.fillStyle = sp.c;
           ctx.beginPath();

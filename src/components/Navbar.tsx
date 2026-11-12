@@ -48,19 +48,19 @@ const NAV: NavItem[] = [
     label: "Registrations",
     children: [
       {
-        label: "Events",
-        href: "/registrations/events",
+        label: "Event registry",
+        href: "/events",
         hint: "Competitions and shows",
       },
       {
-        label: "Workshops",
-        href: "/registrations/workshops",
-        hint: "Hands-on sessions",
+        label: "Merchandise",
+        href: "/merchandise",
+        hint: "The festival collection",
       },
       {
-        label: "Passes",
-        href: "/registrations/passes",
-        hint: "Entry and combo passes",
+        label: "Accommodation",
+        href: "/accommodation",
+        hint: "Stays and delegate kit",
       },
     ],
   },
@@ -69,30 +69,18 @@ const NAV: NavItem[] = [
     children: [
       {
         label: "Core team",
-        href: "/members/core",
-        hint: "The people running Technika",
+        href: "/core",
+        hint: "The organising council",
       },
       {
-        label: "Faculty",
-        href: "/members/faculty",
-        hint: "Advisors and coordinators",
+        label: "Developers",
+        href: "/devs",
+        hint: "The site crew",
       },
       {
-        label: "Volunteers",
-        href: "/members/volunteers",
-        hint: "The wider crew",
-      },
-    ],
-  },
-  { label: "Delegate", href: "/delegate" },
-  {
-    label: "Alumni",
-    children: [
-      { label: "Alumni network", href: "/alumni", hint: "Stay connected" },
-      {
-        label: "Alumni meet",
-        href: "/alumni/meet",
-        hint: "Reunions and talks",
+        label: "Alumni",
+        href: "/alumni",
+        hint: "Reunions and the network",
       },
     ],
   },
@@ -605,6 +593,9 @@ function ProfileMenu({
               </div>
             </div>
             <div className="my-1 h-px bg-line-subtle" />
+            <Link href="/dashboard" onClick={close} className={MENU_ITEM}>
+              Dashboard
+            </Link>
             <Link href={AUTH.profile} onClick={close} className={MENU_ITEM}>
               My profile
             </Link>
@@ -775,18 +766,34 @@ function MobilePanel(props: {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <Link
+                    href="/dashboard"
+                    onClick={onNavigate}
+                    className="rounded-xl border border-line px-3 py-2.5 text-center text-[13px] text-fg-muted hover:text-fg-strong"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
                     href={AUTH.profile}
                     onClick={onNavigate}
                     className="rounded-xl border border-line px-3 py-2.5 text-center text-[13px] text-fg-muted hover:text-fg-strong"
                   >
                     My profile
                   </Link>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
                   <Link
                     href={AUTH.myRegistrations}
                     onClick={onNavigate}
                     className="rounded-xl border border-line px-3 py-2.5 text-center text-[13px] text-fg-muted hover:text-fg-strong"
                   >
                     Registrations
+                  </Link>
+                  <Link
+                    href="/account"
+                    onClick={onNavigate}
+                    className="rounded-xl border border-line px-3 py-2.5 text-center text-[13px] text-fg-muted hover:text-fg-strong"
+                  >
+                    Common room
                   </Link>
                 </div>
                 <RegisterButton
@@ -841,8 +848,8 @@ export interface TechnikaNavbarProps {
 }
 
 export default function TechnikaNavbar({
-  title = "TECHNIKA 2K26",
-  subtitle = "BIT Patna Chapter",
+  title = "TECHNIKA ’27",
+  subtitle = "BIT Patna",
   logoSrc,
   titleClassName = "font-serif",
   className = "",

@@ -10619,7 +10619,15 @@ html[data-house]:not([data-house="default"]) .hero-castle img {
 
 .reference-catalogue { display: grid; gap: 24px; }.reference-catalogue-note { display: flex; align-items: start; gap: 17px; padding: 30px 33px; border: 1px solid #b9955436; border-radius: 12px; background: linear-gradient(120deg, #241d2b, #18131e); }.reference-catalogue-note > svg { flex-shrink: 0; color: #d0a862; }.reference-catalogue-note h2 { margin: 8px 0 10px; color: #ead7b4; font-size: 33px; }.reference-catalogue-note h2 em { color: #d3a75e; }.reference-catalogue-note p { max-width: 620px; color: #9c9094; font-size: 11px; }.reference-product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }.reference-product-slot { display: grid; min-height: 240px; place-items: center; align-content: center; gap: 14px; border: 1px dashed #b995543a; border-radius: 10px; color: #726873; background: #17131f; }.reference-product-slot > span { color: #b18b54; font-family: var(--font-garamond), serif; font-size: 43px; }.reference-product-slot svg { color: #766877; }.reference-product-slot small { color: #7f7178; font-size: 8px; letter-spacing: .12em; text-transform: uppercase; }
 
-.reference-directory { display: grid; gap: 24px; }.reference-directory-intro { display: flex; align-items: center; gap: 20px; padding: 27px 32px; border: 1px solid #b9955436; border-radius: 11px; background: #1e1826; }.reference-seal { display: grid; width: 52px; height: 52px; flex-shrink: 0; place-items: center; border: 1px solid #c4a0625c; border-radius: 50%; color: #d5b171; }.reference-directory-intro h2 { margin: 7px 0 7px; color: #e8d5b2; font-size: 31px; }.reference-directory-intro h2 em { color: #d3a75f; }.reference-directory-intro p { color: #97898f; font-size: 11px; }.reference-directory-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 13px; }.reference-person-slot { display: grid; min-height: 185px; place-items: center; align-content: center; gap: 13px; border: 1px solid #b9955427; border-radius: 9px; color: #776b73; background: #1a1522; }.reference-person-slot > span { color: #b38c53; font-family: var(--font-garamond), serif; font-size: 26px; }.reference-person-slot small { color: #81737b; font-size: 7px; letter-spacing: .11em; text-transform: uppercase; }
+.reference-directory { display: grid; gap: 24px; }.reference-directory-intro { display: flex; align-items: center; gap: 20px; padding: 27px 32px; border: 1px solid #b9955436; border-radius: 11px; background: #1e1826; }.reference-seal { display: grid; width: 52px; height: 52px; flex-shrink: 0; place-items: center; border: 1px solid #c4a0625c; border-radius: 50%; color: #d5b171; }.reference-directory-intro h2 { margin: 7px 0 7px; color: #e8d5b2; font-size: 31px; }.reference-directory-intro h2 em { color: #d3a75f; }.reference-directory-intro p { color: #97898f; font-size: 11px; }.reference-directory-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 13px; }.reference-person-slot { position: relative; display: grid; min-height: 185px; place-items: center; align-content: center; gap: 13px; overflow: hidden; border: 2px solid transparent; border-radius: 4px; color: #776b73; background: linear-gradient(#2b2135, #171021) padding-box, linear-gradient(150deg, #f0d489, #8a5f22 30%, #3c2a0d 52%, #b98d3e 74%, #f0d489) border-box; box-shadow: 0 10px 26px #0006, inset 0 0 0 1px #d8b26a22, inset 0 0 30px #000000a8; transition: transform .3s, box-shadow .3s; }
+.reference-person-slot::before { position: absolute; inset: 5px; pointer-events: none; content: ""; border: 1px solid #deb25e33; background: radial-gradient(circle at 0% 0%, #ecd08a 0 2.5px, transparent 3.5px), radial-gradient(circle at 100% 0%, #ecd08a 0 2.5px, transparent 3.5px), radial-gradient(circle at 0% 100%, #ecd08a 0 2.5px, transparent 3.5px), radial-gradient(circle at 100% 100%, #ecd08a 0 2.5px, transparent 3.5px); }
+.reference-person-slot::after { position: absolute; inset: 0; pointer-events: none; content: ""; background: linear-gradient(115deg, transparent 32%, #ffe29629 46%, #fff0c84f 50%, #ffe29629 54%, transparent 68%); transform: translateX(-130%); transition: transform .9s ease; }
+.reference-person-slot:hover { transform: translateY(-4px) rotate(-.5deg); box-shadow: 0 16px 32px #0008, inset 0 0 0 1px #d8b26a3d, inset 0 0 30px #000000a8; }
+.reference-person-slot:hover::after { transform: translateX(130%); }
+.reference-person-slot > span { color: #d3ab60; font-family: var(--font-garamond), serif; font-size: 26px; text-shadow: 0 0 14px #d8b26a3d; animation: portraitAlive 6s ease-in-out infinite; }
+.reference-person-slot svg { color: #cfb276; filter: drop-shadow(0 0 8px #d8b26a26); animation: portraitAlive 7s ease-in-out infinite; }
+.reference-person-slot small { color: #56431f; font-size: 7px; letter-spacing: .13em; text-transform: uppercase; padding: 3px 9px; border-radius: 2px; background: linear-gradient(180deg, #e9d7ab, #c9ae7c); box-shadow: 0 1px 3px #0007, inset 0 0 0 1px #5a3f1440; }
+@keyframes portraitAlive { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2.5px) scale(1.03); } }
 
 .reference-timeline { position: relative; display: grid; gap: 13px; max-width: 920px; margin-inline: auto; padding: 27px 35px 30px; border: 1px solid #b9955436; border-radius: 14px; background: #1a1523; }.reference-timeline::before { position: absolute; top: 79px; bottom: 35px; left: 84px; width: 1px; background: linear-gradient(#be9859, #be985917); content: ""; }.reference-timeline-topline { display: flex; align-items: center; justify-content: space-between; padding-bottom: 18px; border-bottom: 1px solid #b9955422; color: #b89a68; font-size: 8px; letter-spacing: .13em; text-transform: uppercase; }.reference-timeline-topline > span:first-child { display: inline-flex; align-items: center; gap: 7px; }.reference-live-pill { display: inline-flex; align-items: center; gap: 6px; color: #a58d83; }.reference-live-pill i { width: 5px; height: 5px; border-radius: 50%; background: #bd795f; box-shadow: 0 0 8px #bd795f; }.reference-timeline-row { position: relative; z-index: 1; display: grid; grid-template-columns: 75px 1fr auto; align-items: center; gap: 17px; min-height: 103px; padding: 15px 0; }.reference-timeline-mark { display: grid; width: 38px; height: 38px; place-items: center; margin-left: 30px; border: 1px solid #d3ad6a6b; border-radius: 50%; color: #e1c280; background: #211b2a; font-family: var(--font-garamond), serif; font-size: 18px; }.reference-timeline-row h2 { margin: 5px 0; color: #e2d0b2; font-size: 24px; }.reference-timeline-row p { color: #958890; font-size: 10px; }.reference-timeline-row > .reference-disabled-label { justify-self: end; }
 
@@ -11035,13 +11043,13 @@ html[data-house]:not([data-house="default"]) .hero-castle img {
 :root:not([data-theme]),
 [data-theme="hogwarts"] {
   --primary-hue: 81;
-  --primary-chroma: 0.1;
+  --primary-chroma: 0.115;
   --primary-light: 0.88;
   --secondary-hue: 300;
-  --secondary-chroma: 0.11;
+  --secondary-chroma: 0.13;
   --secondary-light: 0.6;
   --tertiary-hue: 48;
-  --tertiary-chroma: 0.11;
+  --tertiary-chroma: 0.125;
   --tertiary-light: 0.62;
   --neutral-hue: 294;
   --neutral-chroma: 0.027;
@@ -11065,8 +11073,8 @@ html[data-house]:not([data-house="default"]) .hero-castle img {
 /* SLYTHERIN — emerald + silver, lake teal, green-black neutrals */
 [data-theme="slytherin"] {
   --primary-hue: 158;
-  --primary-chroma: 0.12;
-  --primary-light: 0.53;
+  --primary-chroma: 0.145;
+  --primary-light: 0.56;
   --secondary-hue: 235;
   --secondary-chroma: 0.025;
   --secondary-light: 0.78;
@@ -11089,8 +11097,8 @@ html[data-house]:not([data-house="default"]) .hero-castle img {
 /* GRYFFINDOR — scarlet + gold, ember orange, warm red-black neutrals */
 [data-theme="gryffindor"] {
   --primary-hue: 27;
-  --primary-chroma: 0.19;
-  --primary-light: 0.57;
+  --primary-chroma: 0.205;
+  --primary-light: 0.6;
   --secondary-hue: 86;
   --secondary-chroma: 0.145;
   --secondary-light: 0.82;
@@ -11113,8 +11121,8 @@ html[data-house]:not([data-house="default"]) .hero-castle img {
 /* RAVENCLAW — sapphire + bronze, ice blue, midnight neutrals */
 [data-theme="ravenclaw"] {
   --primary-hue: 262;
-  --primary-chroma: 0.19;
-  --primary-light: 0.55;
+  --primary-chroma: 0.18;
+  --primary-light: 0.58;
   --secondary-hue: 68;
   --secondary-chroma: 0.115;
   --secondary-light: 0.72;
@@ -11138,7 +11146,7 @@ html[data-house]:not([data-house="default"]) .hero-castle img {
    Yellow is a light colour, so text on brand fills is dark and hover goes lighter. */
 [data-theme="hufflepuff"] {
   --primary-hue: 90;
-  --primary-chroma: 0.15;
+  --primary-chroma: 0.17;
   --primary-light: 0.84;
   --secondary-hue: 62;
   --secondary-chroma: 0.14;
@@ -14400,4 +14408,23 @@ html[data-theme] :where(.button-glass:hover) {
 .home-atelier b,
 .home-atelier strong {
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 2px 14px rgba(0, 0, 0, 0.75);
+}
+
+/* ==================================================================
+ * Torn & burned paper utilities (checklist item 11)
+ * Apply .paper-torn for a ragged deckle edge, .paper-burned for a
+ * charred vignette rim (fire-kissed parchment). Safe to combine.
+ * ================================================================== */
+.paper-torn {
+  clip-path: polygon(0.4% 0, 9% 1.8%, 22% 0.4%, 36% 2%, 52% 0.3%, 68% 1.9%, 84% 0.5%, 95% 1.6%, 99.6% 0.6%, 100% 24%, 99.2% 46%, 100% 70%, 99.4% 100%, 88% 99.2%, 70% 100%, 47% 99%, 24% 99.6%, 6% 99.2%, 0 100%, 0.8% 78%, 0 55%, 1% 32%);
+}
+.paper-burned { position: relative; }
+.paper-burned::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1; border-radius: inherit;
+  box-shadow: inset 0 0 16px 5px rgba(30, 10, 0, .78), inset 0 0 4px 1.5px rgba(10, 2, 0, .9);
+  background:
+    radial-gradient(130% 100% at 4% 0%, rgba(74, 26, 4, .3), transparent 30%),
+    radial-gradient(130% 100% at 98% 8%, rgba(74, 26, 4, .32), transparent 30%),
+    radial-gradient(140% 110% at 96% 98%, rgba(64, 22, 2, .36), transparent 32%),
+    radial-gradient(130% 110% at 4% 96%, rgba(64, 22, 2, .3), transparent 32%);
 }

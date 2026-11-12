@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Component, useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, Settings2 } from "lucide-react";
 import { houseLogoFor, houseThemes } from "@/lib/houses";
+import { setLandingPreference } from "@/lib/landing-preference";
 import { houseLore, roomObjects } from "@/lib/common-room/content";
 import { initialRoomState, roomReducer } from "@/lib/common-room/interaction";
 import type { ObjectId, RoomParticipant } from "@/lib/common-room/types";
@@ -53,6 +54,9 @@ export function CommonRoomExperience({ participant, accountActions }: { particip
   const onFailure = useCallback((reason: RoomFailure) => { setGuideOpen(false); setFallback(reason); }, []);
   const showFallback = fallback !== null || settings.lightweight;
   useEffect(() => { if (showFallback) dispatch({ type: "FALLBACK" }); }, [showFallback]);
+  // Landing here is itself a choice: remember the common room as the
+  // post-sign-in destination (item 9 of the checklist).
+  useEffect(() => { setLandingPreference("common-room"); }, []);
   useEffect(() => {
     if (modelReady || showFallback) return;
     const timeout = setTimeout(() => onFailure("loading-error"), 30_000);

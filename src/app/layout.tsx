@@ -3,7 +3,7 @@ import Script from "next/script";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { Experience } from "@/components/experience";
-import { Header } from "@/components/header";
+import TechnikaNavbar from "@/components/Navbar";
 import { Footer } from "@/components/footer";
 import PageTransition from "@/components/PageTransition";
 import { SiteSchema } from "@/components/structured-data";
@@ -182,7 +182,10 @@ export default function RootLayout({
           <AuthProvider>
             <RegistrationArrivalProvider>
               <SmoothScroll>
-                <Experience header={<Header />} footer={<Footer />}>
+                <Experience
+                  header={<TechnikaNavbar logoSrc="/images/crest.webp" />}
+                  footer={<Footer />}
+                >
                   <main id="main-content" tabIndex={-1}>
                     {children}
                     <PageTransition />

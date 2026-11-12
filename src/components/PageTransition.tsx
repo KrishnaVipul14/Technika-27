@@ -1010,12 +1010,38 @@ export default function PageTransition({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<Engine | null>(null);
   const prevPath = useRef(pathname);
+  const glowRef = useRef(glow);
   const cfgRef = useRef<Config>({ duration, origin, glow });
   const routerRef = useRef(router);
 
   useEffect(() => {
-    cfgRef.current = { duration, origin, glow };
-  }, [duration, origin, glow]);
+    cfgRef.current = { duration, origin, glow: glowRef.current };
+  }, [duration, origin]);
+
+  // The mortar glow follows the active house theme.
+  useEffect(() => {
+    const HOUSE_GLOWS: Record<string, string> = {
+      hogwarts: "255, 190, 120",
+      gryffindor: "255, 122, 88",
+      slytherin: "118, 235, 172",
+      ravenclaw: "126, 188, 255",
+      hufflepuff: "255, 214, 96",
+    };
+    const read = () => {
+      const theme =
+        document.documentElement.getAttribute("data-theme") || "hogwarts";
+      glowRef.current = HOUSE_GLOWS[theme] ?? glow;
+      cfgRef.current = { duration, origin, glow: glowRef.current };
+    };
+    read();
+    const mo = new MutationObserver(read);
+    mo.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    return () => mo.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     routerRef.current = router;

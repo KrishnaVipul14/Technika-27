@@ -2,7 +2,7 @@
 
 import { lazy, Suspense, useCallback, useRef, useState, type Dispatch, type RefObject } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment, Lightformer } from "@react-three/drei";
+import { ContactShadows, Environment, Lightformer, SoftShadows } from "@react-three/drei";
 import { ACESFilmicToneMapping, PCFShadowMap } from "three";
 import { roomConfigs, type Quality } from "@/lib/common-room/config";
 import type { ObjectId, RoomParticipant } from "@/lib/common-room/types";
@@ -40,12 +40,13 @@ export default function RoomCanvas({ participant, quality, motion, state, dispat
       camera.lookAt(...view.target);
     }}>
       <RenderLifecycle motion={motion} quality={quality} onDecline={onDecline} onFailure={onFailure} />
+      {quality === "high" && <SoftShadows size={28} samples={14} focus={.85} />}
       <color attach="background" args={[config.palette.fog]} /><fog attach="fog" args={[config.palette.fog, 24, 65]} />
       <hemisphereLight args={["#c4d7cf", "#17130f", 1.5]} />
       <directionalLight position={[2, 8, 7]} color={config.palette.light} intensity={2.5} castShadow={quality !== "low"} shadow-mapSize={quality === "high" ? [2048, 2048] : [1024, 1024]} shadow-camera-left={-12} shadow-camera-right={12} shadow-camera-top={12} shadow-camera-bottom={-12} shadow-normalBias={.06} />
       <Suspense fallback={null}><RoomMaterials palette={config.palette}>
         {/* Local, generated reflection environment (no HDR download) so gold, brass and glass read as metal. */}
-        <Environment resolution={64} frames={1} environmentIntensity={.45}>
+        <Environment resolution={quality === "high" ? 128 : 64} frames={1} environmentIntensity={.45}>
           <color attach="background" args={[config.palette.fog]} />
           <Lightformer form="rect" intensity={3} color={config.palette.light} position={[0, 6, -9]} scale={[14, 6, 1]} />
           <Lightformer form="circle" intensity={4} color="#ffa253" position={[-6, 2, -4]} scale={3} />
@@ -57,7 +58,10 @@ export default function RoomCanvas({ participant, quality, motion, state, dispat
         {house === "ravenclaw" && <RavenclawScene house={house} motion={motion} quality={quality} />}
         {house === "hufflepuff" && <HufflepuffScene house={house} motion={motion} quality={quality} />}
         <RoomObjects house={house} motion={motion} quality={quality} hovered={state.hovered} selected={state.selected} disabled={state.phase !== "exploring" || controlsLocked} onHover={(id) => dispatch({ type: "HOVER", id })} onSelect={onSelect} />
-        <EntranceDoor house={house} progress={progress} /><SceneReady onReady={onReady} />
+        <EntranceDoor house={house} progress={progress} />
+        {/* Soft pooled shadows under the furniture, grounding the model in the floor. */}
+        <ContactShadows position={[0, .015, 0]} scale={30} far={5} blur={2.4} opacity={quality === "low" ? .35 : .5} resolution={quality === "high" ? 512 : 256} color="#000000" />
+        <SceneReady onReady={onReady} />
       </RoomMaterials></Suspense>
     </Canvas>
   </div>;

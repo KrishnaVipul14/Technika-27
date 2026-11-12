@@ -235,3 +235,12 @@
   .drift .mote:nth-child(n + 4) { display: none; }
   .quillShadow { display: none; }
 }
+
+/* ---- Item 11: fire-kissed edges on every face of the letter ---- */
+.face::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  box-shadow: inset 0 0 calc(var(--W) * .05) calc(var(--W) * .016) rgba(42, 14, 2, .5), inset 0 0 calc(var(--W) * .01) calc(var(--W) * .004) rgba(24, 6, 0, .6);
+}
+.sheet {
+  box-shadow: 0 calc(var(--W) * .03) calc(var(--W) * .08) rgba(0, 0, 0, .45), 0 0 calc(var(--warm) * var(--W) * .12) rgba(255, 190, 95, calc(var(--warm) * .32)), inset 0 0 calc(var(--W) * .05) calc(var(--W) * .016) rgba(46, 16, 2, .45);
+}

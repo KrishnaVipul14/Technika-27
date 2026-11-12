@@ -32,6 +32,12 @@ import {
 } from "lucide-react";
 import { getSupabase } from "@/lib/supabase/client";
 import { houseFromValue, houseThemes, themeAttributeForHouse } from "@/lib/houses";
+import {
+  getLandingPreference,
+  setLandingPreference,
+  resolveLandingPath,
+  type LandingPreference,
+} from "@/lib/landing-preference";
 import type { ArrivalParticipant } from "@/lib/common-room/types";
 import { useHouse } from "./house-provider";
 import { useAuth } from "./auth-provider";
@@ -338,6 +344,9 @@ export function SignupExperience({
   const [leaving, setLeaving] = useState(false);
   const [continuation, setContinuation] = useState<"/account" | "/login" | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [landing, setLanding] = useState<LandingPreference | null>(() =>
+    getLandingPreference(),
+  );
   const [assignedHouse, setAssignedHouse] = useState<CanonicalHouse | null>(
     null,
   );
@@ -503,7 +512,7 @@ export function SignupExperience({
     void syncHouseMetadata(client, house, knownHouse);
 
     timerRef.current = setTimeout(() => {
-      router.push("/dashboard");
+      router.push(resolveLandingPath());
       router.refresh();
     }, delay);
   };
@@ -1134,6 +1143,45 @@ export function SignupExperience({
                   disabled={disabled}
                   required
                 />
+              )}
+
+              {mode === "login" && (
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">
+                    Where shall the owl take you after signing in?
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(
+                      [
+                        ["great-hall", "Great Hall", "The dashboard"],
+                        ["common-room", "Common Room", "Your house hearth"],
+                      ] as const
+                    ).map(([value, label, hint]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        disabled={disabled}
+                        aria-pressed={landing === value}
+                        onClick={() => {
+                          setLanding(value);
+                          setLandingPreference(value);
+                        }}
+                        className={`rounded-xl border p-2.5 text-left transition-colors disabled:opacity-60 ${
+                          landing === value
+                            ? "border-amber-400/70 bg-amber-500/15"
+                            : "border-amber-500/20 bg-black/20 hover:border-amber-400/40"
+                        }`}
+                      >
+                        <span className="block text-xs font-semibold text-amber-100">
+                          {label}
+                        </span>
+                        <span className="mt-0.5 block text-[10px] text-neutral-400">
+                          {hint}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
 
               {mode === "login" && (
