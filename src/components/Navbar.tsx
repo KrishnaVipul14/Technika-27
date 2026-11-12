@@ -31,8 +31,8 @@ import {
 } from "react";
 import type { User } from "@supabase/supabase-js";
 
-// SUPABASE: point this at your own browser-client helper (the one that calls createBrowserClient).
-import { createClient } from "@/utils/supabase/client";
+// SUPABASE: browser-client helper (getSupabase returns null when auth isn't configured).
+import { getSupabase } from "@/lib/supabase/client";
 
 /* ================================================================== */
 /* CONFIG: change routes here                                          */
@@ -112,11 +112,12 @@ const AUTH = {
 /* ================================================================== */
 
 function useSupabaseUser() {
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => getSupabase(), []);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!supabase) return;
     let alive = true;
     supabase.auth.getUser().then(({ data }) => {
       if (!alive) return;
@@ -133,7 +134,7 @@ function useSupabaseUser() {
     };
   }, [supabase]);
 
-  return { user, loading, supabase };
+  return { user, loading: loading && !!supabase, supabase };
 }
 
 type Profile = {
@@ -871,7 +872,7 @@ export default function TechnikaNavbar({
       : `${AUTH.signIn}?next=${encodeURIComponent(AUTH.register)}`;
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+    await supabase?.auth.signOut();
     closeMenu();
     router.push(AUTH.afterSignOut);
     router.refresh();

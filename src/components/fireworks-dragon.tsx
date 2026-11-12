@@ -4,9 +4,11 @@
  * FireworkDragon — the Weasleys' Wildfire Whiz-bangs replacement for the
  * snake scrollbar. Firecrackers keep bursting along the right edge (near the
  * navbar and down the side), and as you scroll their sparks gather into a
- * fire dragon that grows from a wisp of embers at the top of the page into a
- * full roaring dragon — complete with flapping wings and a flame breath at
- * the very bottom — by the time you reach the end.
+ * long serpentine Chinese dragon — húngry golden lung — that grows from a
+ * wisp of embers at the top of the page into a full roaring celestial
+ * dragon by the time you reach the end: scaled undulating body, flowing
+ * mane along the spine, deer antlers, sweeping whiskers, clawed legs and a
+ * fire breath at the very bottom.
  *
  * Pure <canvas>, no extra dependencies. Dragon is drawn on the right edge:
  * cracker bursts around it, body grows downward with scroll, head at the
@@ -167,7 +169,6 @@ export default function FireworkDragon({
     let target = 0;
     let cur = 0;
     let phase = 0;
-    let flapClock = 0;
     let tongueClock = 0;
     let boost = 0;
     let burstClock = 0.4;
@@ -245,229 +246,84 @@ export default function FireworkDragon({
     };
 
     /* ---------------- dragon parts ---------------- */
-    const drawWings = (f: Pt, b: Pt, wingA: number) => {
-      if (wingA <= 0.01) return;
-      const wl = 120 * g.u;
-      const flap = reduceMotion.matches
-        ? 0.6
-        : Math.sin(flapClock * 2) * 0.55 + 0.45; // 0..1
-      const lift = 0.25 + flap * 0.85; // tip rises with the flap
-      const rip = reduceMotion.matches ? 0 : Math.sin(flapClock * 3.1); // membrane flutter
-      // pulls the midpoint of a chord toward a joint so the trailing edge
-      // scoops inward — the signature concave scallop of a real bat wing
-      const scoop = (
-        ax: number,
-        ay: number,
-        bx2: number,
-        by2: number,
-        px: number,
-        py: number,
-        k: number,
-      ): [number, number] => {
-        const mx = (ax + bx2) / 2;
-        const my = (ay + by2) / 2;
-        return [mx + (px - mx) * k, my + (py - my) * k];
-      };
-      for (const side of [-1, 1]) {
-        // the wing on the page side spreads wide; the edge-side one is half-span
-        const L2 = wl * (side === -1 ? 1 : 0.55);
-        const dir = side;
-        // shoulder, wrist (elbow joint) and the long fourth-finger tip
-        const sx = f.x;
-        const sy = f.y - f.r * 0.55;
-        const wx = f.x + dir * L2 * 0.46;
-        const wy = f.y - L2 * (lift * 0.58 + 0.2);
-        const tx = f.x + dir * L2 * 0.99;
-        const ty = f.y - L2 * (lift * 0.88 + 0.1);
-        // trailing-edge knuckles where the membrane fingers land
-        const n1x = f.x + dir * L2 * 0.76;
-        const n1y = f.y - L2 * lift * 0.22 + 3 * g.u + rip * 1.6 * g.u;
-        const n2x = f.x + dir * L2 * 0.54;
-        const n2y = f.y + 4 * g.u - rip * 1.4 * g.u;
-        const n3x = f.x + dir * L2 * 0.32;
-        const n3y = f.y + 8 * g.u + rip * 1.1 * g.u;
-        const bx = b.x;
-        const by = b.y - b.r * 0.3;
-        // concave control points: each notch bows toward the wrist joint
-        const [c1x, c1y] = scoop(tx, ty, n1x, n1y, wx, wy, 0.5);
-        const [c2x, c2y] = scoop(n1x, n1y, n2x, n2y, wx, f.y - L2 * 0.1, 0.42);
-        const [c3x, c3y] = scoop(n2x, n2y, n3x, n3y, f.x + dir * L2 * 0.3, f.y, 0.38);
-        const [c4x, c4y] = scoop(n3x, n3y, bx, by, f.x + dir * L2 * 0.12, f.y, 0.32);
-
-        ctx.save();
-        ctx.globalAlpha = wingA;
-        ctx.lineJoin = "round";
-        ctx.lineCap = "round";
-
-        // membrane gradient: hot amber at the root fading to ember at the tip
-        const wg = ctx.createLinearGradient(f.x, f.y, tx, ty);
-        wg.addColorStop(0, "rgba(255,175,70,0.88)");
-        wg.addColorStop(0.5, "rgba(238,96,16,0.72)");
-        wg.addColorStop(1, "rgba(150,38,0,0.6)");
-        ctx.globalCompositeOperation = "lighter";
-        ctx.shadowColor = "rgba(255,120,20,0.45)";
-        ctx.shadowBlur = 16;
-        ctx.fillStyle = wg;
-        ctx.beginPath();
-        ctx.moveTo(sx, sy);
-        // leading edge: humerus bows slightly to the wrist, then the long
-        // finger bone runs out to the swept tip
-        ctx.quadraticCurveTo(
-          f.x + dir * L2 * 0.22,
-          wy + L2 * 0.05,
-          wx,
-          wy,
-        );
-        ctx.quadraticCurveTo(
-          f.x + dir * L2 * 0.72,
-          ty + L2 * 0.02,
-          tx,
-          ty,
-        );
-        // trailing edge: three concave notches back to the body
-        ctx.quadraticCurveTo(c1x, c1y, n1x, n1y);
-        ctx.quadraticCurveTo(c2x, c2y, n2x, n2y);
-        ctx.quadraticCurveTo(c3x, c3y, n3x, n3y);
-        ctx.quadraticCurveTo(c4x, c4y, bx, by);
-        ctx.closePath();
-        ctx.fill();
-        ctx.globalCompositeOperation = "source-over";
-        ctx.shadowBlur = 0;
-
-        // bright leading edge, softer trailing outline
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = "rgba(255,240,170,0.9)";
-        ctx.beginPath();
-        ctx.moveTo(sx, sy);
-        ctx.quadraticCurveTo(f.x + dir * L2 * 0.22, wy + L2 * 0.05, wx, wy);
-        ctx.quadraticCurveTo(f.x + dir * L2 * 0.72, ty + L2 * 0.02, tx, ty);
-        ctx.stroke();
-        ctx.lineWidth = 1.4;
-        ctx.strokeStyle = "rgba(255,190,110,0.75)";
-        ctx.beginPath();
-        ctx.moveTo(tx, ty);
-        ctx.quadraticCurveTo(c1x, c1y, n1x, n1y);
-        ctx.quadraticCurveTo(c2x, c2y, n2x, n2y);
-        ctx.quadraticCurveTo(c3x, c3y, n3x, n3y);
-        ctx.quadraticCurveTo(c4x, c4y, bx, by);
-        ctx.stroke();
-
-        // wing bones: arm to wrist, then fingers fanning to each knuckle
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = "rgba(255,215,125,0.8)";
-        ctx.beginPath();
-        ctx.moveTo(sx, sy);
-        ctx.quadraticCurveTo(f.x + dir * L2 * 0.22, wy + L2 * 0.05, wx, wy);
-        ctx.lineTo(tx, ty);
-        ctx.moveTo(wx, wy);
-        ctx.lineTo(n1x, n1y);
-        ctx.stroke();
-        ctx.lineWidth = 1.3;
-        ctx.strokeStyle = "rgba(255,195,95,0.6)";
-        ctx.beginPath();
-        ctx.moveTo(wx, wy);
-        ctx.lineTo(n2x, n2y);
-        ctx.moveTo(f.x + dir * L2 * 0.34, f.y - f.r * 0.1);
-        ctx.lineTo(n3x, n3y);
-        ctx.stroke();
-        // faint membrane veins between the fingers
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "rgba(255,150,55,0.5)";
-        ctx.beginPath();
-        const vx = (wx + n1x) / 2;
-        const vy = (wy + n1y) / 2;
-        ctx.moveTo(vx, vy);
-        ctx.quadraticCurveTo((vx + n2x) / 2, (vy + n2y) / 2, n2x, n2y);
-        ctx.moveTo((wx + n2x) / 2, (wy + n2y) / 2);
-        ctx.quadraticCurveTo((vx + n3x) / 2, (vy + n3y) / 2, n3x, n3y);
-        ctx.stroke();
-        ctx.restore();
-      }
-    };
-
     const drawHead = () => {
       // head grows with the body: an ember-sized wisp at the top of the page,
-      // a full roaring head once the dragon is taking shape
+      // a full celestial-dragon head once the dragon is taking shape
       const r =
         g.R *
-        1.55 *
+        1.6 *
         (0.35 + 0.65 * smoothstep(140 * g.u, 520 * g.u, bodyLen));
-
-      // forked tongue flicker
-      const cycle = tongueClock % 2.6;
-      const flick = cycle < 0.7 ? Math.sin((cycle / 0.7) * Math.PI) : 0;
-      if (flick > 0.02) {
-        ctx.save();
-        ctx.globalCompositeOperation = "lighter";
-        ctx.strokeStyle = "rgba(255,170,60,0.75)";
-        ctx.lineCap = "round";
-        ctx.lineWidth = Math.max(1, r * 0.08);
-        const bx = r * 2.9;
-        const len = r * (0.3 + 1.1 * flick);
-        const fork = r * 0.5 * flick;
-        ctx.beginPath();
-        ctx.moveTo(bx, r * 0.12);
-        ctx.lineTo(bx + len, r * 0.16 * flick);
-        for (const side of [-1, 1]) {
-          ctx.moveTo(bx + len, r * 0.16 * flick);
-          ctx.lineTo(bx + len + fork, r * 0.16 * flick + side * fork * 0.7);
-        }
-        ctx.stroke();
-        ctx.restore();
-      }
+      const now = performance.now();
 
       // dark backdrop so the silhouette cuts out of the body glow
-      ctx.fillStyle = "rgba(28,2,0,0.6)";
+      ctx.fillStyle = "rgba(28,2,0,0.55)";
       ctx.beginPath();
-      ctx.ellipse(0.6 * r, 0.1 * r, 3.4 * r, 1.85 * r, 0, 0, TAU);
+      ctx.ellipse(0.4 * r, 0.05 * r, 3.1 * r, 1.6 * r, 0, 0, TAU);
       ctx.fill();
 
-      // horns sweeping far back over the neck
-      const horn = (
-        sx: number,
-        sy: number,
-        cx1: number,
-        cy1: number,
-        tx: number,
-        ty: number,
-        cx2: number,
-        cy2: number,
-      ) => {
-        ctx.beginPath();
-        ctx.moveTo(sx * r, sy * r);
-        ctx.quadraticCurveTo(cx1 * r, cy1 * r, tx * r, ty * r);
-        ctx.quadraticCurveTo(cx2 * r, cy2 * r, (sx - 0.5) * r, (sy + 0.2) * r);
-        ctx.closePath();
-        const grin = ctx.createLinearGradient(sx * r, sy * r, tx * r, ty * r);
-        grin.addColorStop(0, "rgba(255,215,110,0.95)");
-        grin.addColorStop(1, "rgba(200,110,20,0.85)");
-        ctx.fillStyle = grin;
-        ctx.fill();
-      };
+      // flowing mane fanning back from the skull
       ctx.save();
-      ctx.globalAlpha = 0.92;
-      horn(0.45, -1.0, -0.8, -2.0, -2.6, -2.55, -1.5, -1.35);
-      horn(-0.05, -1.2, -0.9, -2.5, -1.9, -3.3, -1.2, -1.7);
+      ctx.globalCompositeOperation = "lighter";
+      ctx.lineCap = "round";
+      for (let i = -3; i <= 3; i++) {
+        const ws = reduceMotion.matches ? 0 : Math.sin(now / 170 + i * 1.1);
+        const bxx = -0.55 * r;
+        const byy = i * 0.42 * r;
+        const tipx = (-2.4 - Math.abs(i) * 0.24) * r;
+        const tipy = byy + (i * 0.5 + ws * 0.32) * r;
+        const cx1 = (-1.2 + ws * 0.14) * r;
+        const cy1 = byy + (i * 0.14 + 0.2) * r;
+        ctx.beginPath();
+        ctx.moveTo(bxx, byy);
+        ctx.quadraticCurveTo(cx1, cy1, tipx, tipy);
+        ctx.quadraticCurveTo(cx1 - 0.3 * r, cy1 - 0.38 * r, bxx, byy + 0.18 * r);
+        ctx.closePath();
+        ctx.fillStyle = `rgba(255,${118 + Math.abs(i) * 16},18,${0.34 * (1 - Math.abs(i) / 5)})`;
+        ctx.fill();
+      }
       ctx.restore();
 
-      // upper skull: crown, brow ridge, long snout
+      // deer-like branching antlers sweeping back over the neck
+      const stroke = (pts: [number, number][], w: number) => {
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0] * r, pts[0][1] * r);
+        for (let i = 1; i < pts.length - 1; i++) {
+          const mx2 = ((pts[i][0] + pts[i + 1][0]) / 2) * r;
+          const my2 = ((pts[i][1] + pts[i + 1][1]) / 2) * r;
+          ctx.quadraticCurveTo(pts[i][0] * r, pts[i][1] * r, mx2, my2);
+        }
+        ctx.lineTo(pts[pts.length - 1][0] * r, pts[pts.length - 1][1] * r);
+        ctx.lineWidth = w * r;
+        ctx.stroke();
+      };
+      ctx.save();
+      ctx.strokeStyle = "rgba(255,215,120,0.9)";
+      ctx.lineCap = "round";
+      ctx.shadowColor = "rgba(255,160,40,0.55)";
+      ctx.shadowBlur = 6;
+      stroke([[0.1, -0.6], [-0.6, -1.15], [-1.5, -1.45]], 0.15);
+      stroke([[-0.6, -1.15], [-1.05, -1.6], [-1.05, -2.0]], 0.1);
+      stroke([[-1.1, -1.4], [-1.6, -1.62], [-1.95, -1.85]], 0.09);
+      stroke([[0.45, -0.42], [-0.1, -0.85], [-0.85, -1.0]], 0.12);
+      stroke([[-0.35, -0.8], [-0.62, -1.15], [-0.45, -1.55]], 0.08);
+      ctx.restore();
+
+      // skull: camel-like crown and an upturned snout
       const head = new Path2D();
-      head.moveTo(-1.45 * r, -0.7 * r);
-      head.bezierCurveTo(-0.6 * r, -1.55 * r, 0.35 * r, -1.5 * r, 0.85 * r, -1.1 * r);
-      head.quadraticCurveTo(1.7 * r, -1.0 * r, 2.45 * r, -0.55 * r);
-      head.quadraticCurveTo(3.2 * r, -0.35 * r, 3.4 * r, -0.05 * r);
-      // upper lip back to the mouth corner
-      head.quadraticCurveTo(2.9 * r, 0.14 * r, 1.7 * r, 0.2 * r);
-      head.quadraticCurveTo(1.05 * r, 0.24 * r, 0.75 * r, 0.4 * r);
-      // cheek and jowl
-      head.bezierCurveTo(-0.05 * r, 0.85 * r, -1.0 * r, 1.2 * r, -1.45 * r, 0.72 * r);
+      head.moveTo(-1.5 * r, -0.35 * r);
+      head.bezierCurveTo(-0.9 * r, -0.95 * r, 0.3 * r, -1.0 * r, 1.0 * r, -0.72 * r);
+      head.quadraticCurveTo(2.2 * r, -0.55 * r, 3.05 * r, -0.5 * r);
+      head.quadraticCurveTo(3.55 * r, -0.44 * r, 3.55 * r, -0.08 * r);
+      head.quadraticCurveTo(3.42 * r, 0.3 * r, 2.9 * r, 0.32 * r);
+      head.quadraticCurveTo(1.7 * r, 0.36 * r, 1.1 * r, 0.52 * r);
+      head.bezierCurveTo(0.4 * r, 0.8 * r, -0.5 * r, 0.92 * r, -1.5 * r, 0.45 * r);
       head.closePath();
 
-      const hg = ctx.createRadialGradient(0.15 * r, -0.35 * r, 0, 0.15 * r, -0.35 * r, 3.2 * r);
-      hg.addColorStop(0, "rgba(255,240,165,0.98)");
-      hg.addColorStop(0.42, "rgba(255,140,22,0.92)");
-      hg.addColorStop(0.8, "rgba(198,40,0,0.95)");
-      hg.addColorStop(1, "rgba(96,8,0,0.95)");
+      const hg = ctx.createRadialGradient(0.1 * r, -0.3 * r, 0, 0.1 * r, -0.3 * r, 3.4 * r);
+      hg.addColorStop(0, "rgba(255,244,180,0.98)");
+      hg.addColorStop(0.4, "rgba(255,180,60,0.94)");
+      hg.addColorStop(0.78, "rgba(214,74,0,0.95)");
+      hg.addColorStop(1, "rgba(110,12,0,0.95)");
       ctx.fillStyle = hg;
       ctx.fill(head);
       ctx.lineJoin = "round";
@@ -475,98 +331,155 @@ export default function FireworkDragon({
       ctx.strokeStyle = "rgba(64,4,0,0.75)";
       ctx.stroke(head);
 
-      // dark maw between the jaws
+      // mouth line, upturned nose and nostril
       ctx.beginPath();
-      ctx.moveTo(0.8 * r, 0.3 * r);
-      ctx.quadraticCurveTo(2.0 * r, 0.28 * r, 3.3 * r, 0.02 * r);
-      ctx.lineTo(3.0 * r, 0.9 * r);
-      ctx.quadraticCurveTo(1.8 * r, 0.8 * r, 0.85 * r, 0.55 * r);
-      ctx.closePath();
+      ctx.moveTo(3.3 * r, 0.14 * r);
+      ctx.quadraticCurveTo(2.1 * r, 0.3 * r, 1.05 * r, 0.46 * r);
+      ctx.lineWidth = 0.09 * r;
+      ctx.strokeStyle = "rgba(52,2,0,0.85)";
+      ctx.stroke();
       ctx.fillStyle = "rgba(52,2,0,0.9)";
+      ctx.beginPath();
+      ctx.ellipse(3.22 * r, -0.2 * r, 0.09 * r, 0.14 * r, -0.5, 0, TAU);
       ctx.fill();
+
+      // fangs over the lip + small chin beard
+      ctx.fillStyle = "rgba(255,240,205,0.95)";
+      for (const [tx, ty, dir] of [
+        [2.35, 0.3, 1],
+        [1.6, 0.4, 1],
+      ] as const) {
+        ctx.beginPath();
+        ctx.moveTo((tx - 0.12) * r, ty * r);
+        ctx.lineTo((tx + 0.12) * r, ty * r);
+        ctx.lineTo(tx * r, (ty + 0.3 * dir) * r);
+        ctx.closePath();
+        ctx.fill();
+      }
+      const bdg = ctx.createLinearGradient(0.9 * r, 0.6 * r, 1.1 * r, 1.9 * r);
+      bdg.addColorStop(0, "rgba(255,150,40,0.8)");
+      bdg.addColorStop(1, "rgba(200,50,0,0)");
+      ctx.fillStyle = bdg;
+      ctx.beginPath();
+      ctx.moveTo(1.15 * r, 0.52 * r);
+      ctx.quadraticCurveTo(1.55 * r, 1.3 * r, 1.0 * r, 1.85 * r);
+      ctx.quadraticCurveTo(0.68 * r, 1.25 * r, 0.66 * r, 0.6 * r);
+      ctx.closePath();
+      ctx.fill();
+
+      // glowing round eye under a heavy brow
+      const ex = 0.45 * r;
+      const ey = -0.42 * r;
+      ctx.save();
+      ctx.shadowColor = "rgba(255,220,120,0.95)";
+      ctx.shadowBlur = 9;
+      const eg = ctx.createRadialGradient(ex, ey, 0, ex, ey, 0.42 * r);
+      eg.addColorStop(0, "#fffbe0");
+      eg.addColorStop(0.7, "#ffd24a");
+      eg.addColorStop(1, "#ff8a1e");
+      ctx.fillStyle = eg;
+      ctx.beginPath();
+      ctx.arc(ex, ey, 0.3 * r, 0, TAU);
+      ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = "#1a0400";
+      ctx.beginPath();
+      ctx.arc(ex + 0.06 * r, ey, 0.13 * r, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = "rgba(255,255,240,0.9)";
+      ctx.beginPath();
+      ctx.arc(ex + 0.11 * r, ey - 0.08 * r, 0.045 * r, 0, TAU);
+      ctx.fill();
+      // heavy brow stroke
+      ctx.strokeStyle = "rgba(120,18,0,0.8)";
+      ctx.lineWidth = 0.12 * r;
+      ctx.beginPath();
+      ctx.moveTo(-0.05 * r, -0.72 * r);
+      ctx.quadraticCurveTo(0.45 * r, -0.92 * r, 0.95 * r, -0.66 * r);
+      ctx.stroke();
+
+      // the two long sweeping whiskers — the signature of a Chinese dragon
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "rgba(255,228,140,0.85)";
+      for (const side of [-1, 1]) {
+        const ws = reduceMotion.matches ? 0 : Math.sin(now / 240 + (side > 0 ? 0 : 1.4));
+        const tx2 = (5.6 + ws * 0.45) * r;
+        const ty2 = side * (1.75 + ws * 0.35) * r;
+        ctx.lineWidth = 0.085 * r;
+        ctx.beginPath();
+        ctx.moveTo(2.95 * r, side * 0.1 * r);
+        ctx.bezierCurveTo(
+          (4.1 + ws * 0.2) * r,
+          side * (0.5 + ws * 0.12) * r,
+          (5.0 + ws * 0.3) * r,
+          ty2 - side * 0.5 * r,
+          tx2,
+          ty2,
+        );
+        ctx.stroke();
+        ctx.lineWidth = 0.05 * r;
+        ctx.beginPath();
+        ctx.moveTo(tx2, ty2);
+        ctx.lineTo(tx2 + 0.45 * r, ty2 + side * 0.4 * r);
+        ctx.moveTo(tx2, ty2);
+        ctx.lineTo(tx2 + 0.5 * r, ty2 - side * 0.3 * r);
+        ctx.stroke();
+      }
+      ctx.restore();
 
       // fire building at the back of the throat
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
-      ctx.globalAlpha = 0.45 + 0.25 * Math.sin(performance.now() / 60);
-      const mg = ctx.createRadialGradient(0.9 * r, 0.42 * r, 0, 0.9 * r, 0.42 * r, 2.1 * r);
+      ctx.globalAlpha = 0.4 + 0.2 * Math.sin(now / 60);
+      const mg = ctx.createRadialGradient(1.0 * r, 0.3 * r, 0, 1.0 * r, 0.3 * r, 2.0 * r);
       mg.addColorStop(0, "rgba(255,250,210,0.95)");
       mg.addColorStop(0.6, "rgba(255,130,10,0.35)");
       mg.addColorStop(1, "rgba(255,120,10,0)");
       ctx.fillStyle = mg;
       ctx.beginPath();
-      ctx.ellipse(1.4 * r, 0.45 * r, 1.9 * r, 0.6 * r, 0.1, 0, TAU);
+      ctx.ellipse(1.3 * r, 0.32 * r, 1.7 * r, 0.55 * r, 0.1, 0, TAU);
       ctx.fill();
       ctx.restore();
 
-      // lower jaw, biting down into the maw
-      ctx.beginPath();
-      ctx.moveTo(0.8 * r, 0.45 * r);
-      ctx.quadraticCurveTo(2.0 * r, 0.55 * r, 3.05 * r, 0.95 * r);
-      ctx.quadraticCurveTo(2.4 * r, 1.22 * r, 1.1 * r, 1.08 * r);
-      ctx.quadraticCurveTo(0.5 * r, 1.0 * r, 0.55 * r, 0.7 * r);
-      ctx.closePath();
-      {
-        const jg = ctx.createRadialGradient(1.2 * r, 0.7 * r, 0, 1.2 * r, 0.7 * r, 2.2 * r);
-        jg.addColorStop(0, "rgba(255,145,32,0.95)");
-        jg.addColorStop(1, "rgba(138,14,0,0.95)");
-        ctx.fillStyle = jg;
-        ctx.fill();
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "rgba(64,4,0,0.7)";
-        ctx.stroke();
-      }
-
-      // teeth: white spikes on both jaws
-      ctx.fillStyle = "rgba(255,240,205,0.95)";
-      for (const [tx, ty, dir] of [
-        [2.05, 0.22, 1],
-        [2.6, 0.14, 1],
-        [3.1, 0.0, 1],
-        [1.45, 0.56, -1],
-        [2.0, 0.6, -1],
-      ] as const) {
+      // forked tongue flicker past the lips
+      const cycle = tongueClock % 2.6;
+      const flick = cycle < 0.7 ? Math.sin((cycle / 0.7) * Math.PI) : 0;
+      if (flick > 0.02) {
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        ctx.strokeStyle = "rgba(255,170,60,0.8)";
+        ctx.lineCap = "round";
+        ctx.lineWidth = Math.max(1, r * 0.07);
+        const bx = 3.3 * r;
+        const len = r * (0.25 + 1.0 * flick);
+        const fork = r * 0.42 * flick;
         ctx.beginPath();
-        ctx.moveTo((tx - 0.16) * r, ty * r);
-        ctx.lineTo((tx + 0.16) * r, ty * r);
-        ctx.lineTo(tx * r, (ty + 0.34 * dir) * r);
-        ctx.closePath();
-        ctx.fill();
+        ctx.moveTo(bx, 0.08 * r);
+        ctx.lineTo(bx + len, 0.1 * r * flick);
+        for (const side of [-1, 1]) {
+          ctx.moveTo(bx + len, 0.1 * r * flick);
+          ctx.lineTo(bx + len + fork, 0.1 * r * flick + side * fork * 0.7);
+        }
+        ctx.stroke();
+        ctx.restore();
       }
-
-      // glowing slit eye under a heavy brow
-      const ex = 0.55 * r;
-      const ey = -0.45 * r;
-      ctx.save();
-      ctx.shadowColor = "rgba(255,220,120,0.95)";
-      ctx.shadowBlur = 9;
-      const eg = ctx.createRadialGradient(ex, ey, 0, ex, ey, 0.55 * r);
-      eg.addColorStop(0, "#fffbe0");
-      eg.addColorStop(1, "#ff8a1e");
-      ctx.fillStyle = eg;
-      ctx.beginPath();
-      ctx.ellipse(ex, ey, 0.32 * r, 0.2 * r, -0.3, 0, TAU);
-      ctx.fill();
-      ctx.restore();
-      ctx.fillStyle = "#1a0400";
-      ctx.beginPath();
-      ctx.ellipse(ex, ey, 0.23 * r, 0.045 * r, -0.3, 0, TAU);
-      ctx.fill();
 
       // full-scroll fire breath
       if (cur > 0.96) {
         const fa = clamp((cur - 0.96) / 0.04, 0, 1);
         ctx.save();
         ctx.globalCompositeOperation = "lighter";
-        ctx.globalAlpha = fa * (0.75 + 0.25 * Math.sin(performance.now() / 70));
-        const bg = ctx.createLinearGradient(2.4 * r, 0, 6.5 * r, 0);
+        ctx.globalAlpha = fa * (0.75 + 0.25 * Math.sin(now / 70));
+        const bg = ctx.createLinearGradient(3.0 * r, 0, 7.0 * r, 0);
         bg.addColorStop(0, "rgba(255,240,170,0.9)");
         bg.addColorStop(0.4, "rgba(255,150,30,0.6)");
         bg.addColorStop(1, "rgba(220,60,0,0)");
         ctx.beginPath();
-        ctx.moveTo(2.4 * r, -0.35 * r);
-        ctx.quadraticCurveTo(4.4 * r, -0.9 * r + Math.sin(performance.now() / 90) * r * 0.4, 6.6 * r, 0.1 * r);
-        ctx.quadraticCurveTo(4.4 * r, 0.9 * r + Math.cos(performance.now() / 80) * r * 0.4, 2.4 * r, 0.35 * r);
+        ctx.moveTo(3.0 * r, -0.4 * r);
+        ctx.quadraticCurveTo(5.0 * r, -0.9 * r + Math.sin(now / 90) * r * 0.4, 7.0 * r, 0.1 * r);
+        ctx.quadraticCurveTo(5.0 * r, 0.9 * r + Math.cos(now / 80) * r * 0.4, 3.0 * r, 0.4 * r);
         ctx.closePath();
         ctx.fillStyle = bg;
         ctx.fill();
@@ -654,48 +567,151 @@ export default function FireworkDragon({
       layer(0.26, 0, "rgba(255,250,215,0.9)");
       ctx.restore();
 
-      // Wings over the body glow, appear from ~30% scroll on
-      const wingA = smoothstep(0.3, 0.62, cur);
-      if (wingA > 0.01) {
-        let wi = 0;
-        let wj = 0;
-        let best = Infinity;
+      // Serpentine details fade in as the dragon grows, like a proper lung
+      const bodyA = smoothstep(0.25, 0.52, cur);
+      if (bodyA > 0.01) {
+        // pale-gold belly ridge along the page-facing side
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        ctx.globalAlpha = 0.42 * bodyA * flicker;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        let pen = false;
         for (let i = 0; i < n; i++) {
-          const d = Math.abs(pool[i].s - L * 0.44);
-          if (d < best) {
-            best = d;
-            wi = i;
+          const p = pool[i];
+          if (p.r < 4 * g.u) {
+            pen = false;
+            continue;
           }
+          const qx = p.x - p.nx * p.r * 0.55;
+          const qy = p.y - p.ny * p.r * 0.55;
+          if (pen) ctx.lineTo(qx, qy);
+          else ctx.moveTo(qx, qy);
+          pen = true;
         }
-        wj = Math.max(0, wi - Math.round(60 * g.u / step));
-        drawWings(pool[wi], pool[wj], wingA);
-      }
+        ctx.strokeStyle = "rgba(255,238,185,0.6)";
+        ctx.lineWidth = g.R * 0.42;
+        ctx.stroke();
+        ctx.restore();
 
-      // dorsal flame fins flickering along the spine
-      const gap = 30 * g.u;
-      ctx.beginPath();
-      for (let i = 1, next = gap * 0.5; i < n - 1; i++) {
-        const p = pool[i];
-        if (p.s < next) continue;
-        next += gap;
-        if (p.r < 3 * g.u) continue;
-        const h = p.r * (1.2 + 0.5 * Math.sin(p.s * 0.08 + performance.now() / 140));
-        ctx.moveTo(p.x - p.tx * p.r * 0.5, p.y - p.ty * p.r * 0.5);
-        ctx.quadraticCurveTo(
-          p.x - p.nx * (p.r + h * 0.4),
-          p.y - p.ny * (p.r + h * 0.4),
-          p.x - p.nx * (p.r + h),
-          p.y - p.ny * (p.r + h),
-        );
-        ctx.quadraticCurveTo(
-          p.x - p.nx * (p.r + h * 0.4),
-          p.y - p.ny * (p.r + h * 0.3),
-          p.x + p.tx * p.r * 0.5,
-          p.y + p.ty * p.r * 0.5,
-        );
+        // scale bands arcing across the body every ~18px
+        ctx.save();
+        ctx.globalAlpha = 0.5 * bodyA;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "rgba(178,52,0,0.45)";
+        ctx.lineWidth = 1.6 * g.u;
+        ctx.beginPath();
+        let nextBand = 18 * g.u;
+        for (let i = 1; i < n - 1; i++) {
+          const p = pool[i];
+          if (p.s < nextBand) continue;
+          nextBand += 18 * g.u;
+          if (p.r < 4 * g.u) continue;
+          const rr = p.r * 0.9;
+          // crescent bowing toward the head, from flank to flank
+          ctx.moveTo(p.x + p.nx * rr, p.y + p.ny * rr);
+          ctx.quadraticCurveTo(
+            p.x + p.tx * rr * 0.42,
+            p.y + p.ty * rr * 0.42,
+            p.x - p.nx * rr,
+            p.y - p.ny * rr,
+          );
+        }
+        ctx.stroke();
+        ctx.restore();
+
+        // flowing dorsal mane licking backward off the spine
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        ctx.globalAlpha = 0.55 * bodyA * flicker;
+        ctx.lineJoin = "round";
+        const maneGap = 13 * g.u;
+        ctx.beginPath();
+        for (let i = 1, next = maneGap * 0.5; i < n - 1; i++) {
+          const p = pool[i];
+          if (p.s < next) continue;
+          next += maneGap;
+          if (p.r < 3 * g.u) continue;
+          const ws = reduceMotion.matches
+            ? 0
+            : Math.sin(p.s * 0.05 + performance.now() / 130);
+          const h = p.r * (1.5 + 0.75 * ws);
+          const bx2 = p.x + p.nx * p.r * 0.8;
+          const by2 = p.y + p.ny * p.r * 0.8;
+          const mx2 = bx2 - p.tx * h * 0.55 + p.nx * h * 0.5;
+          const my2 = by2 - p.ty * h * 0.55 + p.ny * h * 0.5;
+          const ex2 = bx2 - p.tx * h * 1.15 + p.nx * h * 0.1;
+          const ey2 = by2 - p.ty * h * 1.15 + p.ny * h * 0.1;
+          ctx.moveTo(bx2, by2);
+          ctx.quadraticCurveTo(mx2, my2, ex2, ey2);
+          ctx.quadraticCurveTo(mx2 - p.tx * h * 0.08, my2 - p.ty * h * 0.08, bx2, by2);
+        }
+        ctx.fillStyle = "rgba(255,138,22,0.5)";
+        ctx.fill();
+        ctx.restore();
+
+        // two pairs of clawed legs — a lung always strides
+        if (bodyLen > 240 * g.u) {
+          ctx.save();
+          ctx.globalAlpha = 0.9 * bodyA;
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+          const drawLeg = (p: Pt, dirN: number, reach: number, w: number) => {
+            const sx2 = p.x + p.nx * dirN * p.r * 0.55;
+            const sy2 = p.y + p.ny * dirN * p.r * 0.55;
+            const ex3 = sx2 + p.nx * dirN * p.r * 1.1 - p.tx * p.r * 0.25;
+            const ey3 = sy2 + p.ny * dirN * p.r * 1.1 - p.ty * p.r * 0.25;
+            const fx2 = ex3 + p.tx * p.r * 0.95 * reach + p.nx * dirN * p.r * 0.2;
+            const fy2 = ey3 + p.ty * p.r * 0.95 * reach + p.ny * dirN * p.r * 0.2;
+            ctx.strokeStyle = "rgba(210,84,10,0.85)";
+            ctx.lineWidth = p.r * 0.4 * w;
+            ctx.beginPath();
+            ctx.moveTo(sx2, sy2);
+            ctx.lineTo(ex3, ey3);
+            ctx.stroke();
+            ctx.lineWidth = p.r * 0.28 * w;
+            ctx.strokeStyle = "rgba(255,190,80,0.9)";
+            ctx.beginPath();
+            ctx.moveTo(ex3, ey3);
+            ctx.lineTo(fx2, fy2);
+            ctx.stroke();
+            // three talons fanning forward from the paw
+            ctx.strokeStyle = "rgba(255,238,190,0.95)";
+            ctx.lineWidth = p.r * 0.11 * w;
+            ctx.beginPath();
+            for (const tn of [-1, 0, 1]) {
+              const ang = 0.45 * tn;
+              const ca = Math.cos(ang);
+              const sa = Math.sin(ang);
+              const dx = p.tx * ca + p.nx * dirN * sa;
+              const dy = p.ty * ca + p.ny * dirN * sa;
+              ctx.moveTo(fx2, fy2);
+              ctx.lineTo(
+                fx2 + dx * p.r * 0.55,
+                fy2 + dy * p.r * 0.55,
+              );
+            }
+            ctx.stroke();
+          };
+          for (const frac of [0.36, 0.64]) {
+            let bi = 0;
+            let best = Infinity;
+            for (let i = 0; i < n; i++) {
+              const d = Math.abs(pool[i].s - L * frac);
+              if (d < best) {
+                best = d;
+                bi = i;
+              }
+            }
+            // near-side limb reaching toward the page, far-side one peeking behind
+            drawLeg(pool[bi], -1, 1, 1);
+            const backI = Math.max(0, bi - Math.round(46 * g.u / step));
+            drawLeg(pool[backI], 1, 0.8, 0.7);
+          }
+          ctx.restore();
+        }
       }
-      ctx.fillStyle = `rgba(255,150,30,${0.5 * flicker})`;
-      ctx.fill();
 
       // Head, oriented along the tangent at the end of the body
       const hp = pool[n - 1];
@@ -716,7 +732,7 @@ export default function FireworkDragon({
       if (now - lastPaint < 1000 / 30) return;
       lastPaint = now;
 
-      const dt = Math.min(0.05, (now - last) / 1000);
+      const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
       last = now;
       const active = magicOn && !reduceMotion.matches;
 
@@ -731,7 +747,6 @@ export default function FireworkDragon({
 
       if (active) {
         phase += dt * (0.9 + boost * 5); // body sways faster while scrolling
-        flapClock += dt * (1 + boost * 2);
         tongueClock += dt * (1 + boost * 2.5);
 
         // whiz-bangs keep popping, faster while scrolling
@@ -804,7 +819,7 @@ export default function FireworkDragon({
           ctx.globalAlpha = (0.5 - b.t * 3) * (0.5 + 0.5 * Math.random());
           ctx.fillStyle = "rgba(255,230,160,0.8)";
           ctx.beginPath();
-          ctx.arc(b.x, b.y, 3 + b.t * 130 * g.u, 0, TAU);
+          ctx.arc(b.x, b.y, Math.max(0.5, 3 + b.t * 130 * g.u), 0, TAU);
           ctx.fill();
         }
         for (const sp of b.sparks) {
