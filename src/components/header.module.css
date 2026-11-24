@@ -1,0 +1,220 @@
+.header {
+  position: fixed;
+  inset: 16px 0 auto;
+  z-index: 50;
+  padding-inline: 24px;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 500ms ease;
+}
+
+.header[data-ready="false"] { opacity: 0; visibility: hidden; }
+.header[data-ready="true"] .navigation { animation: arrive 650ms cubic-bezier(.22, 1, .36, 1) both; }
+
+.navigation {
+  width: min(1328px, 100%);
+  min-height: 76px;
+  margin-inline: auto;
+  padding: 10px 16px 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 22px;
+  background-color: var(--glass-surface);
+  background-image: var(--glass-panel-reflection);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .18), inset 0 -1px 0 rgb(0 0 0 / .2), 0 12px 36px #0006;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  pointer-events: auto;
+}
+
+.brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; min-height: 44px; border-radius: 10px; }
+.brand img { width: 48px; height: 44px; object-fit: contain; filter: drop-shadow(0 3px 5px #0006); transition: filter 200ms ease; }
+.brand span { color: var(--fg-strong); font: 500 27px/1 var(--font-garamond), Georgia, serif; letter-spacing: -.02em; }
+.brand:hover img { filter: drop-shadow(0 4px 7px #0009); }
+.brand:hover span { color: var(--fg-brand); }
+
+.desktopLinks { display: flex; justify-content: center; align-items: center; gap: 2px; flex: 1; list-style: none; padding: 0; margin: 0; }
+.navItem { position: relative; display: flex; align-items: center; border-radius: 11px; transition: background 180ms ease; }
+.navLink { display: flex; align-items: center; min-height: 44px; padding-inline: 11px; white-space: nowrap; font-size: 13px; color: var(--fg); transition: color 180ms ease; }
+.navItem:has(.disclosure) .navLink { padding-right: 1px; }
+.navItem[data-active] { background: var(--surface-tint); }
+.navItem[data-active] .navLink { color: var(--fg-brand); }
+.navItem[data-active]::after { content: ""; position: absolute; bottom: 4px; left: 11px; right: 11px; height: 2px; border-radius: 1px; background: var(--fg-brand); pointer-events: none; }
+.navItem:hover, .navItem[data-expanded] { background: var(--control-hover); }
+.navLink:hover { color: var(--fg-brand); }
+.disclosure { display: grid; place-items: center; width: 26px; min-height: 44px; padding: 0; border-radius: 8px; color: var(--fg-brand); background: transparent; }
+.disclosure svg, .sheetRow button svg { transition: transform 200ms ease; }
+.disclosure[aria-expanded="true"] svg, .sheetRow button[aria-expanded="true"] svg { transform: rotate(180deg); }
+.disclosure:hover { background: var(--control-active); }
+
+.dropdown {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 14px);
+  width: 232px;
+  padding: 8px;
+  border: 1px solid var(--control-border);
+  border-radius: 15px;
+  background-color: var(--glass-menu);
+  background-image: var(--glass-panel-reflection);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .16), 0 18px 40px #0008;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  animation: unfold 200ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.dropdown::before { content: ""; position: absolute; top: -15px; left: 0; right: 0; height: 15px; }
+.dropdown[hidden], .sheetSublinks[hidden] { display: none; }
+.dropdown a { display: flex; justify-content: space-between; align-items: center; min-height: 46px; gap: 16px; padding: 10px 12px; color: var(--fg); font-size: 13px; border-radius: 8px; transition: background 180ms ease, color 180ms ease; }
+.dropdown a svg { color: var(--fg-brand); opacity: .65; transition: opacity 180ms ease, transform 180ms ease; }
+.dropdown a:hover, .dropdown a[aria-current], .dropdown a:focus-visible { color: var(--fg-strong); background: var(--control-hover); }
+.dropdown a:hover svg { opacity: 1; transform: translate(1px, -1px); }
+
+.accountActions, .compactActions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.accountActions { padding-left: 14px; border-left: 1px solid color-mix(in oklab, var(--fg-brand) 18%, transparent); }
+.primaryAction, .secondaryAction, .roomAction { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 17px; border: 1px solid var(--control-border); border-radius: 11px; white-space: nowrap; font-size: 13px; line-height: 1; font-weight: 500; background-image: var(--glass-reflection); box-shadow: var(--glass-shadow); transition: box-shadow 180ms ease; }
+.primaryAction { background-color: var(--glass-action); color: var(--action-text); font-weight: 600; }
+.primaryAction:hover { background-color: var(--glass-action-hover); box-shadow: var(--glass-shadow-hover); }
+.primaryAction:active { background-color: var(--glass-action-active); }
+.primaryAction svg { transition: transform 180ms ease; }
+.primaryAction:hover svg { transform: translate(1px, -1px); }
+.secondaryAction { color: var(--fg); background-color: var(--glass-control); }
+.secondaryAction svg { color: var(--fg-brand); }
+.secondaryAction:hover, .roomAction:hover { color: var(--fg-strong); background-color: var(--glass-control-hover); box-shadow: var(--glass-shadow-hover); }
+.secondaryAction:active, .roomAction:active { background-color: var(--glass-control-active); }
+.roomAction { width: 44px; flex-shrink: 0; padding: 0; color: var(--fg-brand); background-color: var(--glass-control); }
+.primaryAction:active, .secondaryAction:active, .roomAction:active, .bookButton:active, .closeButton:active { box-shadow: inset 0 2px 5px #0003; }
+.compactActions { display: none; margin-left: auto; }
+
+.bookButton { width: 48px; height: 44px; display: grid; place-items: center; padding: 0; border: 1px solid var(--control-border); border-radius: 11px; background-color: var(--glass-control); background-image: var(--glass-reflection); box-shadow: var(--glass-shadow); transition: box-shadow 200ms ease; }
+.bookButton:hover { background-color: var(--glass-control-hover); box-shadow: var(--glass-shadow-hover); }
+.primaryAction, .secondaryAction, .roomAction, .bookButton, .closeButton { -webkit-backdrop-filter: var(--glass-control-blur); backdrop-filter: var(--glass-control-blur); }
+.contrastMenu { display: none; }
+.books { position: relative; width: 30px; height: 26px; }
+.books > span { position: absolute; left: 0; width: 30px; height: 7px; border-radius: 2px; box-shadow: inset 0 1px 0 #ffd70040, inset -2px 0 0 #f5e6be80, 0 2px 3px #0008; }
+.books > span::before { content: ""; position: absolute; left: 5px; top: 0; bottom: 0; width: 1px; background: #e6bb6577; box-shadow: 5px 0 0 #e6bb6544; }
+.crimsonBook { bottom: 0; background: linear-gradient(#5c181f, #26090c); }
+.emeraldBook { bottom: 8px; left: 1px !important; background: linear-gradient(#18422a, #06160e); }
+.ochreBook { bottom: 16px; background: linear-gradient(#854d0e, #3a1e02); transform-origin: bottom left; transition: transform 300ms cubic-bezier(.22, 1, .36, 1); }
+.ochreBook::after { content: ""; position: absolute; right: -3px; top: 2px; width: 5px; height: 2px; background: #b82928; }
+.bookButton:hover .ochreBook { transform: translateY(-2px) rotate(-3deg); }
+
+.sheet {
+  position: fixed;
+  inset: 92px 16px auto;
+  width: min(460px, calc(100% - 32px));
+  max-height: calc(100dvh - 108px - env(safe-area-inset-bottom));
+  margin: 0 auto;
+  padding: 0;
+  color: var(--fg);
+  border: 1px solid var(--control-border);
+  border-radius: 22px;
+  background-color: var(--glass-menu);
+  background-image: var(--glass-panel-reflection);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .18), 0 24px 64px #0009;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  overflow: hidden;
+  pointer-events: auto;
+  overscroll-behavior: contain;
+}
+.sheet[open] { display: flex; flex-direction: column; animation: unfold 250ms cubic-bezier(.22, 1, .36, 1) both; }
+.sheet::backdrop { background: #05050ba6; backdrop-filter: blur(5px); }
+.sheetHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 22px 16px; flex-shrink: 0; }
+.sheetHeading h2 { font: 500 28px/1.15 var(--font-garamond), Georgia, serif; color: var(--fg-strong); letter-spacing: -.02em; }
+.sheetHeading p { color: var(--fg-brand); font-size: 12px; line-height: 1.5; margin-top: 4px; }
+.closeButton { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; padding: 0; border: 1px solid var(--control-border); border-radius: 11px; color: var(--fg-brand); background-color: var(--glass-control); background-image: var(--glass-reflection); box-shadow: var(--glass-shadow); transition: box-shadow 180ms ease; }
+.closeButton:hover { background-color: var(--glass-control-hover); box-shadow: var(--glass-shadow-hover); }
+.sheetLinks { padding: 4px 14px 12px; overflow-y: auto; overscroll-behavior: contain; min-height: 0; scrollbar-width: thin !important; scrollbar-color: var(--control-border) var(--bg-sunken); scroll-padding-block: 8px; }
+.sheetLinks::-webkit-scrollbar { display: block !important; width: 6px; }
+.sheetLinks::-webkit-scrollbar-thumb { background: var(--control-border); border-radius: 6px; }
+.sheetLinks::-webkit-scrollbar-track { background: var(--bg-sunken); }
+.sheetLinks ul { padding: 0; margin: 0; list-style: none; }
+.sheetLinks li + li { margin-top: 3px; }
+.sheetRow { display: flex; align-items: center; border-radius: 11px; }
+.sheetRow > a { min-height: 47px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex: 1; padding: 10px 13px; font-size: 15px; }
+.sheetRow svg { color: var(--fg-brand); }
+.sheetRow button { width: 46px; min-height: 47px; padding: 0; display: grid; place-items: center; border-radius: 9px; background: transparent; color: var(--fg-brand); }
+.sheetLinks li[data-active] > .sheetRow { background: var(--surface-tint); color: var(--fg-brand); box-shadow: inset 3px 0 0 var(--fg-brand); }
+.sheetRow:hover { background: var(--control-hover); }
+.sheetRow button:hover { background: var(--control-active); }
+.sheetSublinks { padding: 4px 0 8px 13px; margin-left: 13px; border-left: 1px solid color-mix(in oklab, var(--fg-brand) 30%, transparent); animation: unfold 180ms ease both; }
+.sheetSublinks a { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 9px 13px; font-size: 13px; color: var(--fg); border-radius: 8px; }
+.sheetSublinks a svg { color: var(--fg-brand); }
+.sheetSublinks a:hover, .sheetSublinks a[aria-current] { background: var(--control-hover); color: var(--fg-brand); }
+.sheetActions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 16px 22px 20px; border-top: 1px solid color-mix(in oklab, var(--fg-brand) 18%, transparent); flex-shrink: 0; }
+.sheetActions .primaryAction, .sheetActions .secondaryAction { flex: 1; min-height: 46px; }
+.sheetActions .roomAction { flex: 0 0 44px; }
+
+.navigation a:focus-visible, .navigation button:focus-visible, .sheet a:focus-visible, .sheet button:focus-visible { outline: 2px solid var(--control-ring); outline-offset: 3px; box-shadow: 0 0 0 3px var(--bg-sunken); border-radius: 8px; }
+.brand:focus-visible { outline-offset: 4px; }
+.navigation a, .navigation button, .sheet a, .sheet button { touch-action: manipulation; }
+
+@keyframes arrive { from { opacity: .3; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes unfold { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 1279px) {
+  .desktopLinks, .accountActions { display: none; }
+  .compactActions { display: flex; }
+  .navigation { width: min(1000px, 100%); }
+}
+@media (max-width: 767px) {
+  .header { top: 12px; padding-inline: 12px; }
+  .navigation { min-height: 64px; padding: 8px 10px 8px 14px; border-radius: 17px; gap: 12px; }
+  .brand { gap: 8px; }
+  .brand img { width: 36px; height: 40px; }
+  .brand span { font-size: 24px; }
+  .compactActions { gap: 6px; }
+  .compactActions .primaryAction { padding-inline: 12px; font-size: 12px; }
+  .sheet { top: 88px; }
+}
+@media (max-width: 359px) {
+  .brand span { font-size: 22px; }
+  .brand { gap: 5px; }
+  .compactActions .primaryAction { padding-inline: 10px; }
+  .compactActions .primaryAction svg { display: none; }
+  .sheetHeading { padding-inline: 18px; }
+  .sheetActions:has(.roomAction) .secondaryAction { flex-basis: 100%; }
+}
+@media (max-height: 520px) {
+  /* A modal can overlap the fixed bar in landscape: preserve usable rows
+     rather than reserving half the viewport for the page behind it. */
+  .sheet { top: 12px; max-height: calc(100dvh - 24px - env(safe-area-inset-bottom)); }
+  .sheetHeading { padding: 10px 14px; }
+  .sheetHeading h2 { font-size: 24px; }
+  .sheetHeading p { display: none; }
+  .sheetLinks { padding-bottom: 8px; }
+  .sheetActions { padding: 10px 14px; flex-wrap: nowrap; }
+  .sheetActions .primaryAction, .sheetActions .secondaryAction { padding-inline: 10px; font-size: 12px; }
+  .sheetActions:has(.roomAction) .secondaryAction { flex-basis: auto; }
+}
+@media (max-height: 260px) {
+  /* Keep a complete 47px row even at 180px high, with 44px account targets. */
+  .sheetHeading { padding: 4px 10px; }
+  .sheetHeading h2 { font-size: 20px; }
+  .sheetLinks { padding-block: 0; scroll-padding-block: 0; }
+  .sheetActions { padding: 4px 10px; gap: 6px; }
+  .sheetActions .primaryAction, .sheetActions .secondaryAction { min-height: 44px; padding-inline: 8px; font-size: 11px; }
+}
+@media (max-height: 179px) {
+  /* Below that physical limit the whole sheet scrolls, including its footer. */
+  .sheet { overflow-y: auto; scrollbar-width: thin !important; }
+  .sheet::-webkit-scrollbar { display: block !important; width: 6px; }
+  .sheetLinks { flex-shrink: 0; overflow: visible; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .header, .navigation, .navigation *, .sheet, .sheet * { animation: none !important; transition: none !important; }
+  .bookButton:hover .ochreBook { transform: none; }
+}
+@media (forced-colors: active) {
+  .navigation, .sheet, .dropdown { background: Canvas; border-color: CanvasText; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .primaryAction, .secondaryAction, .roomAction, .bookButton, .closeButton { background: ButtonFace; color: ButtonText; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .primaryAction, .bookButton, .closeButton, .sheetActions .secondaryAction { border: 1px solid ButtonText; }
+  .books { display: none; }
+  .contrastMenu { display: block; }
+  .navigation svg, .sheet svg { color: ButtonText; }
+  .navItem[data-active]::after { background: CanvasText; }
+  .navItem[data-active] .navLink, .sheetLinks li[data-active] > .sheetRow { font-weight: 600; }
+  .navigation a:focus-visible, .navigation button:focus-visible, .sheet a:focus-visible, .sheet button:focus-visible { outline-color: Highlight; }
+}

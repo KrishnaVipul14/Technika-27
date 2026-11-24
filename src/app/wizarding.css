@@ -10,25 +10,6 @@ body {
   background-color: var(--bg);
 }
 
-.button-gold {
-  background: var(--gradient-brand);
-  border-color: var(--brand-border);
-  color: var(--on-brand);
-  box-shadow: var(--glow-brand);
-}
-
-.button-gold:hover {
-  background: linear-gradient(115deg,
-      var(--brand-hover),
-      var(--brand));
-  box-shadow: var(--glow-brand);
-}
-
-.button-glass {
-  border-color: var(--line-brand);
-  color: var(--fg-brand);
-}
-
 .main-nav {
   background: color-mix(in oklab, var(--surface-1) 86%, transparent);
   border-color: var(--line-brand);

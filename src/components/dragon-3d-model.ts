@@ -7,8 +7,8 @@ export interface DragonInstance {
   mixer: THREE.AnimationMixer;
   action: THREE.AnimationAction;
   mesh: THREE.SkinnedMesh | null;
-  material: THREE.MeshStandardMaterial | null;
-  originalEmissive: THREE.Color;
+  bodyMaterial: THREE.MeshStandardMaterial | null;
+  eyeMaterial: THREE.MeshStandardMaterial | null;
 }
 
 export interface DragonModelData {
@@ -18,6 +18,50 @@ export interface DragonModelData {
 
 let cachedGltf: DragonModelData | null = null;
 let loadingPromise: Promise<DragonModelData> | null = null;
+let bodyTexturesPromise: Promise<DragonBodyTextures> | null = null;
+
+interface DragonBodyTextures {
+  diffuse: THREE.Texture;
+  emissive: THREE.Texture;
+}
+
+/**
+ * The source FBX ships only an emissive atlas for the body (white with green
+ * scales), so using it as a diffuse map made the dragon read as a white,
+ * untextured plastic toy. These two prepared maps keep the scale pattern but
+ * give the body a pale-jade base colour and a separate glow mask.
+ */
+function loadTexture(url: string): Promise<THREE.Texture> {
+  return new Promise((resolve, reject) => {
+    new THREE.TextureLoader().load(
+      url,
+      (texture) => {
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.flipY = false;
+        texture.anisotropy = 8;
+        texture.needsUpdate = true;
+        resolve(texture);
+      },
+      undefined,
+      reject,
+    );
+  });
+}
+
+function loadDragonBodyTextures(): Promise<DragonBodyTextures> {
+  if (!bodyTexturesPromise) {
+    bodyTexturesPromise = Promise.all([
+      loadTexture("/models/textures/dragon_body_diffuse.webp"),
+      loadTexture("/models/textures/dragon_body_emissive.webp"),
+    ])
+      .then(([diffuse, emissive]) => ({ diffuse, emissive }))
+      .catch((error) => {
+        bodyTexturesPromise = null;
+        throw error;
+      });
+  }
+  return bodyTexturesPromise;
+}
 
 /**
  * Preloads and parses the optimized 3D dragon model once.
@@ -37,6 +81,14 @@ export async function loadDragonGLTF(): Promise<DragonModelData> {
         box.getCenter(center);
         const size = new THREE.Vector3();
         box.getSize(size);
+        if (typeof window !== "undefined") {
+          (window as unknown as { __dragonDebug?: unknown }).__dragonDebug = {
+            size: size.toArray(),
+            center: center.toArray(),
+            min: box.min.toArray(),
+            max: box.max.toArray(),
+          };
+        }
 
         // Normalize initial model orientation and center at origin
         const maxDim = Math.max(size.x, size.y, size.z);
@@ -74,33 +126,58 @@ export async function loadDragonGLTF(): Promise<DragonModelData> {
  */
 export async function createDragonInstance(): Promise<DragonInstance> {
   const gltf = await loadDragonGLTF();
+  // Texture failures must not block the model; fall back to the embedded maps.
+  const bodyTextures = await loadDragonBodyTextures().catch(() => null);
   const clonedScene = SkeletonUtils.clone(gltf.scene) as THREE.Group;
 
   let mesh: THREE.SkinnedMesh | null = null;
-  let material: THREE.MeshStandardMaterial | null = null;
-  let originalEmissive = new THREE.Color(0xd49a2a); // rich mythical amber gold
+  let bodyMaterial: THREE.MeshStandardMaterial | null = null;
+  let eyeMaterial: THREE.MeshStandardMaterial | null = null;
 
   clonedScene.traverse((child) => {
     if ((child as THREE.SkinnedMesh).isSkinnedMesh) {
-      mesh = child as THREE.SkinnedMesh;
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      mesh.frustumCulled = false;
+      const skMesh = child as THREE.SkinnedMesh;
+      skMesh.castShadow = true;
+      skMesh.receiveShadow = true;
+      skMesh.frustumCulled = false;
 
-      if (mesh.material) {
-        // Clone material so color modifications don't affect other instances
-        const mat = (mesh.material as THREE.MeshStandardMaterial).clone();
-        mat.roughness = 0.38;
-        mat.metalness = 0.32;
-        if (mat.normalMap) {
-          mat.normalScale = new THREE.Vector2(1.15, 1.15);
+      const materials = Array.isArray(skMesh.material)
+        ? skMesh.material
+        : [skMesh.material];
+
+      const clonedMaterials = materials.map((m) => {
+        const mat = (m as THREE.MeshStandardMaterial).clone();
+        if (mat.name === "DragonEyes") {
+          // Fiery glowing eyes.
+          mat.roughness = 0.15;
+          mat.metalness = 0.1;
+          mat.emissive = new THREE.Color(0xff2a00);
+          mat.emissiveIntensity = 1.6;
+          eyeMaterial = mat;
+        } else {
+          // Jade-scaled celestial body with a separate glow mask.
+          mat.roughness = 0.42;
+          mat.metalness = 0.18;
+          if (bodyTextures) {
+            mat.map = bodyTextures.diffuse;
+            mat.emissiveMap = bodyTextures.emissive;
+            mat.emissive = new THREE.Color(0x2f6b4a);
+            mat.emissiveIntensity = 0.5;
+          }
+          if (mat.normalMap) {
+            mat.normalScale = new THREE.Vector2(1.2, 1.2);
+          }
+          bodyMaterial = mat;
         }
-        if (mat.emissive) {
-          originalEmissive = mat.emissive.clone();
-        }
-        mesh.material = mat;
-        material = mat;
-      }
+        mat.needsUpdate = true;
+        return mat;
+      });
+
+      skMesh.material = Array.isArray(skMesh.material)
+        ? clonedMaterials
+        : clonedMaterials[0];
+
+      if (!mesh) mesh = skMesh;
     }
   });
 
@@ -115,9 +192,32 @@ export async function createDragonInstance(): Promise<DragonInstance> {
     mixer,
     action,
     mesh,
-    material,
-    originalEmissive,
+    bodyMaterial,
+    eyeMaterial,
   };
+}
+
+/**
+ * Procedural circular soft glow particle texture for magical embers.
+ */
+export function createEmberTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement("canvas");
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext("2d")!;
+
+  const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grad.addColorStop(0, "rgba(255, 255, 255, 1)");
+  grad.addColorStop(0.25, "rgba(255, 220, 130, 0.9)");
+  grad.addColorStop(0.6, "rgba(255, 110, 30, 0.4)");
+  grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 64, 64);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  return texture;
 }
 
 /**
@@ -126,7 +226,7 @@ export async function createDragonInstance(): Promise<DragonInstance> {
 export interface HouseDragonTheme {
   primary: THREE.Color;
   secondary: THREE.Color;
-  emissive: THREE.Color;
+  rim: THREE.Color;
   sparks: THREE.Color[];
 }
 
@@ -134,7 +234,7 @@ export const HOUSE_DRAGON_THEMES: Record<string, HouseDragonTheme> = {
   gryffindor: {
     primary: new THREE.Color("#c83b28"),
     secondary: new THREE.Color("#e9b236"),
-    emissive: new THREE.Color("#d28418"),
+    rim: new THREE.Color("#ffb732"),
     sparks: [
       new THREE.Color("#ffdd55"),
       new THREE.Color("#ff8822"),
@@ -145,7 +245,7 @@ export const HOUSE_DRAGON_THEMES: Record<string, HouseDragonTheme> = {
   slytherin: {
     primary: new THREE.Color("#185a38"),
     secondary: new THREE.Color("#3ba66b"),
-    emissive: new THREE.Color("#2db56a"),
+    rim: new THREE.Color("#44ee88"),
     sparks: [
       new THREE.Color("#66ffaa"),
       new THREE.Color("#22cc77"),
@@ -156,7 +256,7 @@ export const HOUSE_DRAGON_THEMES: Record<string, HouseDragonTheme> = {
   ravenclaw: {
     primary: new THREE.Color("#1c3b6a"),
     secondary: new THREE.Color("#3e82d6"),
-    emissive: new THREE.Color("#2b74d4"),
+    rim: new THREE.Color("#55aaff"),
     sparks: [
       new THREE.Color("#77bbff"),
       new THREE.Color("#3388ff"),
@@ -167,7 +267,7 @@ export const HOUSE_DRAGON_THEMES: Record<string, HouseDragonTheme> = {
   hufflepuff: {
     primary: new THREE.Color("#cf8c1e"),
     secondary: new THREE.Color("#f2c03b"),
-    emissive: new THREE.Color("#dfa024"),
+    rim: new THREE.Color("#ffcc44"),
     sparks: [
       new THREE.Color("#ffdd66"),
       new THREE.Color("#e69922"),

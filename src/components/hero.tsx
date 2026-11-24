@@ -44,11 +44,11 @@ const HERO_CSS = `
 .flying-snitch svg{position:relative;display:block;width:100%;height:100%;filter:drop-shadow(0 0 8px rgba(255, 201, 83, 0.78))}
 `;
 
-/* Buttons (same recipe as the navbar's Register button). */
+/* Shared action colours; the hero retains its own type and spacing. */
 const BTN =
-  "group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full px-7 py-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring";
-const BTN_GOLD = `${BTN} bg-brand text-brand-on shadow-glow-brand hover:bg-brand-hover active:bg-brand-active`;
-const BTN_GLASS = `${BTN} border border-line-strong bg-surface/40 text-fg shadow-inset backdrop-blur-xl backdrop-saturate-150 hover:border-brand/40 hover:bg-brand-soft`;
+  "group relative inline-flex min-h-12 items-center justify-center gap-2 overflow-hidden rounded-full px-7 py-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] transition-shadow";
+const BTN_GOLD = `${BTN} button-gold`;
+const BTN_GLASS = `${BTN} button-glass`;
 
 function GoldenSnitch() {
   const realmRef = useRef<HTMLDivElement>(null);
@@ -526,10 +526,6 @@ export function Hero() {
             </p>
             <div className="hero-actions mt-1 flex flex-wrap items-center justify-center gap-3">
               <Link href="/registrations" className={BTN_GOLD}>
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 bg-gradient-to-br from-fg/40 via-transparent to-transparent"
-                />
                 <span className="relative">Register now</span>
                 <ArrowUpRight
                   size={17}

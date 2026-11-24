@@ -244,6 +244,38 @@
   --brand-border: color-mix(in oklab, var(--primary-500) 45%, transparent);
   --on-brand: var(--neutral-50);
 
+  /* Contrast-safe colour pairs are independent of the glass material.
+     Dark houses use light text; gold/honey invert this pair below. */
+  --action-fill: var(--primary-600);
+  --action-hover: color-mix(in oklab, var(--primary-600) 72%, var(--primary-500));
+  --action-active: var(--primary-700);
+  --action-text: var(--on-brand);
+  --action-border: var(--primary-400);
+  --control-fill: var(--surface-1);
+  --control-hover: var(--surface-2);
+  --control-active: var(--surface-3);
+  --control-border: var(--primary-400);
+  --control-text: var(--fg-brand);
+  --control-ring: var(--primary-200);
+
+  /* Smoked house glass: tint does the contrast work, blur softens real
+     backdrop detail, and static reflections never sweep across labels. */
+  --glass-surface: color-mix(in oklab, var(--surface-tint) 80%, transparent);
+  --glass-menu: color-mix(in oklab, var(--surface-tint) 90%, transparent);
+  --glass-action: color-mix(in oklab, var(--action-fill) 94%, transparent);
+  --glass-action-hover: color-mix(in oklab, var(--action-hover) 94%, transparent);
+  --glass-action-active: color-mix(in oklab, var(--action-active) 94%, transparent);
+  --glass-control: color-mix(in oklab, var(--control-fill) 88%, transparent);
+  --glass-control-hover: color-mix(in oklab, var(--control-hover) 92%, transparent);
+  --glass-control-active: color-mix(in oklab, var(--control-active) 94%, transparent);
+  --glass-edge: color-mix(in oklab, var(--primary-300) 38%, transparent);
+  --glass-reflection: linear-gradient(160deg, rgb(255 255 255 / .025), rgb(255 255 255 / .008) 48%, rgb(0 0 0 / .10));
+  --glass-panel-reflection: linear-gradient(130deg, rgb(255 255 255 / .075), rgb(255 255 255 / .018) 45%, rgb(0 0 0 / .12));
+  --glass-blur: blur(22px) saturate(1.25);
+  --glass-control-blur: blur(12px) saturate(1.2);
+  --glass-shadow: inset 0 1px 0 rgb(255 255 255 / .16), inset 0 -1px 0 rgb(0 0 0 / .22), 0 8px 20px -8px rgb(0 0 0 / .5);
+  --glass-shadow-hover: inset 0 1px 0 rgb(255 255 255 / .24), inset 0 -1px 0 rgb(0 0 0 / .22), 0 12px 24px -8px rgb(0 0 0 / .65);
+
   /* ---------- accent = secondary ---------- */
   --accent: var(--secondary-500);
   --accent-hover: var(--secondary-400);
@@ -416,6 +448,9 @@
   --house-second: var(--primary-400);
   --on-brand: var(--neutral-1000);
   --fg-brand: var(--primary-500);
+  --action-fill: var(--primary-500);
+  --action-hover: var(--primary-400);
+  --action-active: var(--primary-600);
   --link: var(--primary-400);
   --link-hover: var(--primary-300);
   --ring: var(--primary-400);
@@ -518,6 +553,9 @@
   --brand-hover: var(--primary-400);
   --brand-active: var(--primary-600);
   --on-brand: var(--neutral-1000);
+  --action-fill: var(--primary-500);
+  --action-hover: var(--primary-400);
+  --action-active: var(--primary-600);
 }
 
 /* ================================================================== */
@@ -541,32 +579,93 @@ body {
 /* These are the shared brand surfaces used by the pre-existing editorial
    components. The geometry, spacing, typography and illustrations stay
    untouched; only the colour layer follows the authenticated house. */
-html[data-theme] .button-gold {
-  background: var(--gradient-brand);
-  border-color: var(--brand-border);
-  color: var(--on-brand);
-  box-shadow: var(--glow-brand);
+.button-gold {
+  background-color: var(--glass-action);
+  background-image: var(--glass-reflection);
+  border: 1px solid var(--action-border);
+  color: var(--action-text);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-control-blur);
+  backdrop-filter: var(--glass-control-blur);
 }
 
-html[data-theme] .button-gold:hover {
-  background: linear-gradient(
-    115deg,
-    var(--brand-hover),
-    var(--brand)
-  );
-  box-shadow: var(--glow-brand);
+.button-gold:hover:not(:disabled) {
+  background-color: var(--glass-action-hover);
+  box-shadow: var(--glass-shadow-hover);
 }
 
-html[data-theme] .button-glass {
-  border-color: var(--line-brand);
-  background: color-mix(in oklab, var(--surface-1) 72%, transparent);
-  color: var(--fg-brand);
+.button-gold:active:not(:disabled) { background-color: var(--glass-action-active); }
+
+.button-glass {
+  border: 1px solid var(--control-border);
+  background-color: var(--glass-control);
+  background-image: var(--glass-reflection);
+  color: var(--control-text);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-control-blur);
+  backdrop-filter: var(--glass-control-blur);
 }
 
-html[data-theme] .button-glass:hover {
-  background: var(--brand-soft);
-  border-color: var(--brand-border);
-  box-shadow: var(--glow-brand);
+.button-glass:hover:not(:disabled) {
+  background-color: var(--glass-control-hover);
+  box-shadow: var(--glass-shadow-hover);
+}
+
+.button-glass:active:not(:disabled) { background-color: var(--glass-control-active); }
+
+:is(.button, .button-gold, .button-glass):focus-visible {
+  outline: 2px solid var(--control-ring);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px var(--bg-sunken);
+}
+
+.button:disabled {
+  background: var(--surface-2);
+  color: var(--fg-muted);
+  border-color: var(--neutral-500);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.button > svg { color: inherit; }
+
+@media (forced-colors: active) {
+  .button-gold, .button-glass { background: ButtonFace; color: ButtonText; border-color: ButtonText; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .button:disabled { color: GrayText; border-color: GrayText; }
+  :is(.button, .button-gold, .button-glass):focus-visible { outline-color: Highlight; }
+}
+
+/* Opaque fallback is token-level, so every consumer keeps the same states. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root, [data-theme] {
+    --glass-surface: var(--surface-tint);
+    --glass-menu: var(--surface-tint);
+    --glass-action: var(--action-fill);
+    --glass-action-hover: var(--action-hover);
+    --glass-action-active: var(--action-active);
+    --glass-control: var(--control-fill);
+    --glass-control-hover: var(--control-hover);
+    --glass-control-active: var(--control-active);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root, [data-theme] {
+    --glass-surface: var(--surface-tint);
+    --glass-menu: var(--surface-tint);
+    --glass-action: var(--action-fill);
+    --glass-action-hover: var(--action-hover);
+    --glass-action-active: var(--action-active);
+    --glass-control: var(--control-fill);
+    --glass-control-hover: var(--control-hover);
+    --glass-control-active: var(--control-active);
+    --glass-blur: none;
+    --glass-control-blur: none;
+    --glass-reflection: none;
+    --glass-panel-reflection: none;
+  }
 }
 
 html[data-theme] .nav-account.active {

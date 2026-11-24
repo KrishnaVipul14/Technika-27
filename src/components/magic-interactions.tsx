@@ -11,16 +11,11 @@ export function MagicInteractions() {
 
   useEffect(() => {
     if (!enabled || !ready) return;
-    const cleanup: (() => void)[] = [];
-    const ctx = gsap.context(() => {
+    const media = gsap.matchMedia();
+    media.add("(prefers-reduced-motion: no-preference)", () => {
+      const cleanup: (() => void)[] = [];
+      const ctx = gsap.context(() => {
       gsap.fromTo(".scroll-progress", { scaleX: 0 }, { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: .3 } });
-      // Distinct scroll speeds give the story section and Great Hall their own depth.
-      gsap.utils.toArray<HTMLElement>(".about-crest, .campus-art > img, .delegate-emblem, .owl-moon").forEach((element) => {
-        gsap.fromTo(element, { y: 28, rotation: element.classList.contains("about-crest") ? -7 : 0 }, {
-          y: -28, rotation: element.classList.contains("about-crest") ? 7 : 0, ease: "none",
-          scrollTrigger: { trigger: element.parentElement, start: "top bottom", end: "bottom top", scrub: 1.4 },
-        });
-      });
       if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
       const hero = document.querySelector<HTMLElement>(".hero");
       const heroLayer = hero?.querySelector<HTMLElement>(".hero-tilt-layer");
@@ -48,10 +43,13 @@ export function MagicInteractions() {
           hero.removeEventListener("pointerenter", enter);
           hero.removeEventListener("pointermove", move);
           hero.removeEventListener("pointerleave", leave);
+          hero.classList.remove("hero-depth-active");
+          hero.style.removeProperty("--hero-light-x");
+          hero.style.removeProperty("--hero-light-y");
           gsap.set(heroLayer, { clearProps: "transform" });
         });
       }
-      const selector = ".event-card, .sponsor-card, .house-card, .academy-card, .memory-card, .order-card, .about-copy.parchment-sheet, .campus-panel, .sponsor-invite, .invitation";
+      const selector = '.event-card, .sponsor-card, .house-card, .academy-card, .memory-card, .order-gallery[data-magic-hydrated="true"] .order-card, .about-copy.parchment-sheet, .campus-panel, .sponsor-invite, .invitation';
       const attached = new WeakSet<HTMLElement>();
       const attachCards = () => gsap.utils.toArray<HTMLElement>(selector).forEach((element) => {
         if (attached.has(element)) return;
@@ -62,7 +60,7 @@ export function MagicInteractions() {
         const enter = () => {
           rect = element.getBoundingClientRect();
           element.classList.add("magic-card-active");
-          gsap.to(element, { y: -8, scale: 1.015, duration: .35, ease: "power3.out", overwrite: "auto" });
+          ctx.add(() => { gsap.to(element, { y: -8, scale: 1.015, duration: .35, ease: "power3.out", overwrite: "auto" }); });
         };
         const move = (event: PointerEvent) => {
           if (!rect) rect = element.getBoundingClientRect();
@@ -74,7 +72,7 @@ export function MagicInteractions() {
         };
         const leave = () => {
           x(0); y(0); element.classList.remove("magic-card-active");
-          gsap.to(element, { y: 0, scale: 1, duration: .5, ease: "power3.out", overwrite: "auto" });
+          ctx.add(() => { gsap.to(element, { y: 0, scale: 1, duration: .5, ease: "power3.out", overwrite: "auto" }); });
         };
         element.addEventListener("pointerenter", enter);
         element.addEventListener("pointermove", move, { passive: true });
@@ -89,16 +87,18 @@ export function MagicInteractions() {
       });
       attachCards();
       const observer = new MutationObserver((records) => {
-        const newCards = records.some((record) => [...record.addedNodes].some((node) =>
+        const newCards = records.some((record) => record.type === "attributes" || [...record.addedNodes].some((node) =>
           node instanceof Element && (node.matches(selector) || node.querySelector(selector))));
         if (newCards) ctx.add(attachCards);
       });
       const main = document.getElementById("main-content");
-      if (main) observer.observe(main, { childList: true, subtree: true });
+      if (main) observer.observe(main, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-magic-hydrated"] });
       cleanup.push(() => observer.disconnect());
+      });
+      const refresh = window.setTimeout(() => ScrollTrigger.refresh(), 120);
+      return () => { window.clearTimeout(refresh); cleanup.forEach((fn) => fn()); ctx.revert(); };
     });
-    const refresh = window.setTimeout(() => ScrollTrigger.refresh(), 120);
-    return () => { window.clearTimeout(refresh); cleanup.forEach((fn) => fn()); ctx.revert(); };
+    return () => media.revert();
   }, [enabled, ready, pathname]);
 
   return null;

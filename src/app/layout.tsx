@@ -184,7 +184,7 @@ export default function RootLayout({
           Skip to content
         </a>
         <SiteSchema />
-        <Analytics />
+        {process.env.VERCEL === "1" && <Analytics />}
         <HouseProvider initialHouse={theme}>
           <AuthProvider>
             <RegistrationArrivalProvider>

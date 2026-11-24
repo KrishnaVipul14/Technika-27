@@ -1,0 +1,44 @@
+.wrapper {
+  position: fixed;
+  top: 112px;
+  bottom: 22px;
+  right: 0;
+  z-index: 40;
+  width: var(--dragon-width, 56px);
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 350ms ease, visibility 350ms ease;
+}
+.wrapper[data-ready="true"] { opacity: .8; visibility: visible; }
+.wrapper:has(.control:hover), .wrapper:focus-within, .wrapper[data-dragging] { opacity: 1; }
+.guide { position: absolute; top: 20px; bottom: 20px; left: 50%; width: 1px; background: color-mix(in oklab, var(--fg-brand) 16%, transparent); }
+.guideFill { position: absolute; inset: 0; background: color-mix(in oklab, var(--fg-brand) 35%, transparent); transform: scaleY(var(--dragon-progress, 0)); transform-origin: top; }
+.startMarker, .endMarker { position: absolute; left: calc(50% - 2px); width: 5px; height: 5px; transform: rotate(45deg); border: 1px solid color-mix(in oklab, var(--fg-brand) 55%, transparent); }
+.startMarker { top: 3px; }
+.endMarker { bottom: 3px; }
+.canvas { position: absolute; top: 0; right: 0; width: 120px; height: 100%; filter: drop-shadow(0 2px 4px #0006); pointer-events: none; }
+.control { position: absolute; inset: 0; border-radius: 12px; touch-action: none; pointer-events: auto; cursor: grab; transition: background 180ms ease; }
+.control:hover { background: color-mix(in oklab, var(--fg-brand) 3%, transparent); }
+.control:active { cursor: grabbing; }
+.control:focus-visible { outline: 1px solid var(--fg-brand); outline-offset: -5px; background: color-mix(in oklab, var(--bg-sunken) 40%, transparent); }
+.readout { position: absolute; bottom: 6px; right: calc(100% + 5px); display: flex; flex-direction: column; gap: 3px; min-width: 116px; padding: 11px 14px; color: var(--fg-strong); border: 1px solid color-mix(in oklab, var(--fg-brand) 25%, transparent); border-radius: 11px; background: var(--bg-sunken); box-shadow: 0 6px 20px #0005; opacity: 0; transform: translateX(4px); transition: opacity 180ms ease, transform 180ms ease; }
+.readout span:first-child { color: var(--fg-brand); font: 500 26px/1 var(--font-garamond), Georgia, serif; font-variant-numeric: tabular-nums; }
+.readout span:last-child { font-size: 11px; line-height: 1.5; color: var(--fg); white-space: nowrap; }
+.wrapper:has(.control:hover) .readout, .wrapper:focus-within .readout, .wrapper[data-dragging] .readout { opacity: 1; transform: translateX(0); }
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+@media (max-width: 767px), (pointer: coarse) {
+  .wrapper { --dragon-art-width: 24px !important; width: 26px; top: 96px; bottom: calc(20px + env(safe-area-inset-bottom)); }
+  .wrapper[data-ready="true"] { opacity: .65; }
+  .control, .readout, .srOnly { display: none; }
+  .startMarker, .endMarker { width: 3px; height: 3px; left: calc(50% - 1px); }
+  .guide { opacity: .65; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wrapper, .control, .readout { transition: none; transform: none; }
+}
+@media (forced-colors: active) {
+  .wrapper { display: none; }
+}

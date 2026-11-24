@@ -113,26 +113,3 @@ html[data-theme] :where(.auth-success) {
   background-color: var(--success-soft);
   color: var(--success-fg);
 }
-
-html[data-theme] :where(.button-gold) {
-  border-color: var(--brand-border);
-  background: var(--gradient-brand);
-  color: var(--on-brand);
-  box-shadow: var(--glow-brand);
-}
-
-html[data-theme] :where(.button-gold:hover) {
-  background: linear-gradient(115deg, var(--brand-hover), var(--brand));
-}
-
-html[data-theme] :where(.button-glass) {
-  border-color: var(--line-brand);
-  background-color: color-mix(in oklab, var(--surface-1) 72%, transparent);
-  color: var(--fg-brand);
-}
-
-html[data-theme] :where(.button-glass:hover) {
-  border-color: var(--brand-border);
-  background-color: var(--brand-soft);
-  box-shadow: var(--glow-brand);
-}

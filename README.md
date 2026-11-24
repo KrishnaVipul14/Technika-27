@@ -97,6 +97,20 @@ If a Vercel deployment shows `Internal Server Error`, verify that both Supabase 
 3. In **Authentication → Sign In / Providers → Email**, enable **Confirm email** to require inbox verification. With confirmation disabled, Supabase can return a session immediately after sign-up. This behaviour is controlled in the dashboard.
 4. Configure SMTP/delivery and Supabase Auth rate limits for the expected festival traffic.
 
+### Verify the connected project without writing data
+
+```bash
+npm run supabase:check
+```
+
+The checker loads Next.js environment files, validates a browser-safe publishable key, checks Email Auth settings, and requests **zero rows** from `profiles` and `contact_messages` to check the migration columns. It prints no keys, personal data or raw provider error messages, sends no email and changes no accounts/database rows. Failed checks exit nonzero. `npm run test:supabase` runs its offline regressions; these also run in `npm test`.
+
+This is not an RLS, write-permission, signup-trigger, SMTP or callback-allowlist audit. An insert-only contact role may correctly reject a read probe; do not grant it SELECT just to make this check green. Email confirmation being disabled is reported, not changed. Set `NODE_ENV=production` when checking production-specific environment files; shell variables take precedence over `.env.local`.
+
+**Observed local-project setup status (24 November 2026):** the existing `.env.local` connects successfully to Email Auth. The project lacks `profiles.updated_at` and the `contact_messages` table. Applying schema changes requires an authorized Supabase administrative connection; the publishable frontend key cannot do this. Deployment environment variables and dashboard callback/SMTP settings also require hosting/project administration and are not configured by a Git push.
+
+**Review before applying the legacy profiles migration:** `CREATE TABLE IF NOT EXISTS` does not add missing columns to an existing table. The checked-in profiles SQL also contains an unrestricted profile SELECT policy (including phone numbers) and a public `SECURITY DEFINER` assignment function accepting arbitrary user IDs. Do not blindly replay it against a live project. First inspect the live schema, policies, grants and signup triggers with an authorized administrative connection, then reconcile drift and review least-privilege access. No claim is made here that those legacy policies/functions exist in the connected project.
+
 ### Session and access behaviour
 
 - Supabase handles passwords and account sessions; the app does not put passwords in local storage or run a custom password database.
@@ -151,7 +165,7 @@ The original references are preserved in `image refs/`. Optimised versions of th
 
 ## Checks
 
-The offline smoke test is a single command and performs the lint plus production build. It works on Windows, macOS, and Linux:
+The offline smoke test is a single command and performs Supabase checker regressions, lint and the production build. It works on Windows, macOS, and Linux:
 
 ```bash
 npm test

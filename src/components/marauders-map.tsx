@@ -371,7 +371,7 @@ function MapIllustration({
                 <circle className="marker-core" r="7" />
                 <text className="marker-count" x="0" y="4">{eventCounts[venue.id]}</text>
                 <text className="marker-label" x="30" y="5">{venue.label}</text>
-                <title>{venue.label} · {eventCounts[venue.id]} event entries</title>
+                <title>{`${venue.label} · ${eventCounts[venue.id]} event entries`}</title>
               </g>
             );
           })}

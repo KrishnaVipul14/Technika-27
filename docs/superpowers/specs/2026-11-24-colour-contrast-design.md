@@ -1,0 +1,11 @@
+# Button colour, navigation contrast and bug audit
+
+Goal: improve button/nav readability for Technika festival visitors while retaining the five house identities, existing layouts/fonts and dragon artwork. Scope: shared primary/secondary buttons, navbar/mobile disclosures, theme chooser and reproducible public-shell bugs. No authentication/backend redesign, dependencies, commits or unrelated asset changes.
+
+Direction (updated by user: “i want glass morphism”): house-tinted frosted glass for buttons, navbar, mobile disclosures and house chooser. Use actual translucent fills with backdrop blur, a restrained static reflection and inset edge lighting; no moving shimmer over labels. Keep Outfit for controls and Garamond for the brand. Primary actions retain scarlet/emerald/sapphire with light text and gold/honey with dark text. Navigation uses smoked midnight glass and an active underline as well as colour. Hover/pressed pairs must remain AA. Unsupported blur and reduced-transparency preferences receive opaque, equally readable surfaces; forced colours use native system colours.
+
+Alternatives considered: (1) very clear glass, rejected because bright imagery can wash out text; (2) opaque enamel, initially selected but superseded by the user's glassmorphism request; (3) shared semantic colour pairs with smoked, tinted glass, selected by the implementer to honour glassmorphism while keeping house identity and reliable contrast. Preserve all behaviour and prior bug fixes; do not extend the material to unrelated content cards.
+
+Acceptance: normal text >=4.5:1 and control boundaries/focus >=3:1 across all five themes and normal/hover/pressed/focused states; 44px touch targets; open mobile navigation usable in portrait and short landscape; visible inner scrollbars; keyboard dismissal/restoration; reduced-motion and forced-colors support. Preserve entrance/reveal motion, but no animated shine that temporarily lowers text contrast. Test actual DOM/CSS and interactions, then inspect real desktop/mobile screenshots.
+
+Baseline findings: shared primary gradient endpoints measure 2.69–2.72:1 in the three dark-colour houses; mobile sheet overflow is scrollable but its WebKit scrollbar is hidden by `globals.css`'s universal `!important`; local production analytics requests a Vercel-only endpoint. Other bugs must be reproduced before correction.

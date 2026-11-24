@@ -12,7 +12,17 @@ export function OrderGallery() {
   const [filter, setFilter] = useState(filters[0]);
   const [selected, setSelected] = useState<(typeof orderMembers)[number] | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
+  const gallery = useRef<HTMLDivElement>(null);
   const members = filter === filters[0] ? orderMembers : orderMembers.filter((member) => member.category === filter);
+
+  useEffect(() => {
+    const element = gallery.current;
+    if (!element) return;
+    // Global GSAP setup must not touch Motion's server-rendered transforms
+    // until this streamed gallery and its cards have hydrated.
+    element.dataset.magicHydrated = "true";
+    return () => { delete element.dataset.magicHydrated; };
+  }, []);
 
   useEffect(() => {
     if (!selected || !dialog.current) return;
@@ -24,7 +34,7 @@ export function OrderGallery() {
     return () => { element.close(); document.body.style.overflow = overflow; focus?.focus(); };
   }, [selected]);
 
-  return <div id="order" className="order-gallery">
+  return <div ref={gallery} id="order" className="order-gallery">
     <div className="order-filters" aria-label="Filter the Order by chamber">{filters.map((item) => <button key={item} className={filter === item ? "active" : ""} onClick={() => setFilter(item)} aria-pressed={filter === item}>{item}</button>)}</div>
     <div className="ministry-notice-wall"><div className="notice-wall-plaque"><span>BY ORDER OF THE FESTIVAL MINISTRY</span><h2>Educational Decrees</h2><small>THE ORDER OF TECHNIKA · SESSION ’27</small></div><motion.div layout className="order-grid"><AnimatePresence mode="popLayout">{members.map((member) => <motion.article layout initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: .95 }} transition={{ duration: .3 }} key={member.title} className="order-card decree-frame">
       <span className="decree-hanger" aria-hidden="true"/><div className="decree-paper"><span className="decree-topline">EDUCATIONAL DECREE</span><div className="decree-serial">N<sup>o</sup> <strong>{String(26 + member.image).padStart(3, "0")}</strong></div><div className="decree-rule"/><span className="decree-department">{member.category}</span><h3>{member.title}</h3><div className="portrait-frame"><Image src={`/images/order-${member.image}.webp`} alt={`Sealed ministry portrait for ${member.role}`} fill sizes="(max-width: 560px) 45vw, (max-width: 900px) 40vw, 22vw"/><div className="portrait-lock"><span><LockKeyhole size={17}/></span><small>Identity under seal</small></div></div><div className="portrait-copy"><p>{member.role}</p><span className="decree-signature">The Festival Ministry</span><small><i/>Roster unveiling soon</small></div><button type="button" className="read-decree" onClick={() => setSelected(member)} aria-label={`Read decree for ${member.title}`}><ScrollText size={12}/>Read the decree</button></div>

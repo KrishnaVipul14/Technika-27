@@ -6,7 +6,15 @@ async function arrive(page: Page, path = "/") {
   await page.keyboard.press("Enter");
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.locator("h1")).toBeVisible();
-  if (path === "/") await expect(page.locator(".hero-details")).toHaveCSS("opacity", "1");
+  if (path === "/") {
+    const skip = page.getByRole("button", { name: "Skip to castle scene" });
+    if (await skip.isVisible()) await skip.click();
+    // The child starts at opacity 1 while its parent is hidden. Wait for the
+    // actual intro state and both entrances before reading or hovering it.
+    await expect(page.locator("header")).toHaveAttribute("data-ready", "true");
+    await expect(page.locator(".hero-tilt-layer")).toHaveCSS("opacity", "1");
+    await expect(page.locator(".hero-details")).toHaveCSS("opacity", "1");
+  }
 }
 
 test("arrival, home sections, timeline tabs, and real links work", async ({ page }) => {
@@ -29,8 +37,9 @@ test("login exposes the Supabase password recovery flow", async ({ page }) => {
   await page.goto("/login", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Forgot your password?" }).click();
   await expect(page.getByRole("heading", { name: /Recover your castle key/i })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Send my reset letter" })).toBeVisible();
-  await expect(page.getByText(/verified reset link/i)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Send Reset Letter", exact: true })).toBeVisible();
+  await expect(page.getByText(/registered email.*password reset link/i)).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Email address", exact: true })).toHaveAttribute("type", "email");
 });
 
 test("Supabase auth callback keeps the password reset destination", async ({ request }) => {
@@ -54,9 +63,7 @@ test("house crest logo and website icons follow the equipped house", async ({ pa
 test("every themed portal is readable, images load, and layout fits", async ({ page }, testInfo) => {
   test.setTimeout(90000);
   for (const route of ["/", "/registrations", "/members", "/delegate", "/alumni", "/contact"]) {
-    await page.goto(route);
-    await expect(page.getByRole("dialog")).toHaveCount(0);
-    await expect(page.locator("h1")).toBeVisible();
+    await arrive(page, route);
     await expect(page.locator(route === "/" ? ".hero-details" : ".inner-hero")).toHaveCSS("opacity", "1");
     if (route !== "/") await expect(page.locator(".soon-badge")).toBeVisible();
     await page.evaluate(async () => { await document.fonts.ready; await Promise.all([...document.images].filter((img) => img.loading !== "lazy").map((img) => img.decode().catch(() => {}))); });
@@ -211,10 +218,11 @@ test("explicit motion controls can override a reduced-motion system preference",
 test("cards and buttons have visible hover microinteractions", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop");
   await arrive(page);
+  await page.getByRole("navigation", { name: "Main Navigation" }).hover();
   const button = page.locator(".hero-actions .button-gold");
-  const before = await button.evaluate((el) => getComputedStyle(el, "::after").transform);
+  const before = await button.evaluate((el) => getComputedStyle(el).boxShadow);
   await button.hover();
-  await expect.poll(() => button.evaluate((el) => getComputedStyle(el, "::after").transform)).not.toBe(before);
+  await expect.poll(() => button.evaluate((el) => getComputedStyle(el).boxShadow)).not.toBe(before);
   const card = page.locator(".event-card").first();
   await card.scrollIntoViewIfNeeded();
   await card.hover();
