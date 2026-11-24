@@ -43,7 +43,9 @@
 - [x] Fetch all GitHub branches/tags; confirm write permission and `experimento` has no remote-only commits (2 ahead, 0 behind).
 - [x] Run `npm test`, `npm run typecheck`, checker tests, browser smoke checks, and `git diff --check`; inspect staged paths and scan staged content against actual configured credentials.
 - [x] Obtain an independent read-only review and resolve important findings; perform one final robustness improvement if needed.
-- [ ] Commit, perform a normal push to `origin/experimento`, then compare GitHub's branch SHA with local HEAD and enumerate fetched branches.
+- [x] Commit verified application/source/docs changes locally (`62f93fe`).
+- [ ] Perform a normal push to `origin/experimento` and confirm SHA equality — blocked by GitHub authentication (HTTP 403).
+- [x] Confirm remote SHA remains unchanged and enumerate all five fetched branches.
 
 ## Execution ledger
 
@@ -62,3 +64,11 @@ Independent read-only review: no checker defects, 8/8 regressions, lint and non-
 Final: Ruling: preserve existing ahead commits and their two historic screenshot blobs — the user authorized a normal publication, not rewriting earlier work; the final tip excludes captures and local copies remain. Cost if wrong: those historical, non-secret screenshot blobs are still present in GitHub history. Existing model-source archive blobs are also preserved.
 
 Review limitations upheld: live schema/RLS/triggers/SMTP/redirects and authenticated persistence cannot be certified without administration; no new whole-site/device/date certification is implied. Final remote equality and outgoing-history credential scanning are the publication gate, performed by the parent rather than claimed by the reviewer.
+
+Publication gate: checked 42 staged files and 19 outgoing-history blobs against the configured credential value; no match, private key material or excluded artifact was found. Only `.env.example` is tracked. Final index has no screenshots, both historic local captures are preserved, and staged/working-tree whitespace checks passed. A fresh fetch confirmed `experimento` was 2 ahead/0 behind before the application commit.
+
+**GitHub push blocker:** application commit `62f93fe` was created successfully. Normal HTTPS push using the existing macOS Keychain credential failed with HTTP 403 (`Permission ... denied to algospider`). Retrying with an explicit GitHub CLI credential helper also failed with 403, ruling out a stale Git helper alone. Existing SSH authentication failed with `Permission denied (publickey)`. Repository API reports account-level `push: true`, but the currently configured credential cannot exercise it. GitHub's authoritative branch endpoint still reports `6b576a3b0083802ea453a4fbb61d45479e152468`; publication did not happen. No force-push, auth replacement, history rewrite, fork or PR was attempted.
+
+Current GitHub documentation states fine-grained tokens do not support contributing as an outside/repository collaborator; this is consistent with the authenticated collaborator using a fine-grained token here, but its exact grants were not inspected. Unblocking requires an authorized browser/OAuth GitHub login, an authorized SSH key, or suitable collaborator-compatible token authentication. Supabase schema setup separately requires a scoped administrative connection/token. Never place either credential in `NEXT_PUBLIC_*` variables or paste tokens into committed docs.
+
+Task 2 outcome: verified and committed locally, all remote branches fetched, push blocked by authentication. Task 1 checker is complete; live Supabase schema reconciliation remains administratively blocked. Preview: `http://127.0.0.1:3105` (owned production server configured with a 24-hour tool lifetime).
