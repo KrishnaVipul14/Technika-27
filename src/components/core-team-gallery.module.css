@@ -1,0 +1,321 @@
+.page {
+  --council-gold: #d8b778;
+  --council-gold-light: #f2deb1;
+  --council-ink: #44301f;
+  --council-paper: #e9d8b0;
+  --ring: #edce92;
+}
+
+.page.page {
+  padding-block: 114px 65px;
+  background: radial-gradient(ellipse at 50% 6%, #8e704b20, transparent 44%), var(--bg);
+}
+
+.backdrop {
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 auto;
+  height: 780px;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(#000 50%, transparent);
+}
+
+.backdrop > img {
+  object-fit: cover;
+  object-position: center 38%;
+  opacity: .2;
+  filter: saturate(.55) sepia(.25);
+}
+
+.backdrop::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(90deg, var(--bg), transparent 42%, transparent 58%, var(--bg)), linear-gradient(0deg, var(--bg), transparent 80%);
+}
+
+.archLines {
+  position: absolute;
+  z-index: 1;
+  inset: 35px max(8%, calc((100% - 1080px) / 2)) -100px;
+  border: 1px solid #d8b77818;
+  border-radius: 50% 50% 0 0;
+}
+
+.archLines::before,
+.archLines::after {
+  position: absolute;
+  inset: 16px;
+  border: 1px solid #d8b7780f;
+  border-radius: inherit;
+  content: "";
+}
+
+.archLines::after { inset: 30px; }
+.stars { position: absolute; z-index: 2; inset: 80px 5% 0; }
+.stars > span { position: absolute; color: #eac98e; font-size: 10px; opacity: .5; animation: star-glimmer 5s ease-in-out infinite; }
+.stars > span:nth-child(3n) { font-size: 5px; }
+.stars > span:nth-child(4n) { font-size: 15px; }
+
+.page .content { position: relative; z-index: 2; max-width: 1160px; }
+.masthead { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-block: 0 13px; border-bottom: 1px solid #d8b77824; }
+.backLink { display: inline-flex; min-height: 44px; align-items: center; gap: 8px; color: #c9b89a; font-size: 11px; transition: color .2s; }
+.backLink:hover { color: var(--council-gold-light); }
+.archiveMark { display: inline-flex; align-items: center; gap: 13px; color: #bda780; font-size: 8px; letter-spacing: .17em; }
+.archiveMark i { font-size: 12px; font-style: normal; }
+
+.page .hero { position: relative; max-width: none; padding: 25px 0 0; }
+.page .hero .heroKicker { color: var(--council-gold); font-size: 9px; letter-spacing: .22em; }
+.page .hero h1 { display: flex; justify-content: center; align-items: baseline; gap: 17px; margin: 24px 0 17px; color: var(--council-gold-light); line-height: .94; }
+.hero h1 > span { font-family: var(--font-harryp), var(--font-garamond), serif; font-size: clamp(80px, 8.2vw, 112px); font-weight: 400; letter-spacing: .025em; text-shadow: 0 2px 30px #d8b77826; }
+.page .hero h1 > em { color: #eadcc1; font-size: clamp(42px, 4vw, 56px); letter-spacing: -.025em; }
+.page .hero .heroCopy { max-width: 600px; color: #cbbfa9; font-family: var(--font-garamond), serif; font-size: 19px; line-height: 1.55; }
+.page .hero :global(.soon-badge) { margin-top: 17px; border-color: #d8b77838; color: #d9c19a; background: #171a1db3; font-size: 10px; }
+.page .hero .heroDivider { margin: 22px auto 25px; }
+.heroDivider > span { width: 110px; }
+
+/* Floating Great Hall candles are lightweight, decorative CSS shapes. */
+.candle { position: absolute; width: 18px; height: 80px; pointer-events: none; animation: candle-drift 7s ease-in-out infinite; }
+.candle::before { position: absolute; top: -65px; left: -65px; width: 148px; height: 148px; border-radius: 50%; background: radial-gradient(#efb65125, transparent 68%); content: ""; }
+.candleWax { position: absolute; inset: 14px 2px 0; border-radius: 4px 4px 2px 2px; background: linear-gradient(90deg, #9b8058, #f1dcb0 42%, #d0b282 75%, #876b45); box-shadow: 0 5px 12px #0004; }
+.candleWax::before { position: absolute; top: 3px; right: 2px; width: 3px; height: 21px; border-radius: 2px; background: #f6e2b9; content: ""; }
+.candleWax::after { position: absolute; top: -5px; left: 6px; width: 2px; height: 7px; background: #422510; content: ""; }
+.flame { position: absolute; z-index: 1; top: -9px; left: 5px; width: 9px; height: 20px; border-radius: 70% 35% 55% 45%; background: radial-gradient(ellipse at 50% 75%, #fff9e3, #f8d989 40%, #e39742 80%); box-shadow: 0 0 12px #f7b75a70; transform-origin: center bottom; animation: flame-flicker 3s ease-in-out infinite alternate; }
+.candleLeft { top: 55px; left: 6%; rotate: -5deg; }
+.candleLeftSmall { top: 145px; left: 16%; scale: .58; opacity: .6; animation-delay: -3s; }
+.candleRight { top: 85px; right: 7%; rotate: 4deg; animation-delay: -2s; }
+.candleRightSmall { top: 5px; right: 20%; scale: .55; opacity: .55; animation-delay: -4s; }
+.heroSnitch { position: absolute; right: 17%; bottom: 6px; width: 104px; rotate: -15deg; filter: drop-shadow(0 0 13px #d8b77826); pointer-events: none; animation: snitch-drift 8s ease-in-out infinite; }
+
+.ministryNote { display: flex; align-items: center; gap: 18px; padding: 19px 25px; border: 1px solid #ab8b5759; border-radius: 3px; color: var(--council-ink); background: radial-gradient(ellipse at 0 0, #a8753930, transparent 65%), linear-gradient(105deg, #e4cfa5, #f0e2c1 52%, #dec69b); box-shadow: inset 0 0 25px #9363321a, 0 6px 25px #0002; }
+.noteIcon { display: grid; width: 45px; height: 45px; flex-shrink: 0; place-items: center; border: 1px solid #8c653359; border-radius: 50%; color: #7c5030; }
+.noteKicker { color: #7b5133; font-size: 8px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.ministryNote h2 { margin-top: 5px; color: #483021; font-size: clamp(20px, 2vw, 25px); line-height: 1.2; letter-spacing: -.015em; }
+.ministryNote p { margin-top: 5px; color: #715336; font-size: 11px; line-height: 1.6; }
+.noteStamp { margin-left: auto; padding-left: 20px; border-left: 1px solid #906a3d45; color: #805b37; text-align: center; font-size: 8px; line-height: 1.7; letter-spacing: .16em; }
+.noteStamp b { font-family: var(--font-garamond), serif; font-size: 27px; font-weight: 500; letter-spacing: .02em; }
+
+.gallery { margin-top: 35px; }
+.galleryHeading { display: flex; align-items: end; justify-content: space-between; gap: 20px; }
+.galleryKicker { display: inline-flex; align-items: center; gap: 8px; color: var(--council-gold); font-size: 9px; letter-spacing: .15em; text-transform: uppercase; }
+.galleryHeading h2 { margin-top: 9px; color: #eadbc0; font-size: 41px; }
+.galleryHeading h2 em { color: var(--council-gold); }
+.galleryHeading > p { padding-bottom: 3px; color: #d0bfa1; text-align: right; font-family: var(--font-garamond), serif; font-size: 17px; line-height: 1.6; }
+.galleryHeading > p > span { color: #a89b87; font-family: var(--font-outfit), sans-serif; font-size: 10px; }
+.galleryToolbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin: 19px 0 26px; padding-block: 12px; border-block: 1px solid #d8b77826; }
+.filters { display: flex; flex-wrap: wrap; gap: 7px; }
+.filters button { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 7px; padding: 9px 13px; border: 1px solid transparent; border-radius: 3px; color: #c3b69d; background: transparent; font-size: 10px; transition: color .2s, border-color .2s, background-color .2s; }
+.filters button:hover { border-color: #d8b77840; color: #f0dcb4; background: #d8b7780a; }
+.filters button[aria-pressed="true"] { border-color: #d8b77870; color: #edd7af; background: linear-gradient(110deg, #d8b77822, #d8b7780f); box-shadow: inset 0 0 12px #d8b7780a; }
+.filters button > span { display: grid; min-width: 19px; height: 19px; place-items: center; border-radius: 50%; color: #c8ad7d; background: #d8b77813; font-size: 9px; }
+.galleryCount { flex-shrink: 0; color: #b7a080; font-size: 8px; letter-spacing: .14em; }
+.portraitGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 32px 26px; }
+
+/* Gilded wizard portraits with engraved corners and parchment nameplates. */
+.portraitCard,
+.scrollDialog { --seal-base: #74373a; --seal-deep: #3e1b25; --seal-highlight: #b97361; }
+.portraitCard[data-chamber="aurors"],
+.scrollDialog[data-chamber="aurors"] { --seal-base: #3c6151; --seal-deep: #193c32; --seal-highlight: #819878; }
+.portraitCard[data-chamber="faculty"],
+.scrollDialog[data-chamber="faculty"] { --seal-base: #3d536c; --seal-deep: #1d2b42; --seal-highlight: #8797a8; }
+
+.portraitCard { position: relative; min-width: 0; padding: 19px 16px 16px; overflow: hidden; border: 3px solid transparent; border-radius: 5px; background: linear-gradient(145deg, #26251e, #151b1b 50%, #282218) padding-box, linear-gradient(140deg, #eed6a0, #98703a 23%, #493b24 48%, #caa15d 75%, #f0d49b) border-box; box-shadow: 0 15px 30px #0004, inset 0 0 0 1px #d8b77828, inset 0 0 35px #0005; transition: transform .4s ease, box-shadow .4s ease; animation: portrait-arrive .6s ease-out backwards; }
+.portraitCard::before { position: absolute; inset: 5px; border: 1px solid #d8b77835; border-radius: 1px; pointer-events: none; content: ""; }
+.portraitCard::after { position: absolute; z-index: 5; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 35%, #f8e6bc0a 45%, #fff0c733 50%, #f8e6bc0a 55%, transparent 65%); content: ""; transform: translateX(-145%); transition: transform .9s ease; }
+.frameCorner { position: absolute; z-index: 3; width: 35px; height: 35px; color: #d6af6a; pointer-events: none; }
+.topLeft { top: 7px; left: 7px; }
+.topRight { top: 7px; right: 7px; rotate: 90deg; }
+.bottomRight { bottom: 7px; right: 7px; rotate: 180deg; }
+.bottomLeft { bottom: 7px; left: 7px; rotate: 270deg; }
+.cardTopline { display: flex; min-height: 30px; align-items: center; justify-content: center; gap: 12px; padding: 0 20px 10px; }
+.cardTopline > span:first-child { color: #ddc491; font-size: 8px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; }
+.portraitNumber { color: #c29c5e; font-family: var(--font-garamond), serif; font-size: 19px; line-height: 1; }
+.portraitFrame { position: relative; aspect-ratio: 1.35; overflow: hidden; border: 1px solid #d8b7787a; border-radius: 48% 48% 3px 3px; background: #111918; box-shadow: 0 0 0 4px #100f0c, 0 0 0 5px #b18d4b4d, inset 0 0 35px #0009; }
+.portraitFrame::after { position: absolute; z-index: 2; inset: 7px; border: 1px solid #ead0a24d; border-radius: inherit; pointer-events: none; content: ""; }
+.portraitFrame > .portraitImage { object-fit: cover; filter: saturate(.65) sepia(.15); transform: scale(1.09); transition: transform 1s ease, filter 1s ease; }
+.portraitVeil { position: absolute; z-index: 1; inset: 0; background: linear-gradient(0deg, #0c1111 2%, #0c1111b3 16%, transparent 48%), linear-gradient(90deg, #17191138, transparent 50%, #17191138); }
+.portraitStar { position: absolute; z-index: 3; top: 9px; left: 50%; color: #efd294; font-size: 16px; translate: -50% 0; text-shadow: 0 0 13px #ffe6b980; }
+.sealedLabel { position: absolute; z-index: 3; right: 15px; bottom: 18px; left: 15px; display: flex; justify-content: center; align-items: center; gap: 6px; color: #e4d1ad; font-size: 8px; letter-spacing: .12em; text-transform: uppercase; }
+.nameplate { position: relative; margin-top: 15px; padding: 32px 14px 0; border: 1px solid #bca072; border-radius: 2px; text-align: center; background: radial-gradient(ellipse at 0 100%, #a37c4730, transparent 60%), linear-gradient(115deg, #deca9f, #f0e2c3 50%, #e3cfa7); box-shadow: inset 0 0 21px #8f62271a, 0 3px 7px #0004; }
+.nameplate::before { position: absolute; inset: 5px; border: 1px solid #8a63352e; pointer-events: none; content: ""; }
+.waxSeal { position: relative; display: flex; width: 53px; height: 53px; flex-shrink: 0; flex-direction: column; justify-content: center; align-items: center; gap: 2px; border: 3px double #dca97994; border-radius: 46% 54% 48% 52% / 53% 46% 54% 47%; color: #f0c89a; background: radial-gradient(circle at 30% 20%, var(--seal-highlight), var(--seal-base) 50%, var(--seal-deep)); box-shadow: 0 3px 5px #28140e66, inset 0 0 0 3px #0002, inset 0 0 0 4px #efc99345; }
+.waxSeal small { font-family: var(--font-garamond), serif; font-size: 7px; letter-spacing: .1em; line-height: 1; }
+.nameplate > .waxSeal { position: absolute; z-index: 3; top: -26px; left: calc(50% - 26.5px); }
+.nameplateKicker { position: relative; color: #84603a; font-size: 7px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; }
+.nameplate h3 { position: relative; margin-top: 7px; color: #422c1e; font-size: clamp(25px, 2.25vw, 30px); font-weight: 600; line-height: 1.15; letter-spacing: -.025em; }
+.nameplate > p { position: relative; margin-top: 5px; color: #715235; font-size: 11px; line-height: 1.6; }
+.nameplateRule { position: relative; display: flex; align-items: center; justify-content: center; gap: 9px; margin: 10px 0 5px; color: #9e7842; font-size: 9px; }
+.nameplateRule > span { width: 39px; height: 1px; background: #9e78424a; }
+.identityNote { position: relative; color: #785934; font-family: var(--font-handwriting), cursive; font-size: 18px; line-height: 1.4; }
+.scrollButton { position: relative; display: flex; width: 100%; min-height: 46px; justify-content: center; align-items: center; gap: 8px; margin-top: 11px; padding: 9px 3px; border-top: 1px solid #9e78424a; color: #69372c; background: transparent; font-size: 10px; font-weight: 500; letter-spacing: .04em; transition: color .2s, background-color .2s; }
+.scrollButton > svg:last-child { margin-left: 3px; transition: transform .3s; }
+.scrollButton:hover { color: #441d1b; background: #fff5d833; }
+.scrollButton:hover > svg:last-child { transform: translate(2px, -2px); }
+.scrollButton:focus-visible { outline-color: #7b3c2d; outline-offset: -3px; }
+.portraitCard:focus-within { transform: translateY(-6px); box-shadow: 0 20px 35px #0005, 0 0 25px #d8b77817, inset 0 0 0 1px #d8b77845; }
+.galleryFootnote { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 25px; color: #bba888; text-align: center; font-family: var(--font-garamond), serif; font-size: 15px; font-style: italic; line-height: 1.5; }
+
+.closing { display: flex; flex-direction: column; align-items: center; margin-top: 68px; padding-top: 37px; border-top: 1px solid #d8b77826; text-align: center; }
+.closing > svg { margin-bottom: 15px; color: var(--council-gold); }
+.closing > :global(.eyebrow) { color: #d8b778; font-size: 8px; }
+.closing h2 { margin-top: 14px; color: #e6d6b9; font-size: clamp(31px, 3.5vw, 43px); }
+.closing h2 em { color: var(--council-gold); }
+.closing p { margin-top: 14px; color: #bdb09a; font-size: 12px; }
+.sorcerersLink { display: inline-flex; min-height: 46px; align-items: center; gap: 9px; margin-top: 21px; padding: 11px 19px; border: 1px solid #d8b77855; border-radius: 3px; color: #e2c99e; background: #d8b7780a; font-size: 11px; transition: border-color .2s, background-color .2s; }
+.sorcerersLink:hover { border-color: #d8b77899; background: #d8b77819; }
+.signoff { margin-top: 20px; color: #9c896c; font-family: var(--font-handwriting), cursive; font-size: 23px; }
+
+/* A native scroll dialog supplies keyboard focus trapping and Escape dismissal. */
+.scrollDialog { --ring: #7d4331; width: min(650px, calc(100vw - 40px)); max-width: none; max-height: calc(100svh - 40px); margin: auto; padding: 0; overflow: auto; overscroll-behavior: contain; border: 2px solid #b39158; border-radius: 4px; color: #44301f; background: #e9d8b0; box-shadow: 0 25px 100px #0009; color-scheme: light; }
+.scrollDialog::backdrop { background: #090d14d9; backdrop-filter: blur(7px); }
+.scrollPaper { position: relative; padding: 29px 36px 31px; background: radial-gradient(ellipse at 0 0, #af7d3940, transparent 60%), linear-gradient(120deg, #e1cda4, #f1e3c4 55%, #e6d3ac); box-shadow: inset 0 0 45px #99682d20; }
+.scrollDialog[open] .scrollPaper { animation: scroll-arrive .45s ease-out; }
+.scrollPaper::before { position: absolute; inset: 9px; border: 1px solid #8f6b3d45; pointer-events: none; content: ""; }
+.closeScroll { position: sticky; z-index: 3; top: 12px; display: flex; width: 44px; min-height: 44px; justify-content: center; align-items: center; margin: -15px -21px -29px auto; border: 1px solid #8b623842; border-radius: 50%; color: #663c2b; background: #efdfbcf5; }
+.closeScroll:hover { background: #fff0cf; }
+.scrollFolio { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-right: 39px; padding-bottom: 15px; border-bottom: 1px solid #89613a45; color: #7c5734; font-size: 8px; letter-spacing: .13em; line-height: 1.6; }
+.scrollFolio > span:first-child { display: inline-flex; align-items: center; gap: 7px; }
+.scrollFolio > span:last-child { flex-shrink: 0; }
+.scrollHeading { display: grid; grid-template-columns: 135px 1fr; align-items: center; gap: 25px; margin-top: 27px; }
+.scrollPortrait { position: relative; height: 161px; overflow: hidden; border: 3px double #96703e; border-radius: 48% 48% 2px 2px; box-shadow: 0 4px 10px #533c202e; }
+.scrollPortrait::after { position: absolute; inset: 0; background: linear-gradient(0deg, #0e181955, transparent 50%); content: ""; }
+.scrollPortrait > img { object-fit: cover; filter: sepia(.2) saturate(.7); }
+.scrollChamber { color: #79502d; font-size: 9px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; }
+.scrollHeading h2 { margin-top: 8px; color: #4a3022; font-size: 40px; line-height: 1.05; }
+.scrollHeading .scrollRole { margin-top: 9px; color: #775535; font-family: var(--font-garamond), serif; font-size: 19px; line-height: 1.4; }
+.scrollPaper :global(.ornament-divider) { margin-block: 23px; color: #956c39; }
+.scrollPaper :global(.ornament-divider span) { background: linear-gradient(90deg, transparent, #956c3988); }
+.scrollPaper > p { color: #60462e; font-family: var(--font-garamond), serif; font-size: 18px; line-height: 1.7; }
+.scrollPaper > p + p { margin-top: 12px; }
+.scrollPaper > .scrollSalutation { margin-bottom: 11px; color: #713a2b; font-family: var(--font-handwriting), cursive; font-size: 27px; }
+.scrollSignoff { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-top: 28px; padding-top: 18px; border-top: 1px solid #89613a45; }
+.scrollSignoff > div { display: grid; gap: 4px; }
+.scrollSignoff span { color: #755438; font-family: var(--font-garamond), serif; font-size: 15px; }
+.scrollSignoff strong { color: #783f2f; font-family: var(--font-handwriting), cursive; font-size: 29px; font-weight: 500; line-height: 1.2; }
+.scrollSignoff small { margin-top: 4px; color: #795b3f; font-size: 9px; line-height: 1.6; }
+.scrollSignoff .waxSeal { width: 61px; height: 61px; color: #f0c89a; }
+.scrollSignoff .waxSeal small { margin-top: 0; color: #f0c89a; font-size: 7px; line-height: 1; }
+
+@media (hover: hover) and (pointer: fine) {
+  .portraitCard:hover { transform: translateY(-7px) rotate(-.35deg); box-shadow: 0 22px 40px #0006, 0 0 28px #d8b7781c, inset 0 0 0 1px #d8b77845; }
+  .portraitCard:hover::after { transform: translateX(145%); }
+  .portraitCard:hover .portraitImage { transform: scale(1.16); filter: saturate(.95) sepia(.05); }
+}
+
+@keyframes star-glimmer { 0%, 100% { opacity: .2; transform: scale(.8); } 50% { opacity: .7; transform: scale(1.12); } }
+@keyframes candle-drift { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@keyframes flame-flicker { 0%, 100% { transform: scale(.95, 1) rotate(-5deg); opacity: .85; } 50% { transform: scale(1.1, .9) rotate(5deg); opacity: 1; } }
+@keyframes snitch-drift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(9px, -13px); } }
+@keyframes portrait-arrive { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scroll-arrive { from { opacity: .3; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 1000px) {
+  .portraitGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 29px 24px; }
+  .galleryToolbar { flex-wrap: wrap; gap: 9px; }
+  .galleryCount { margin-left: auto; }
+  .nameplate h3 { font-size: 29px; }
+  .candleLeft { left: 1%; }
+  .candleRight { right: 1%; }
+  .candleLeftSmall { left: 12%; }
+  .candleRightSmall { display: none; }
+  .heroSnitch { right: 9%; width: 88px; }
+  .noteStamp { display: none; }
+}
+
+@media (max-width: 620px) {
+  .page.page { padding-block: 101px 48px; }
+  .page .content { width: calc(100% - 36px); }
+  .masthead { padding-bottom: 4px; gap: 9px; }
+  .backLink { gap: 6px; font-size: 10px; }
+  .archiveMark { gap: 6px; font-size: 7px; letter-spacing: .1em; }
+  .archiveMark i { display: none; }
+  .page .hero { padding-top: 24px; }
+  .page .hero .heroKicker { max-width: 280px; font-size: 8px; letter-spacing: .13em; line-height: 1.8; }
+  .page .hero h1 { display: block; margin-top: 18px; }
+  .hero h1 > span { display: block; font-size: clamp(76px, 19vw, 100px); }
+  .page .hero h1 > em { display: block; margin-top: 7px; font-size: 43px; }
+  .page .hero .heroCopy { max-width: 330px; font-size: 17px; line-height: 1.6; }
+  .page .hero :global(.soon-badge) { margin-top: 16px; font-size: 9px; }
+  .page .hero .heroDivider { margin-block: 24px; }
+  .heroDivider > span { width: 75px; }
+  .candle { display: none; }
+  .heroSnitch { right: -13px; bottom: 24px; width: 66px; opacity: .7; }
+  .archLines { right: -18%; left: -18%; }
+  .ministryNote { align-items: start; gap: 12px; padding: 17px 15px; }
+  .noteIcon { width: 32px; height: 32px; margin-top: 2px; }
+  .noteIcon > svg { width: 18px; }
+  .noteKicker { font-size: 7px; letter-spacing: .1em; line-height: 1.6; }
+  .ministryNote h2 { margin-top: 6px; font-size: 22px; line-height: 1.15; }
+  .ministryNote p { margin-top: 7px; font-size: 10px; }
+  .gallery { margin-top: 32px; }
+  .galleryHeading { align-items: start; flex-direction: column; gap: 10px; }
+  .galleryKicker { font-size: 8px; letter-spacing: .12em; }
+  .galleryHeading h2 { margin-top: 7px; font-size: 37px; }
+  .galleryHeading > p { text-align: left; font-size: 16px; }
+  .galleryHeading > p > span { font-size: 10px; }
+  .galleryToolbar { margin-block: 18px 24px; padding-block: 11px; gap: 13px; }
+  .filters { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+  .filters button { gap: 6px; padding: 9px 7px; border-color: #d8b77820; font-size: 9px; }
+  .filters button > span { min-width: 17px; height: 17px; font-size: 8px; }
+  .filters button > svg { width: 12px; }
+  .galleryCount { font-size: 7px; }
+  .portraitGrid { max-width: 390px; grid-template-columns: minmax(0, 1fr); gap: 27px; margin-inline: auto; }
+  .portraitCard { padding: 19px 16px 16px; }
+  .portraitFrame { aspect-ratio: 1.28; }
+  .nameplate { padding-inline: 12px; }
+  .nameplate h3 { font-size: 30px; }
+  .nameplateKicker { font-size: 7px; }
+  .nameplate > p { font-size: 12px; }
+  .sealedLabel { font-size: 8px; letter-spacing: .1em; }
+  .scrollButton { font-size: 11px; min-height: 48px; }
+  .galleryFootnote { align-items: start; gap: 7px; padding-inline: 8px; font-size: 14px; }
+  .galleryFootnote > svg { margin-top: 4px; }
+  .closing { margin-top: 45px; padding-top: 30px; }
+  .closing h2 { max-width: 340px; margin-top: 13px; font-size: 34px; }
+  .closing h2 em { display: block; margin-top: 3px; }
+  .closing p { max-width: 300px; font-size: 11px; }
+  .sorcerersLink { font-size: 10px; }
+  .signoff { font-size: 22px; }
+  .scrollDialog { width: calc(100vw - 24px); max-height: calc(100svh - 24px); }
+  .scrollPaper { padding: 27px 23px 25px; }
+  .closeScroll { margin-right: -10px; }
+  .scrollFolio { font-size: 7px; letter-spacing: .07em; gap: 8px; }
+  .scrollFolio > span:first-child { gap: 5px; }
+  .scrollFolio > span:first-child > svg { width: 12px; }
+  .scrollHeading { grid-template-columns: 90px 1fr; gap: 17px; margin-top: 25px; }
+  .scrollPortrait { height: 122px; }
+  .scrollChamber { font-size: 8px; letter-spacing: .1em; }
+  .scrollHeading h2 { margin-top: 7px; font-size: 30px; }
+  .scrollHeading .scrollRole { margin-top: 7px; font-size: 16px; }
+  .scrollPaper > p { font-size: 17px; }
+  .scrollPaper > .scrollSalutation { font-size: 25px; }
+  .scrollSignoff { gap: 12px; }
+  .scrollSignoff strong { font-size: 27px; }
+  .scrollSignoff small { font-size: 8px; }
+  .scrollSignoff .waxSeal { width: 49px; height: 49px; }
+}
+
+@media (max-width: 360px) {
+  .archiveMark { max-width: 75px; text-align: right; line-height: 1.6; }
+  .page .hero .heroKicker { max-width: 230px; }
+  .noteIcon { display: none; }
+  .filters button { gap: 4px; font-size: 8px; }
+  .nameplate h3 { font-size: 27px; }
+  .scrollHeading { grid-template-columns: 1fr; gap: 16px; text-align: center; }
+  .scrollPortrait { width: 110px; height: 128px; margin-inline: auto; }
+  .scrollSignoff strong { font-size: 24px; }
+}
+
+:global(html[data-magic="off"]) .candle,
+:global(html[data-magic="off"]) .flame,
+:global(html[data-magic="off"]) .heroSnitch,
+:global(html[data-magic="off"]) .stars > span { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  .candle, .flame, .heroSnitch, .heroSnitch :global(.snitch-wing), .stars > span, .portraitCard, .scrollDialog[open] .scrollPaper { animation: none; }
+  .portraitCard, .portraitCard::after, .portraitFrame > .portraitImage, .scrollButton, .scrollButton > svg:last-child { transition: none; }
+  .portraitCard:hover, .portraitCard:focus-within { transform: none; }
+  .portraitCard:hover::after { transform: translateX(-145%); }
+  .portraitCard:hover .portraitImage { transform: scale(1.09); }
+}
