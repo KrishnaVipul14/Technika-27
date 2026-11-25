@@ -369,73 +369,6 @@ function BookBurger({
    leaning against the top-right corner of the middle book.
    The fall is staged like real physics: slide off the stack -> slow tip over the
    corner -> accelerating free fall -> impact slap -> damped rocking to rest. */
-const CSS = `
-.tn-book{position:absolute;border-radius:2px 3px 3px 2px;transform-origin:50% 50%;
-   background:
-     radial-gradient(circle at 18% 62%,color-mix(in srgb,var(--brand) 75%,transparent) 0 1.1px,transparent 1.7px),
-     radial-gradient(circle at 71% 28%,color-mix(in srgb,var(--brand-active) 70%,transparent) 0 1px,transparent 1.6px),
-     linear-gradient(90deg,transparent 36%,color-mix(in srgb,var(--fg-accent) 55%,transparent) 36% 64%,transparent 64%) 0 50%/100% 1px no-repeat,
-     linear-gradient(180deg,color-mix(in srgb,var(--fg-brand) 30%,transparent),color-mix(in srgb,var(--fg-brand) 0%,transparent) 40%,color-mix(in srgb,var(--bg-sunken) 38%,transparent)),
-     var(--book);
-   box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--bg-sunken) 55%,transparent),0 1px 1.5px color-mix(in srgb,var(--bg-sunken) 60%,transparent)}
-.tn-book::before,.tn-book::after{content:"";position:absolute;top:0;bottom:0;width:2px;
-  background:linear-gradient(180deg,var(--fg-brand),var(--brand-active));opacity:.85}
-.tn-book::before{left:5px}.tn-book::after{right:5px}
-.tn-b1{left:8px;top:36px;width:30px;height:8px;--book:var(--brand-active);--thud:.8px}
-.tn-b2{left:9px;top:26px;width:28px;height:8px;--book:var(--primary-800);--thud:1.6px}
-.tn-b3{left:7px;top:16px;width:30px;height:8px;--book:var(--primary-600);transition:transform .25s ease}
-.tn-burger[data-state="idle"]:hover .tn-b3{transform:translate(1px,-1.5px) rotate(-2.5deg)}
-.tn-burger[data-state="open"] .tn-b3{animation:tn-fall 1.05s both}
-.tn-burger[data-state="close"] .tn-b3{animation:tn-rise .9s both}
-.tn-burger[data-state="open"] .tn-b1,.tn-burger[data-state="open"] .tn-b2{animation:tn-thud 1.05s both}
-
-@keyframes tn-fall{
-  0%{transform:translate(0,0) rotate(0);animation-timing-function:ease-out}
-  12%{transform:translate(2.5px,-1px) rotate(-3deg);animation-timing-function:ease-in-out}
-  24%{transform:translate(7px,-.5px) rotate(3deg);animation-timing-function:ease-in}
-  34%{transform:translate(11.5px,1px) rotate(12deg);animation-timing-function:ease-in}
-  43%{transform:translate(15px,2.6px) rotate(27deg);animation-timing-function:ease-in}
-  51%{transform:translate(17.5px,4.8px) rotate(46deg);animation-timing-function:ease-in}
-  58%{transform:translate(19.5px,6.9px) rotate(64deg);animation-timing-function:ease-in}
-  64%{transform:translate(20.9px,8.3px) rotate(80deg);animation-timing-function:ease-in}
-  68%{transform:translate(21.6px,8.9px) rotate(88deg);animation-timing-function:ease-out}
-  76%{transform:translate(21.8px,8.3px) rotate(62deg);animation-timing-function:ease-in-out}
-  85%{transform:translate(21.1px,8.6px) rotate(79deg);animation-timing-function:ease-out}
-  92%{transform:translate(20.8px,8.5px) rotate(68deg);animation-timing-function:ease-in-out}
-  100%{transform:translate(20.7px,8.5px) rotate(72deg)}
-}
-@keyframes tn-rise{
-  0%{transform:translate(20.7px,8.5px) rotate(72deg);animation-timing-function:ease-in-out}
-  8%{transform:translate(20.8px,8.5px) rotate(68deg);animation-timing-function:ease-in-out}
-  15%{transform:translate(21.1px,8.6px) rotate(79deg);animation-timing-function:ease-in-out}
-  24%{transform:translate(21.8px,8.3px) rotate(62deg);animation-timing-function:ease-out}
-  32%{transform:translate(21.6px,8.9px) rotate(88deg);animation-timing-function:ease-in}
-  36%{transform:translate(20.9px,8.3px) rotate(80deg);animation-timing-function:ease-out}
-  42%{transform:translate(19.5px,6.9px) rotate(64deg);animation-timing-function:ease-out}
-  49%{transform:translate(17.5px,4.8px) rotate(46deg);animation-timing-function:ease-out}
-  57%{transform:translate(15px,2.6px) rotate(27deg);animation-timing-function:ease-out}
-  66%{transform:translate(11.5px,1px) rotate(12deg);animation-timing-function:ease-out}
-  76%{transform:translate(7px,-.5px) rotate(3deg);animation-timing-function:ease-in-out}
-  88%{transform:translate(2.5px,-1px) rotate(-3deg);animation-timing-function:ease-in-out}
-  100%{transform:translate(0,0) rotate(0)}
-}
-@keyframes tn-thud{
-  0%,66%{transform:none}
-  72%{transform:translateY(var(--thud))}
-  80%{transform:translateY(calc(var(--thud) * -.4))}
-  88%,100%{transform:none}
-}
-
-@keyframes tn-pop{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
-.tn-pop{animation:tn-pop .16s ease-out both}
-@keyframes tn-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.tn-in{animation:tn-in .35s ease-out both}
-
-@media (prefers-reduced-motion:reduce){
-  .tn-book,.tn-pop,.tn-in{animation-duration:.01ms!important;animation-delay:0s!important;transition:none!important}
-}
-`;
-
 /* ================================================================== */
 /* Desktop                                                             */
 /* ================================================================== */
@@ -914,7 +847,7 @@ export default function TechnikaNavbar({
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      {/* Book-burger animation styles live in src/app/globals.css. */}
 
       {menuOpen && (
         <div

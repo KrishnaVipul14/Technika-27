@@ -2,7 +2,7 @@ import Image from "next/image";
 import { houseLogoFor, houseThemes } from "@/lib/houses";
 import { houseLore, unavailableSources } from "@/lib/common-room/content";
 import type { AssignedHouse } from "@/lib/common-room/types";
-import styles from "../common-room.module.css";
+import { room as styles } from "@/lib/css-classes";
 
 export function HouseArchivesPanel({ house }: { house: AssignedHouse }) {
   const theme = houseThemes[house];

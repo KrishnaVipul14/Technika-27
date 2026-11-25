@@ -14,7 +14,7 @@ import { CameraController } from "./camera-controller";
 import { RenderLifecycle } from "./render-lifecycle";
 import type { RoomFailure } from "./room-fallback";
 import { sceneLoaders } from "./room-assets";
-import styles from "./common-room.module.css";
+import { room as styles } from "@/lib/css-classes";
 
 const SlytherinScene = lazy(sceneLoaders.slytherin);
 const GryffindorScene = lazy(sceneLoaders.gryffindor);

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { houseThemes } from "@/lib/houses";
 import { unavailableSources } from "@/lib/common-room/content";
 import type { RoomParticipant } from "@/lib/common-room/types";
-import styles from "../common-room.module.css";
+import { room as styles } from "@/lib/css-classes";
 
 export function ParticipantProfilePanel({ participant, accountActions }: { participant: RoomParticipant; accountActions: ReactNode }) {
   return <article>

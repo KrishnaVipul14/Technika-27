@@ -26,8 +26,7 @@ import {
   houseIconFor,
   themeAttributeForHouse,
 } from "@/lib/houses";
-import "lenis/dist/lenis.css";
-import "./main.css";
+import "./globals.css";
 
 const garamond = localFont({
   src: [

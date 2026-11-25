@@ -149,6 +149,463 @@ The original references are preserved in `image refs/`. Optimised versions of th
 - Alternatively set `CONTACT_FORM_WEBHOOK_URL` to deliver the validated payload to an approved email/automation provider without storing it in Supabase.
 - Set `NEXT_PUBLIC_CONTACT_EMAIL` only when you want the organisation schema to publish a contact email address.
 
+## Styling and theming
+
+Every visual decision lives in one stylesheet: [`src/app/globals.css`](src/app/globals.css). It is imported once by [`src/app/layout.tsx`](src/app/layout.tsx) and contains the Tailwind entry point, the base layer, the five house themes, every page and component style, the shared animations, and the vendored Lenis scroll rules. There are no CSS Modules and no component `<style>` blocks.
+
+The class names that used to come from CSS Modules are kept in [`src/lib/css-classes.ts`](src/lib/css-classes.ts). Components import one of the maps (`acceptance`, `arrival`, `registry`, `council`, `room`) as `styles`, so markup still reads `styles.root`; the maps point at the prefixed global classes `acceptance-*`, `arrival-*`, `registry-*`, `council-*`, and `cr-*`. When you add a class to one of those sections, add it to the matching map too.
+
+### Section order
+
+`globals.css` is concatenated in a deliberate cascade order. Later sections intentionally override earlier ones, so **do not reorder the sections**. Add new rules to the section that owns the component.
+
+| # | Section | What belongs there |
+| --- | --- | --- |
+| 1 | Globals | Tailwind bridge, reset, typography, scrollbar, shared page chrome and loading scene. |
+| 2 | Wizarding | Home page, hero, castle, house, timeline and shared festival sections. |
+| 3 | Marauders map | Map paper palette, map controls, markers and event cards. |
+| 4 | Reference portals | Shared coming-soon/reference-page chrome. |
+| 5 | House themes | OKLCH generator, semantic tokens, five theme presets and their overrides. |
+| 6 | Theme utilities | The `theme-*` component classes and the cross-site colour bridge. |
+| 7 | Home experience | Atelier-style home sections, scroll scenes and home-only palettes. |
+| 8 | Page components | Former CSS Modules: acceptance letter, arrival, alumni registry, council gallery, common room. |
+| 9 | Component animations | Former inline `<style>` blocks: header and navbar book-burgers, hero candles and snitch. |
+| 10 | Lenis | Vendored `lenis/dist/lenis.css` (MIT). |
+
+### How a house theme works
+
+A theme only declares a handful of knobs: a hue, a chroma and a peak lightness for the primary, secondary and tertiary scales, a hue and chroma for the neutrals, the tower-light hue, and four status hues. The generator turns those knobs into the full 11-step scales and every semantic token, so all five themes always expose exactly the same variable names.
+
+`data-theme` is set on `<html>` by the boot script in `layout.tsx` and kept in sync by the house provider. The values are `hogwarts` (the default gold look), `gryffindor`, `slytherin`, `ravenclaw` and `hufflepuff`. You can put `data-theme="ravenclaw"` on any element to theme just that subtree — the whole token system recomputes there, which is how the house cards and previews work.
+
+Colours are authored in OKLCH. A 2023+ browser is required (Chrome 111, Safari 15.4, Firefox 113).
+
+### Theme knobs
+
+These are the only values a house preset needs. All of them live in section 5 of `globals.css`.
+
+| Knob | Hogwarts (default) | Gryffindor | Slytherin | Ravenclaw | Hufflepuff |
+| --- | --- | --- | --- | --- | --- |
+| `--primary-hue` | 81 | 27 | 158 | 262 | 90 |
+| `--primary-chroma` | 0.115 | 0.205 | 0.145 | 0.18 | 0.17 |
+| `--primary-light` | 0.88 | 0.6 | 0.56 | 0.58 | 0.84 |
+| `--secondary-hue` | 300 | 86 | 235 | 68 | 62 |
+| `--secondary-chroma` | 0.13 | 0.145 | 0.025 | 0.115 | 0.14 |
+| `--secondary-light` | 0.6 | 0.82 | 0.78 | 0.72 | 0.72 |
+| `--tertiary-hue` | 48 | 52 | 190 | 225 | 138 |
+| `--tertiary-chroma` | 0.125 | 0.15 | 0.1 | 0.085 | 0.095 |
+| `--tertiary-light` | 0.62 | 0.68 | 0.72 | 0.8 | 0.7 |
+| `--neutral-hue` | 294 | 22 | 165 | 268 | 75 |
+| `--neutral-chroma` | 0.027 | 0.022 | 0.02 | 0.03 | 0.018 |
+| `--success-hue` | 155 | 150 | 128 | 155 | 150 |
+| `--warning-hue` | 60 | 62 | 85 | 80 | 55 |
+| `--danger-hue` | 20 | 8 | 22 | 22 | 25 |
+| `--info-hue` | 245 | 250 | 235 | 220 | 245 |
+| `--house-tower-hue` | 0deg | 325deg | 85deg | 170deg | 0deg |
+
+The five presets also override a few semantic tokens where the generic mapping would not read well on that palette:
+
+| Theme | Overrides |
+| --- | --- |
+| Hogwarts | `--house-flag: var(--primary-800)` · `--house-second: var(--primary-400)` · `--on-brand: var(--neutral-1000)` · `--fg-brand: var(--primary-500)` · `--link: var(--primary-400)` · `--link-hover: var(--primary-300)` · `--ring: var(--primary-400)` · `--selection: color-mix(in oklab, var(--primary-500) 30%, transparent)` |
+| Gryffindor, Slytherin, Ravenclaw | `--brand-hover: var(--primary-600)` · `--brand-active: var(--primary-700)` |
+| Hufflepuff | `--brand-hover: var(--primary-400)` · `--brand-active: var(--primary-600)` · `--on-brand: var(--neutral-1000)` |
+
+### Editing recipes
+
+**Recolour a house.** Change only that house's `--primary-*` (or `--secondary-*` / `--tertiary-*`) knobs in section 5. Keep `--primary-light` high enough that `--fg-brand` stays readable on the dark surfaces; the house presets use `0.56`–`0.88` for that reason. To validate, load any page with `data-theme` set to the house and check body text, buttons, the navbar and one parchment page.
+
+**Change the warmth of the darks.** `--neutral-hue` and `--neutral-chroma` control every background, surface, border and muted text at once. Raising chroma above roughly `0.04` starts to tint the whole site; lowering it toward `0` gives a neutral grey.
+
+**Theme one page or card.** Put `data-theme="gryffindor"` on a wrapper. All child components use the local tokens automatically. This is cheaper and safer than writing new colour rules.
+
+**Add a sixth house.** Add its selector to the shared generator list (`:root, [data-theme="hogwarts"], …`), add a preset block with the 16 knobs above, add the key to `src/lib/houses.ts` (`houseThemes`, `selectableHouses`, crest paths), and make sure the boot script and `houseFromValue` accept it. No component CSS should need to change.
+
+**Change the type.** The font families come from `next/font` in `src/app/layout.tsx` and are exposed as `--font-garamond`, `--font-outfit`, `--font-handwriting` and `--font-harryp`. Tailwind reads them through `--font-serif`, `--font-sans` and `--font-harryp`. Swap the loader there, not in `globals.css`.
+
+**Retune a page's paper palette.** The acceptance letter, alumni registry, council gallery and common room each expose a small local palette. Edit the tokens in their section 8 block; the table below lists them. These are intentionally independent of the house theme so the printed/parchment objects keep their material colour.
+
+### Core tokens
+
+These tokens are generated for every theme. Components should use them instead of raw colours; that is what makes a house swap recolour the whole site.
+
+#### Scales
+
+Each scale has 11 steps. Step `500` is the pure colour and is the only step that equals the knobs exactly; `50`–`400` interpolate toward white (`0.985` lightness), and `600`–`950` interpolate toward `0.19` lightness. Use `300`–`500` for text and accents on dark surfaces, `700`–`950` for fills and borders, and `50`–`200` for text on light parchment.
+
+| Step | Primary | Secondary | Tertiary |
+| --- | --- | --- | --- |
+| 50 | `--primary-50` | `--secondary-50` | `--tertiary-50` |
+| 100 | `--primary-100` | `--secondary-100` | `--tertiary-100` |
+| 200 | `--primary-200` | `--secondary-200` | `--tertiary-200` |
+| 300 | `--primary-300` | `--secondary-300` | `--tertiary-300` |
+| 400 | `--primary-400` | `--secondary-400` | `--tertiary-400` |
+| 500 | `--primary-500` | `--secondary-500` | `--tertiary-500` |
+| 600 | `--primary-600` | `--secondary-600` | `--tertiary-600` |
+| 700 | `--primary-700` | `--secondary-700` | `--tertiary-700` |
+| 800 | `--primary-800` | `--secondary-800` | `--tertiary-800` |
+| 900 | `--primary-900` | `--secondary-900` | `--tertiary-900` |
+| 950 | `--primary-950` | `--secondary-950` | `--tertiary-950` |
+
+| Step | Token | Lightness |
+| --- | --- | --- |
+| 50 | `--neutral-50` | 0.975 |
+| 100 | `--neutral-100` | 0.94 |
+| 200 | `--neutral-200` | 0.88 |
+| 300 | `--neutral-300` | 0.79 |
+| 400 | `--neutral-400` | 0.68 |
+| 500 | `--neutral-500` | 0.56 |
+| 600 | `--neutral-600` | 0.44 |
+| 700 | `--neutral-700` | 0.34 |
+| 800 | `--neutral-800` | 0.26 |
+| 900 | `--neutral-900` | 0.2 |
+| 950 | `--neutral-950` | 0.15 |
+| 1000 | `--neutral-1000` | 0.105 |
+
+The neutral steps are tinted by `--neutral-hue` / `--neutral-chroma`; the chroma is scaled up from `50` to `500` and stays near full strength for the darks.
+
+#### Surfaces
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--bg-sunken` | `var(--neutral-1000)` | Deepest chrome behind the page. |
+| `--bg` | `var(--neutral-950)` | Base page background. |
+| `--surface-1` | `var(--neutral-900)` | Panels, cards and inputs. |
+| `--surface-2` | `var(--neutral-800)` | Raised controls and hovered surfaces. |
+| `--surface-3` | `var(--neutral-700)` | Highest surface and strong separators. |
+| `--bg-tint` | `primary-900` 40% over `neutral-950` | House-tinted page wash. |
+| `--surface-tint` | `primary-900` 50% over `neutral-900` | House-tinted panel. |
+| `--overlay` | `neutral-1000` 72% | Modal and drawer scrim. |
+| `--hover-overlay` | `neutral-50` 6% | Generic hover wash. |
+| `--active-overlay` | `neutral-50` 10% | Generic pressed wash. |
+
+#### Text
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--fg-strong` | `var(--neutral-50)` | Headings and high-emphasis text. |
+| `--fg` | `var(--neutral-100)` | Default body text. |
+| `--fg-muted` | `var(--neutral-300)` | Secondary copy, labels, descriptions. |
+| `--fg-subtle` | `var(--neutral-400)` | Captions, placeholders, metadata. |
+| `--fg-disabled` | `var(--neutral-500)` | Disabled labels and icons. |
+| `--fg-brand` | `var(--primary-300)` | House-coloured headings and accents. |
+| `--fg-accent` | `var(--secondary-300)` | Metal / secondary accent text. |
+| `--fg-highlight` | `var(--tertiary-300)` | Supporting accent text. |
+| `--link` | `var(--secondary-300)` | Inline link colour. |
+| `--link-hover` | `var(--secondary-200)` | Inline link hover. |
+| `--text` | `var(--fg)` | Legacy alias for `--fg`. |
+| `--muted` | `var(--fg-muted)` | Legacy alias for `--fg-muted`. |
+| `--panel` | `var(--surface-1)` | Legacy alias for a panel surface. |
+| `--gold` | `var(--fg-brand)` | Legacy alias for the house accent. |
+| `--gold-deep` | `var(--primary-600)` | Legacy deeper accent. |
+| `--ink` | `var(--neutral-800)` | Legacy dark ink; re-declared by parchment pages. |
+| `--paper` | `var(--neutral-100)` | Legacy light paper; re-declared by the registry. |
+
+#### Borders and focus
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--line-subtle` | `var(--neutral-800)` | Hairline separators. |
+| `--line` | `var(--neutral-700)` | Default border. |
+| `--line-strong` | `var(--neutral-600)` | Emphasised border. |
+| `--line-brand` | `primary-500` 45% | House-coloured border. |
+| `--line-accent` | `secondary-500` 45% | Metal-coloured border. |
+| `--ring` | `var(--secondary-400)` | Focus ring colour. |
+| `--ring-offset` | `var(--bg)` | Focus ring offset. |
+| `--selection` | `secondary-500` 35% | Text selection background. |
+
+#### Brand, accent and highlight
+
+Each family has the same shape: a solid fill, hover/active variants, translucent soft fills, a border and a foreground colour for text placed on the solid fill. Use the soft fill plus border for ghost buttons and badges.
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--brand` | `var(--primary-500)` | Primary solid fill (house colour). |
+| `--brand-hover` | `var(--primary-400)` | Primary hover; some houses use `600` instead. |
+| `--brand-active` | `var(--primary-600)` | Primary pressed; some houses use `700`. |
+| `--brand-soft` | `primary-500` 14% | Translucent primary fill. |
+| `--brand-soft-hover` | `primary-500` 22% | Translucent primary hover. |
+| `--brand-border` | `primary-500` 45% | Primary border. |
+| `--on-brand` | `var(--neutral-50)` | Text/icon on a primary fill; Hogwarts and Hufflepuff use `neutral-1000`. |
+| `--accent` | `var(--secondary-500)` | Secondary solid fill. |
+| `--accent-hover` | `var(--secondary-400)` | Secondary hover. |
+| `--accent-active` | `var(--secondary-600)` | Secondary pressed. |
+| `--accent-soft` | `secondary-500` 14% | Translucent secondary fill. |
+| `--accent-soft-hover` | `secondary-500` 22% | Translucent secondary hover. |
+| `--accent-border` | `secondary-500` 45% | Secondary border. |
+| `--on-accent` | `var(--neutral-1000)` | Text/icon on a secondary fill. |
+| `--highlight` | `var(--tertiary-500)` | Tertiary solid fill. |
+| `--highlight-hover` | `var(--tertiary-400)` | Tertiary hover. |
+| `--highlight-active` | `var(--tertiary-600)` | Tertiary pressed. |
+| `--highlight-soft` | `tertiary-500` 14% | Translucent tertiary fill. |
+| `--highlight-soft-hover` | `tertiary-500` 22% | Translucent tertiary hover. |
+| `--highlight-border` | `tertiary-500` 45% | Tertiary border. |
+| `--on-highlight` | `var(--neutral-1000)` | Text/icon on a tertiary fill. |
+
+`--accent` is remapped by the small accent utilities: `.accent-gold` uses `--fg-accent`, `.accent-crimson` uses `--fg-brand`, `.accent-blue` uses `--fg-highlight`, and `.parchment-card` pins it to `#8d432f` for readable links on cream paper.
+
+#### Status and charts
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--success-solid` | `oklch(0.64 0.15 var(--success-hue))` | Success fill. |
+| `--success-fg` | `oklch(0.82 0.12 var(--success-hue))` | Success text. |
+| `--success-soft` | `success-solid` 16% | Success background. |
+| `--success-border` | `success-solid` 42% | Success border. |
+| `--warning-solid` | `oklch(0.8 0.13 var(--warning-hue))` | Warning fill. |
+| `--warning-fg` | `oklch(0.88 0.12 var(--warning-hue))` | Warning text. |
+| `--warning-soft` | `warning-solid` 16% | Warning background. |
+| `--warning-border` | `warning-solid` 42% | Warning border. |
+| `--danger-solid` | `oklch(0.6 0.19 var(--danger-hue))` | Error fill. |
+| `--danger-fg` | `oklch(0.8 0.13 var(--danger-hue))` | Error text. |
+| `--danger-soft` | `danger-solid` 16% | Error background. |
+| `--danger-border` | `danger-solid` 42% | Error border. |
+| `--info-solid` | `oklch(0.65 0.11 var(--info-hue))` | Info fill. |
+| `--info-fg` | `oklch(0.82 0.1 var(--info-hue))` | Info text. |
+| `--info-soft` | `info-solid` 16% | Info background. |
+| `--info-border` | `info-solid` 42% | Info border. |
+| `--on-solid` | `var(--neutral-1000)` | Text on any solid status fill. |
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--chart-1` | `var(--primary-500)` | Chart series 1. |
+| `--chart-2` | `var(--secondary-500)` | Chart series 2. |
+| `--chart-3` | `var(--tertiary-500)` | Chart series 3. |
+| `--chart-4` | `var(--primary-300)` | Chart series 4. |
+| `--chart-5` | `var(--secondary-300)` | Chart series 5. |
+| `--chart-6` | `var(--tertiary-300)` | Chart series 6. |
+
+The four status families are hue-only knobs. Changing `--danger-hue` recolours the fill, text, background and border together.
+
+#### Gradients, shadows and glows
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--gradient-brand` | 135° `primary-700` → `primary-500` → `primary-400` | Primary buttons and banners. |
+| `--gradient-accent` | 135° `secondary-700` → `secondary-500` → `secondary-300` | Metal accents. |
+| `--gradient-sigil` | 120° `primary-500` → `secondary-500` | Crests and seals. |
+| `--gradient-text` | 90° `primary-300` → `secondary-300` | Gradient text. |
+| `--gradient-surface` | 180° `surface-2` → `surface-1` | Raised panel fill. |
+| `--gradient-fade` | 180° transparent → `bg` | Section fade-out. |
+| `--gradient-hero` | Two radial house washes over `bg` | Hero atmosphere. |
+| `--shadow-sm` | 1 px ambient shadow | Small elevation. |
+| `--shadow-md` | 6 px / 2 px shadow pair | Cards and popovers. |
+| `--shadow-lg` | 24 px soft shadow | Dialogs and floating panels. |
+| `--inner-highlight` | inset 1 px white 8% | Top inner highlight on glass. |
+| `--glow-brand` | 1 px `brand-border` + 32 px primary glow | Focused/selected house element. |
+| `--glow-accent` | 1 px `accent-border` + 32 px secondary glow | Focused/selected accent element. |
+| `--glow-highlight` | 1 px `highlight-border` + 32 px tertiary glow | Focused/selected highlight element. |
+
+#### House aliases
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--house-flag` | `var(--primary-800)` | House banner colour. |
+| `--house-second` | `var(--secondary-300)` | Second banner colour; Hogwarts uses `primary-400`. |
+| `--house-glow` | `var(--primary-300)` | House light/glow colour. |
+| `--house-tower-hue` | `0deg` | Rotates the castle tower light for each house. |
+
+### Tailwind bridge
+
+Tailwind utilities use a mirror namespace declared in `@theme inline` at the top of `globals.css`. The bridge exists so utilities such as `bg-surface`, `text-fg-brand` or `border-brand-border` resolve to the same tokens. Edit the semantic token, not the bridge.
+
+The mapping is mechanical (`--color-foo` → `--foo`) with these exceptions:
+
+| Bridge token | Maps to |
+| --- | --- |
+| `--color-obsidian` | `--bg-sunken` |
+| `--color-vault` | `--surface-1` |
+| `--color-gold` | `--fg-brand` |
+| `--color-lumos` | `--brand` |
+| `--color-parchment` | `--fg-strong` |
+| `--color-surface` | `--surface-1` |
+| `--color-brand-on` | `--on-brand` |
+
+The complete bridge set is:
+
+```text
+--color-bg-sunken      --color-bg            --color-surface        --color-surface-1
+--color-surface-2      --color-surface-3     --color-fg             --color-fg-strong
+--color-fg-muted       --color-fg-subtle     --color-fg-disabled    --color-fg-brand
+--color-fg-accent      --color-fg-highlight  --color-brand          --color-brand-hover
+--color-brand-active   --color-brand-soft    --color-brand-border   --color-brand-on
+--color-accent         --color-accent-soft   --color-accent-border  --color-highlight
+--color-highlight-soft --color-highlight-border --color-line-subtle --color-line
+--color-line-strong    --color-ring          --color-danger-fg      --color-danger-soft
+--color-obsidian       --color-vault         --color-gold           --color-lumos
+--color-parchment      --shadow-glow-brand   --shadow-glow-accent   --shadow-glow-highlight
+--shadow-inset         --font-sans           --font-serif           --font-harryp
+```
+
+There is deliberately no bridge for the hover/active pairs other than brand, for the full status family, or for the `on-*` tokens other than brand; use the `var(--token)` form in component CSS when you need those.
+
+### Typography
+
+| Token | Source | Use |
+| --- | --- | --- |
+| `--font-garamond` | `localFont` Garamond files in `layout.tsx` | Editorial serif (`font-serif`). |
+| `--font-outfit` | `localFont` Outfit in `layout.tsx` | UI sans (`font-sans`, default body). |
+| `--font-handwriting` | `localFont` Caveat in `layout.tsx` | Signatures and marginalia. |
+| `--font-harryp` | `localFont` HarryP in `layout.tsx` | Festival wordmark (`font-harryp`). |
+| `--font-sans` | `var(--font-outfit)` | Tailwind `font-sans`. |
+| `--font-serif` | `var(--font-garamond)` | Tailwind `font-serif`. |
+| `--font-harryp` | `var(--font-harryp)` | Tailwind `font-harryp`; the name is intentionally identical. |
+
+Fonts are self-hosted by `next/font`; changing the family means changing the loader in `layout.tsx`, not the CSS.
+
+### Page and component tokens
+
+These palettes are local to one experience. They are declared on the component root, so they can be adjusted without touching the global theme.
+
+#### Loading scene
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--loading-x-far` / `--loading-y-far` | `0px` | Far parallax layer offset. |
+| `--loading-x-mid` / `--loading-y-mid` | `0px` | Mid parallax layer offset. |
+| `--loading-x-near` / `--loading-y-near` | `0px` | Near parallax layer offset. |
+
+Set them on `.loading-screen` if you reintroduce pointer parallax; the bundled scene currently keeps the layers at rest.
+
+#### Marauder's Map
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--map-paper` | `#ead8b3` | Map parchment. |
+| `--map-paper-deep` | `#b78d60` | Parchment edge/shadow. |
+| `--map-ink` | `#3f3027` | Primary map ink. |
+| `--map-ink-soft` | `#705440` | Secondary map ink. |
+| `--map-burgundy` | `#6e302d` | Route and seal accent. |
+| `--map-gold` | `#c99c50` | Marker gold. |
+
+#### Home experience
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--home-ink` | `bg-sunken` 88% + black | Atelier ink. |
+| `--home-panel` | `surface-1` 84% | Translucent atelier panel. |
+| `--home-line` | `fg-brand` 24% | Atelier hairline. |
+
+#### Acceptance letter
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--ink` | `#23170c` | Letter ink. |
+| `--parchment` | Layered radial + linear gradient | Aged paper surface. |
+| `--envelope-paper` | Layered radial + linear gradient | Envelope stock. |
+| `--W` | `240`–`560px` | Sheet width, measured from the viewport; every other size derives from it. |
+| `--P` | `W × .46` | One fold panel height. |
+| `--E` | measured px | Envelope width. |
+| `--EH` | measured px | Envelope height. |
+| `--D` | measured px (max 150) | Desk-plane offset. |
+| `--S` | `P × .34` | Wax seal diameter. |
+| `--persp` | `1100px` | 3D perspective. |
+| `--row` | `0`, `1`, … | Strip offset in sheet heights; keeps the paper grain and print aligned across folds. |
+| `--seal` | `0` | Wax seal progress; GSAP drives it to `1`. |
+| `--edge` | `0` | Paper edge glow; GSAP drives it. |
+| `--warm` | `0` | Warm paper glow; GSAP drives it. |
+| `--shine` | `130%` | Name-shine background position. |
+| `--shineOn` | `0` | Name-shine opacity. |
+
+The layout variables (`--W`, `--P`, `--E`, `--EH`, `--D`, `--S`, `--persp`) are computed from the measured viewport in `acceptance-letter.tsx`. Leave them to the component; override the material colours if you are reskinning the letter.
+
+#### Registration arrival
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--paper-height` | `min(560px, calc(100svh - 230px))` | Height of the folded invitation. |
+| `--piece` | `calc(var(--paper-height) / 3)` | One folded panel. |
+| `--paper-surface` | Layered grain + gradient | Invitation paper. |
+| `--dissolve` | `0%` | Ink-dissolve progress. |
+| `--iris` | `0%` | Iris reveal progress. |
+| `--drift` | unset | Per-mote horizontal drift; optional hook used by the mote keyframe. |
+
+#### Alumni registry
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--registry-gold` | `#d8b778` | Ledger gold. |
+| `--registry-wine` | `#642932` | Wax and leather. |
+| `--registry-ink` | `#39291e` | Registry ink. |
+| `--paper` | `#ead9b4` | Ledger paper (local override). |
+| `--ink` | `var(--registry-ink)` | Ink alias (local override). |
+| `--bg` | `#1d0c12` | Registry room background. |
+| `--fg` | `#eadbc1` | Registry body text (dark room). |
+| `--fg-strong` | `#f0dfbc` | Registry headings. |
+| `--fg-muted` | `#c5b29b` | Registry secondary text. |
+| `--fg-subtle` | `#b19a7d` | Registry metadata. |
+| `--fg-brand` | `var(--registry-gold)` | Registry accent text. |
+| `--brand` | `var(--registry-gold)` | Registry accent fill. |
+| `--ring` | `#ecd19c` | Registry focus ring. |
+| `--surface-1` | `#fff8df80` | Paper card fill (paper scope). |
+| `--line` | `#a7835545` | Paper rules (paper scope). |
+
+The paper sheets re-declare `--fg`, `--fg-strong`, `--fg-muted`, `--fg-subtle`, `--fg-brand`, `--surface-1`, `--line` and `--ring` to dark-ink values so shared form and text components stay readable on cream. Keep those local overrides when editing the registry.
+
+#### Council gallery
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--council-gold` | `#d8b778` | Frames and rules. |
+| `--council-gold-light` | `#f2deb1` | Highlighted metal. |
+| `--council-ink` | `#44301f` | Portrait caption ink. |
+| `--council-paper` | `#e9d8b0` | Portrait card paper. |
+| `--ring` | `#edce92` | Gallery focus ring. |
+| `--seal-base` | `#74373a` | Wax seal base (default chamber). |
+| `--seal-deep` | `#3e1b25` | Wax seal shadow. |
+| `--seal-highlight` | `#b97361` | Wax seal highlight. |
+
+The wax trio is re-declared per chamber: `aurors` uses `#3c6151 / #193c32 / #819878`, `faculty` uses `#3d536c / #1d2b42 / #8797a8`. The scroll dialog also pins `--ring` to `#7d4331`.
+
+#### Common room
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--room-accent` | `#a9c6a8` | House accent for room props. |
+| `--room-ink` | `#24372e` | Room ink and headings. |
+| `--room-paper` | `#eee4d1` | Parchment panels and dialogs. |
+| `--entrance-progress` | `0` | Camera entrance progress; JS writes `0`–`1`. |
+| `--welcome-opacity` | `0` | Welcome copy fade, derived from the entrance progress. |
+
+Room accents are re-declared per house: Gryffindor `#d9b374 / #652c26`, Ravenclaw `#b7c9de / #283d58`, Hufflepuff `#e0c38b / #5a4a27`. The panel dialog re-declares `--fg`, `--fg-strong`, `--fg-muted`, `--fg-brand`, `--room-ink` and `--room-paper` for light paper.
+
+#### Book-burger
+
+| Token | Default | Use |
+| --- | --- | --- |
+| `--book` | `var(--brand-active)` | Cover colour of one book; `.tn-b1`, `.tn-b2` and `.tn-b3` set `brand-active`, `primary-800` and `primary-600`. |
+| `--thud` | `0.8px` | Book drop distance in the fall/rise keyframes; `.tn-b1` uses `0.8px` and `.tn-b2` uses `1.6px`. |
+
+
+### Runtime-only variables
+
+These are written by React, GSAP or the camera controller rather than by a stylesheet. They are listed so you know where to look when you trace a value in DevTools.
+
+| Token | Set by | Use |
+| --- | --- | --- |
+| `--hero-light-x` / `--hero-light-y` | `magic-interactions.tsx` | Pointer position for the hero light. |
+| `--glow-x` / `--glow-y` | `magic-interactions.tsx` | Pointer position for card glows. |
+| `--hole` | `ChamberDoor.tsx` | Radius of the transitional hole. |
+| `--region-accent` | `marauders-map.tsx` | Category colour for a map region. |
+| `--marker-accent` | `marauders-map.tsx` | Category colour for a map marker. |
+| `--event-accent` | `marauders-map.tsx` | Category colour for a map event card. |
+| `--i` | `room-entrance.tsx` | Stagger index for entrance letters. |
+| `--entrance-progress` / `--welcome-opacity` | `camera-controller.tsx` | Common-room entrance progress. |
+| `--seal` / `--edge` / `--warm` / `--shine` / `--shineOn` | `letter-timeline.ts` (GSAP) | Acceptance-letter animation state. |
+
+A handful of decorative hooks are still read by legacy markup but are not set anywhere today: `--house-color`, `--dust-left`, `--dust-top`, `--dust-delay`, `--star-left`, `--star-top`, `--star-delay`, `--flame-index`, `--brick-index` and the arrival `--drift`. They are inert (the CSS falls back or inherits) and are safe to set if you reuse those elements.
+
+### Finding a variable
+
+Search by name from the repository root:
+
+```bash
+grep -n -- '--primary-hue' src/app/globals.css     # declaration and every use
+grep -rn -- '--room-accent' src                   # component and CSS references
+```
+
+When you add a token, add it to the owning section and to this document. Before committing, run `grep -o -- '--[a-z0-9-]*' src/app/globals.css | sort -u` and confirm every declaration is covered here.
+
 ## Checks
 
 The offline smoke test is a single command and performs the lint plus production build. It works on Windows, macOS, and Linux:

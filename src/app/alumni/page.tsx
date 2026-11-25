@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Droplets, LockKeyhole } from "lucide-react";
 import { BackLink } from "@/components/coming-soon";
 import { AlumniRegistry } from "@/components/alumni-registry";
-import styles from "@/components/alumni-registry.module.css";
+import { registry as styles } from "@/lib/css-classes";
 import { Divider, Eyebrow } from "@/components/ornaments";
 import { Reveal } from "@/components/reveal";
 

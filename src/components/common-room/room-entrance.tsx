@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Fragment, type CSSProperties, type RefObject } from "react";
 import { houseLogoFor, houseThemes } from "@/lib/houses";
 import type { RoomParticipant } from "@/lib/common-room/types";
-import styles from "./common-room.module.css";
+import { room as styles } from "@/lib/css-classes";
 
 // Per-character ink reveal, like Harry Potter chapter text writing itself in.
 function InkText({ text, className }: { text: string; className?: string }) {

@@ -32,14 +32,6 @@ const FX = {
   halo: "radial-gradient(circle, rgba(255, 218, 128, 0.6), transparent 66%)",
 };
 
-const HERO_CSS = `
-@keyframes hx-flicker{0%,100%{opacity:1;transform:scale(1)}20%{opacity:.82;transform:scale(.92,1.08)}45%{opacity:1;transform:scale(1.06,.96)}70%{opacity:.88;transform:scale(.96,1.05)}}
-@keyframes hx-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-@keyframes hx-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
-@keyframes hx-pulse{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:.95;transform:scale(1.18)}}
-.flying-snitch svg{position:relative;display:block;width:100%;height:100%;filter:drop-shadow(0 0 8px rgba(255, 201, 83, 0.78))}
-`;
-
 /* Buttons */
 const BTN =
   "group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full px-5 py-2.5 sm:px-7 sm:py-3.5 text-xs sm:text-[13px] font-semibold uppercase tracking-[0.1em] outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ring";
@@ -144,7 +136,7 @@ export function Hero() {
       className="hero relative isolate min-h-[100svh] overflow-hidden bg-transparent text-fg select-none flex flex-col justify-between"
       aria-labelledby="hero-title"
     >
-      <style dangerouslySetInnerHTML={{ __html: HERO_CSS }} />
+      {/* Hero candle and snitch animation styles live in src/app/globals.css. */}
 
       <HouseBanners />
       <AmbientParticles count={36} />

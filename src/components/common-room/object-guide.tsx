@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { Compass } from "lucide-react";
 import { roomObjects } from "@/lib/common-room/content";
 import type { ObjectId } from "@/lib/common-room/types";
-import styles from "./common-room.module.css";
+import { room as styles } from "@/lib/css-classes";
 
 export function ObjectGuide({ disabled, onSelect, onOpenChange }: { disabled: boolean; onSelect: (id: ObjectId) => void; onOpenChange: (open: boolean) => void }) {
   const ref = useRef<HTMLDetailsElement>(null);

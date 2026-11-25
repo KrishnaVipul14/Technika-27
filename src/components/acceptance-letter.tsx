@@ -8,7 +8,7 @@ import type { ArrivalJourney } from "./registration-arrival";
 import { ChamberDoor, type ChamberDoorHandle } from "./ChamberDoor";
 import { buildLetterTimeline, computeLayout, PERSPECTIVE, type LetterFx } from "./acceptance-letter/letter-timeline";
 import type { Tier } from "./acceptance-letter/letter-room";
-import styles from "./acceptance-letter/letter.module.css";
+import { acceptance as styles } from "@/lib/css-classes";
 
 const LetterRoom = lazy(() => import("./acceptance-letter/letter-room"));
 

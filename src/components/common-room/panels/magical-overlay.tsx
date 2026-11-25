@@ -3,7 +3,7 @@
 import { useEffect, useRef, useId, type ReactNode } from "react";
 import { X } from "lucide-react";
 import type { AssignedHouse } from "@/lib/common-room/types";
-import styles from "../common-room.module.css";
+import { room as styles } from "@/lib/css-classes";
 
 type Props = { open: boolean; motion?: boolean; title: string; house: AssignedHouse; onClose: () => void; onExited: () => void; children: ReactNode };
 export function MagicalOverlay({ open, motion = true, title, house, onClose, onExited, children }: Props) {

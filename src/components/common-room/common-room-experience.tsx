@@ -25,7 +25,7 @@ import { MembersPanel } from "./panels/members-panel";
 import { ParticipantProfilePanel } from "./panels/participant-profile-panel";
 import { SecretRoomPanel } from "./panels/secret-room-panel";
 import { useRegistrationArrival } from "../registration-arrival";
-import styles from "./common-room.module.css";
+import { room as styles } from "@/lib/css-classes";
 
 const RoomCanvas = dynamic(() => import("./room-canvas"), { ssr: false, loading: () => <RoomLoader stage="Opening the chamber" /> });
 

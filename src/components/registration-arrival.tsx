@@ -7,7 +7,7 @@ import { useReducedMotion } from "motion/react";
 import { ArrowRight, SkipForward } from "lucide-react";
 import type { ArrivalParticipant } from "@/lib/common-room/types";
 import { useAuth } from "./auth-provider";
-import styles from "./registration-arrival.module.css";
+import { arrival as styles } from "@/lib/css-classes";
 
 const AcceptanceLetter = lazy(() => import("./acceptance-letter"));
 export type ArrivalJourney = { token: number; from: string; participant: ArrivalParticipant; phase: "letter" | "travelling" | "revealing" | "complete"; skipped: boolean; atDestination: boolean };

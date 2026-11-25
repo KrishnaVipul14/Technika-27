@@ -1,5 +1,5 @@
 import { unavailableSources } from "@/lib/common-room/content";
-import styles from "../common-room.module.css";
+import { room as styles } from "@/lib/css-classes";
 
 export function NoticeBoardPanel() {
   return <div>

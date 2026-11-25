@@ -1,7 +1,7 @@
 import type { AssignedHouse } from "@/lib/common-room/types";
 import type { RoomSettings } from "./use-room-settings";
 import { MagicalOverlay } from "./panels/magical-overlay";
-import styles from "./common-room.module.css";
+import { room as styles } from "@/lib/css-classes";
 
 type Props = { house: AssignedHouse; settings: RoomSettings; motion: boolean; open: boolean; onClose: () => void; onExited: () => void; onChange: (patch: Partial<RoomSettings>) => void; audioUnavailable: boolean; audioPaused: boolean; onResume: () => void };
 export function RoomSettingsPanel({ house, settings, motion, open, onClose, onExited, onChange, audioUnavailable, audioPaused, onResume }: Props) {

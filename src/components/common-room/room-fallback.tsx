@@ -1,7 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { houseLore, roomObjects } from "@/lib/common-room/content";
 import type { ObjectId, RoomParticipant } from "@/lib/common-room/types";
-import styles from "./common-room.module.css";
+import { room as styles } from "@/lib/css-classes";
 
 export type FallbackReason = "chosen" | "unsupported" | "loading-error" | "context-lost";
 export type RoomFailure = Exclude<FallbackReason, "chosen">;

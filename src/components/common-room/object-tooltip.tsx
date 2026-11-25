@@ -4,7 +4,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { Vector3, type Group } from "three";
 import type { ObjectId } from "@/lib/common-room/types";
 import type { Vec3 } from "@/lib/common-room/config";
-import styles from "./common-room.module.css";
+import { room as styles } from "@/lib/css-classes";
 
 const anchors: Record<ObjectId, Vec3> = { archives: [0, 4.4, .6], notices: [0, 2.3, .35], members: [0, 1.9, .5], profile: [0, .8, .63], secret: [0, 1.8, .35] };
 const v = new Vector3();

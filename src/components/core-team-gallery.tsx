@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { orderMembers } from "@/lib/festival";
 import { Divider } from "./ornaments";
-import styles from "./core-team-gallery.module.css";
+import { council as styles } from "@/lib/css-classes";
 
 const chambers = [
   { label: "High Council", key: "council", icon: Crown },

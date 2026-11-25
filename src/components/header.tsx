@@ -152,60 +152,7 @@ export function Header() {
 
   return (
     <>
-      {/* Inline styles for physics-based Harry Potter book hamburger animation */}
-      <style>{`
-        @keyframes book-fall {
-          0% {
-            transform: translate(0, 0) rotate(0deg);
-          }
-          20% {
-            transform: translate(-1px, -2px) rotate(-3deg);
-          }
-          45% {
-            transform: translate(10px, 0px) rotate(22deg);
-          }
-          75% {
-            transform: translate(16px, 6px) rotate(76deg);
-          }
-          100% {
-            transform: translate(15px, 5px) rotate(68deg);
-          }
-        }
-
-        @keyframes book-rise {
-          0% {
-            transform: translate(15px, 5px) rotate(68deg);
-          }
-          30% {
-            transform: translate(12px, 1px) rotate(40deg);
-          }
-          65% {
-            transform: translate(2px, -2px) rotate(-2deg);
-          }
-          100% {
-            transform: translate(0, 0) rotate(0deg);
-          }
-        }
-
-        @keyframes book-thud {
-          0%, 50% { transform: translateY(0); }
-          65% { transform: translateY(1.5px); }
-          80% { transform: translateY(-0.5px); }
-          100% { transform: translateY(0); }
-        }
-
-        .animate-book-fall {
-          animation: book-fall 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        .animate-book-rise {
-          animation: book-rise 0.55s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-        }
-
-        .animate-book-thud {
-          animation: book-thud 0.65s ease-out;
-        }
-      `}</style>
+      {/* Book-burger animation styles live in src/app/globals.css. */}
 
       <header
         className={`fixed inset-x-0 top-3 sm:top-5 z-50 pointer-events-none px-3 sm:px-6 transition-all duration-1000 ease-out ${

@@ -6,7 +6,7 @@ import { SoonBadge } from "@/components/coming-soon";
 import { Divider, Eyebrow, SnitchArtwork } from "@/components/ornaments";
 import { BreadcrumbsSchema } from "@/components/structured-data";
 import { createPageMetadata } from "@/lib/seo";
-import styles from "@/components/core-team-gallery.module.css";
+import { council as styles } from "@/lib/css-classes";
 
 export const metadata = createPageMetadata("/core");
 

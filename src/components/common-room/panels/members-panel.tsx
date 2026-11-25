@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { houseThemes } from "@/lib/houses";
 import { unavailableSources } from "@/lib/common-room/content";
 import type { AssignedHouse, MembersResult, RoomMember } from "@/lib/common-room/types";
-import styles from "../common-room.module.css";
+import { room as styles } from "@/lib/css-classes";
 
 export function MembersPanel({ house, onSessionExpired }: { house: AssignedHouse; onSessionExpired: () => void }) {
   const [page, setPage] = useState(0);

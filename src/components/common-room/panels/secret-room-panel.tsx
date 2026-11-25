@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { houseLore } from "@/lib/common-room/content";
 import type { AssignedHouse } from "@/lib/common-room/types";
-import styles from "../common-room.module.css";
+import { room as styles } from "@/lib/css-classes";
 
 export function SecretRoomPanel({ house }: { house: AssignedHouse }) {
   const [answer, setAnswer] = useState("");

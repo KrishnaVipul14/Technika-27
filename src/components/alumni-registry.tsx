@@ -13,7 +13,7 @@ import { useAuth } from "./auth-provider";
 import { useMagic } from "./experience";
 import { Countdown, SoonBadge } from "./coming-soon";
 import { AmbientParticles, Divider } from "./ornaments";
-import styles from "./alumni-registry.module.css";
+import { registry as styles } from "@/lib/css-classes";
 
 function WaxSeal({ small = false }: { small?: boolean }) {
   return <span className={`wax-seal ${styles.seal} ${small ? styles.smallSeal : ""}`} aria-hidden="true"><span>T</span><small>XXVII</small></span>;
